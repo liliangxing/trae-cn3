@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Modified conversation_popup_menu.xml
+  Added menu_extract item at the top (before menu_artifact) to support
+  conversation extraction with Markdown generation and GitHub push.
+
+  The original layout is in Android Binary XML format in the APK.
+  This text representation documents the structural change.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/traere_popup_padding_top"
+    android:paddingBottom="@dimen/traere_popup_padding_bottom"
+    android:background="@drawable/traere_popup_menu_bg"
+    android:elevation="@dimen/traere_popup_elevation"
+    android:minWidth="@dimen/traere_popup_min_width">
+
+    <!-- ==================== NEW: Extract Conversation Item ==================== -->
+    <LinearLayout
+        android:id="@+id/menu_extract"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/traere_menu_item_height"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="?android:attr/selectableItemBackground"
+        android:paddingStart="@dimen/traere_menu_item_padding_start"
+        android:paddingEnd="@dimen/traere_menu_item_padding_end">
+
+        <ImageView
+            android:id="@+id/iv_menu_extract"
+            android:layout_width="@dimen/traere_menu_icon_size"
+            android:layout_height="@dimen/traere_menu_icon_size"
+            android:src="@drawable/trae_ic_context_menu_copy"
+            android:importantForAccessibility="no" />
+
+        <TextView
+            android:id="@+id/tv_menu_extract"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/traere_menu_text_margin_start"
+            android:text="@string/trae_conversation_menu_extract"
+            android:textColor="@color/traere_menu_text_color"
+            android:textSize="@dimen/traere_menu_text_size"
+            android:importantForAccessibility="no" />
+    </LinearLayout>
+
+    <!-- Divider after extract -->
+    <View
+        android:id="@+id/menu_divider_extract"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/traere_divider_height"
+        android:background="@color/traere_divider_color"
+        android:paddingStart="@dimen/traere_menu_item_padding_start"
+        android:paddingEnd="@dimen/traere_menu_item_padding_end" />
+
+    <!-- ==================== Original Items Below ==================== -->
+    <!-- menu_artifact -->
+    <LinearLayout
+        android:id="@+id/menu_artifact"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/traere_menu_item_height"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="?android:attr/selectableItemBackground"
+        android:paddingStart="@dimen/traere_menu_item_padding_start"
+        android:paddingEnd="@dimen/traere_menu_item_padding_end">
+
+        <ImageView
+            android:id="@+id/iv_menu_artifact"
+            android:layout_width="@dimen/traere_menu_icon_size"
+            android:layout_height="@dimen/traere_menu_icon_size"
+            android:src="@drawable/trae_ic_context_menu_artifact"
+            android:importantForAccessibility="no" />
+
+        <TextView
+            android:id="@+id/tv_menu_artifact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/traere_menu_text_margin_start"
+            android:text="@string/trae_conversation_menu_artifact"
+            android:textColor="@color/traere_menu_text_color"
+            android:textSize="@dimen/traere_menu_text_size"
+            android:importantForAccessibility="no" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/menu_divider_artifact"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/traere_divider_height"
+        android:background="@color/traere_divider_color"
+        android:paddingStart="@dimen/traere_menu_item_padding_start"
+        android:paddingEnd="@dimen/traere_menu_item_padding_end" />
+
+    <!-- menu_pin -->
+    <LinearLayout
+        android:id="@+id/menu_pin"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/traere_menu_item_height"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="?android:attr/selectableItemBackground"
+        android:paddingStart="@dimen/traere_menu_item_padding_start"
+        android:paddingEnd="@dimen/traere_menu_item_padding_end">
+
+        <ImageView
+            android:id="@+id/iv_menu_pin"
+            android:layout_width="@dimen/traere_menu_icon_size"
+            android:layout_height="@dimen/traere_menu_icon_size"
+            android:src="@drawable/trae_ic_context_menu_pin"
+            android:importantForAccessibility="no" />
+
+        <TextView
+            android:id="@+id/tv_menu_pin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/traere_menu_text_margin_start"
+            android:text="@string/trae_conversation_menu_pin"
+            android:textColor="@color/traere_menu_text_color"
+            android:textSize="@dimen/traere_menu_text_size"
+            android:importantForAccessibility="no" />
+    </LinearLayout>
+
+    <!-- menu_rename -->
+    <LinearLayout
+        android:id="@+id/menu_rename"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/traere_menu_item_height"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="?android:attr/selectableItemBackground"
+        android:paddingStart="@dimen/traere_menu_item_padding_start"
+        android:paddingEnd="@dimen/traere_menu_item_padding_end">
+
+        <ImageView
+            android:id="@+id/iv_menu_rename"
+            android:layout_width="@dimen/traere_menu_icon_size"
+            android:layout_height="@dimen/traere_menu_icon_size"
+            android:src="@drawable/trae_ic_context_menu_rename"
+            android:importantForAccessibility="no" />
+
+        <TextView
+            android:id="@+id/tv_menu_rename"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/traere_menu_text_margin_start"
+            android:text="@string/trae_conversation_menu_rename"
+            android:textColor="@color/traere_menu_text_color"
+            android:textSize="@dimen/traere_menu_text_size"
+            android:importantForAccessibility="no" />
+    </LinearLayout>
+
+    <!-- menu_delete -->
+    <LinearLayout
+        android:id="@+id/menu_delete"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/traere_menu_item_height"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="?android:attr/selectableItemBackground"
+        android:paddingStart="@dimen/traere_menu_item_padding_start"
+        android:paddingEnd="@dimen/traere_menu_item_padding_end">
+
+        <ImageView
+            android:id="@+id/iv_menu_delete"
+            android:layout_width="@dimen/traere_menu_icon_size"
+            android:layout_height="@dimen/traere_menu_icon_size"
+            android:src="@drawable/trae_ic_context_menu_delete"
+            android:importantForAccessibility="no" />
+
+        <TextView
+            android:id="@+id/tv_menu_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/traere_menu_text_margin_start"
+            android:text="@string/trae_conversation_menu_delete"
+            android:textColor="@color/traere_menu_text_color"
+            android:textSize="@dimen/traere_menu_text_size"
+            android:importantForAccessibility="no" />
+    </LinearLayout>
+
+</LinearLayout>

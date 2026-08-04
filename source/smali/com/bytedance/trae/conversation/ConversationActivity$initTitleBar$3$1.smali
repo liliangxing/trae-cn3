@@ -153,6 +153,51 @@
     return-void 
 .end method
 
+.method public onExtractClick()void
+    .registers 5
+    # ins_size=1
+    iget-object v0, v4, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0 Lcom/bytedance/trae/conversation/ConversationActivity;
+    invoke-static v0, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getMenuPopupWindow$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;
+    move-result-object v0
+    if-eqz v0, +005h
+    invoke-virtual v0, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;->dismiss()V
+    iget-object v0, v4, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0 Lcom/bytedance/trae/conversation/ConversationActivity;
+    invoke-static v0, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getViewModel$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/ConversationViewModel;
+    move-result-object v0
+    const/4 v1, 0
+    const-string/jumbo v2, viewModel
+    if-nez v0, +006h
+    invoke-static v2, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
+    move-object v0, v1
+    invoke-virtual v0, Lcom/bytedance/trae/conversation/ConversationViewModel;->getConversationId()Lkotlinx/coroutines/flow/StateFlow;
+    move-result-object v0
+    invoke-interface v0, Lkotlinx/coroutines/flow/StateFlow;->getValue()Ljava/lang/Object;
+    move-result-object v0
+    check-cast v0, Ljava/lang/String;
+    if-nez v0, +004h
+    const-string v0, ""
+    move-object v1, v0
+    check-cast v1, Ljava/lang/String;
+    iget-object v0, v4, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0 Lcom/bytedance/trae/conversation/ConversationActivity;
+    invoke-static v0, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getViewModel$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/ConversationViewModel;
+    move-result-object v0
+    if-nez v0, +006h
+    invoke-static v2, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
+    move-object v0, v1
+    invoke-virtual v0, Lcom/bytedance/trae/conversation/ConversationViewModel;->getConversationTitle()Lkotlinx/coroutines/flow/StateFlow;
+    move-result-object v0
+    invoke-interface v0, Lkotlinx/coroutines/flow/StateFlow;->getValue()Ljava/lang/Object;
+    move-result-object v0
+    check-cast v0, Ljava/lang/String;
+    if-nez v0, +004h
+    const-string v0, "conversation"
+    sget-object v3, Lcom/bytedance/trae/conversation/extract/ExtractHelper;->INSTANCE Lcom/bytedance/trae/conversation/extract/ExtractHelper;
+    iget-object v4, v4, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0 Lcom/bytedance/trae/conversation/ConversationActivity;
+    check-cast v4, Landroid/app/Activity;
+    invoke-virtual v3, v4, v1, v0, Lcom/bytedance/trae/conversation/extract/ExtractHelper;->start(Landroid/app/Activity; Ljava/lang/String; Ljava/lang/String;)V
+    return-void
+.end method
+
 .method public onRenameClick()void
     .registers 2
     # ins_size=1
