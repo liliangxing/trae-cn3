@@ -97,6 +97,13 @@
     invoke-direct v0, v5, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow$$ExternalSyntheticLambda0;-><init>(Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;)V
     invoke-virtual v6, v0, Landroid/widget/PopupWindow;->setOnDismissListener(Landroid/widget/PopupWindow$OnDismissListener;)V
     iget-object v6, v5, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;->contentView Landroid/view/View;
+    sget v0, Lcom/bytedance/trae/conversation/R$id;->menu_extract I
+    invoke-virtual v6, v0, Landroid/view/View;->findViewById(I)Landroid/view/View;
+    move-result-object v6
+    new-instance v0, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow$$ExternalSyntheticLambda5;
+    invoke-direct v0, v5, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow$$ExternalSyntheticLambda5;-><init>(Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;)V
+    invoke-virtual v6, v0, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+    iget-object v6, v5, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;->contentView Landroid/view/View;
     sget v0, Lcom/bytedance/trae/conversation/R$id;->menu_artifact I
     invoke-virtual v6, v0, Landroid/view/View;->findViewById(I)Landroid/view/View;
     move-result-object v6
@@ -238,6 +245,18 @@
     invoke-interface v1, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow$OnMenuClickListener;->onDeleteClick()V
     invoke-virtual v0, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;->dismiss()V
     return-void 
+.end method
+
+.method synthetic lambda$init$5$com-bytedance-trae-conversation-widget-MenuPopupWindow(android.view.View)void
+    .registers 2
+    # ins_size=2
+    const-string v1, "extract"
+    invoke-direct {v0, v1}, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;->trackMenuActionClick(Ljava/lang/String;)V
+    iget-object v1, v0, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;->listener Lcom/bytedance/trae/conversation/widget/MenuPopupWindow$OnMenuClickListener;
+    if-eqz v1, +005h
+    invoke-interface {v1}, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow$OnMenuClickListener;->onExtractClick()V
+    invoke-virtual {v0}, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;->dismiss()V
+    return-void
 .end method
 
 .method public showAsDropDown(android.view.View  int  int)void

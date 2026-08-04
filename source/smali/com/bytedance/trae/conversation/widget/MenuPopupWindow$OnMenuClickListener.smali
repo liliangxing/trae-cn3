@@ -5,18 +5,22 @@
 .source "MenuPopupWindow.java"
 
 
-.method public abstract onArtifactClick()void
+.method public abstract onArtifactClick()V
     # abstract or native
 .end method
 
-.method public abstract onDeleteClick()void
+.method public abstract onDeleteClick()V
     # abstract or native
 .end method
 
-.method public abstract onPinClick()void
+.method public abstract onExtractClick()V
     # abstract or native
 .end method
 
-.method public abstract onRenameClick()void
+.method public abstract onPinClick()V
+    # abstract or native
+.end method
+
+.method public abstract onRenameClick()V
     # abstract or native
 .end method
