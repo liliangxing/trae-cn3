@@ -1,0 +1,25 @@
+# Decompiled TRAE business class
+# Source DEX: classes5.dex
+.class public final Lcom/bytedance/trae/conversation/chat/block/AgentContentBlock$InitialLoading;
+.super Lcom/bytedance/trae/conversation/chat/block/AgentContentBlock;
+.source "AgentContentBlock.kt"
+
+.field public static final INSTANCE:Lcom/bytedance/trae/conversation/chat/block/AgentContentBlock$InitialLoading;
+
+
+.method static constructor <clinit>()void
+    .registers 1
+    # ins_size=0
+    new-instance v0, Lcom/bytedance/trae/conversation/chat/block/AgentContentBlock$InitialLoading;
+    invoke-direct v0, Lcom/bytedance/trae/conversation/chat/block/AgentContentBlock$InitialLoading;-><init>()V
+    sput-object v0, Lcom/bytedance/trae/conversation/chat/block/AgentContentBlock$InitialLoading;->INSTANCE Lcom/bytedance/trae/conversation/chat/block/AgentContentBlock$InitialLoading;
+    return-void 
+.end method
+
+.method private constructor <init>()void
+    .registers 2
+    # ins_size=1
+    const/4 v0, 0
+    invoke-direct v1, v0, Lcom/bytedance/trae/conversation/chat/block/AgentContentBlock;-><init>(Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+    return-void 
+.end method

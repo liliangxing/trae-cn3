@@ -1,0 +1,15 @@
+# Decompiled TRAE business class
+# Source DEX: classes4.dex
+.class public final Lcom/bytedance/trae/update/bits/impl/R$layout;
+.super Ljava/lang/Object;
+
+.field public static final trae_update_dialog:I
+.field public static final trae_update_progress_dialog:I
+
+
+.method private constructor <init>()void
+    .registers 1
+    # ins_size=1
+    invoke-direct v0, Ljava/lang/Object;-><init>()V
+    return-void 
+.end method

@@ -1,0 +1,133 @@
+# Decompiled TRAE business class
+# Source DEX: classes4.dex
+.class public final Lcom/bytedance/trae/login/R$id;
+.super Ljava/lang/Object;
+
+.field public static final agreement_container:I
+.field public static final bottom_login_container:I
+.field public static final btn_agree:I
+.field public static final btn_back:I
+.field public static final btn_back_password:I
+.field public static final btn_back_step1:I
+.field public static final btn_back_step2:I
+.field public static final btn_back_step3:I
+.field public static final btn_back_step4:I
+.field public static final btn_bytecloud_sso:I
+.field public static final btn_cancel_deletion:I
+.field public static final btn_container:I
+.field public static final btn_continue:I
+.field public static final btn_disagree:I
+.field public static final btn_douyin_login:I
+.field public static final btn_enterprise_login:I
+.field public static final btn_exit:I
+.field public static final btn_get_code:I
+.field public static final btn_go_login:I
+.field public static final btn_login:I
+.field public static final btn_login_current:I
+.field public static final btn_logout_device:I
+.field public static final btn_one_click_login:I
+.field public static final btn_phone_login:I
+.field public static final btn_send_code:I
+.field public static final btn_send_code_old:I
+.field public static final btn_set_password:I
+.field public static final btn_sso_login:I
+.field public static final cb_agreement:I
+.field public static final divider_login_links:I
+.field public static final et_code_1:I
+.field public static final et_code_2:I
+.field public static final et_code_3:I
+.field public static final et_code_4:I
+.field public static final et_code_5:I
+.field public static final et_code_6:I
+.field public static final et_confirm_password:I
+.field public static final et_email_step1:I
+.field public static final et_new_password:I
+.field public static final et_old_phone:I
+.field public static final et_password:I
+.field public static final et_phone:I
+.field public static final fragment_container:I
+.field public static final iv_agreement_check:I
+.field public static final iv_back:I
+.field public static final iv_clear:I
+.field public static final iv_clear_email:I
+.field public static final iv_clear_email_step1:I
+.field public static final iv_clear_password:I
+.field public static final iv_close:I
+.field public static final iv_device_icon:I
+.field public static final iv_toggle_confirm_password:I
+.field public static final iv_toggle_new_password:I
+.field public static final iv_toggle_password:I
+.field public static final layout_confirm_password_input:I
+.field public static final layout_email_input:I
+.field public static final layout_email_input_step1:I
+.field public static final layout_error_email:I
+.field public static final layout_error_password:I
+.field public static final layout_error_step1:I
+.field public static final layout_error_step2:I
+.field public static final layout_error_step3:I
+.field public static final layout_new_password_input:I
+.field public static final layout_or_divider:I
+.field public static final layout_password_input:I
+.field public static final layout_step_email:I
+.field public static final layout_step_new_password:I
+.field public static final layout_step_password:I
+.field public static final layout_step_send_code:I
+.field public static final layout_step_success:I
+.field public static final layout_step_verify_code:I
+.field public static final ll_phone_input:I
+.field public static final loading_overlay:I
+.field public static final login_current_text:I
+.field public static final login_loading_overlay:I
+.field public static final nav_bar:I
+.field public static final pb_loading:I
+.field public static final pb_loading_email:I
+.field public static final pb_loading_step1:I
+.field public static final pb_loading_step2:I
+.field public static final pb_loading_step3:I
+.field public static final phone_input_group:I
+.field public static final privacy_policy_text:I
+.field public static final rv_devices:I
+.field public static final tv_code_hint:I
+.field public static final tv_country_code:I
+.field public static final tv_description:I
+.field public static final tv_device_name:I
+.field public static final tv_email_display:I
+.field public static final tv_error:I
+.field public static final tv_error_email:I
+.field public static final tv_error_step1:I
+.field public static final tv_error_step2:I
+.field public static final tv_error_step3:I
+.field public static final tv_forgot_password:I
+.field public static final tv_legal_notice:I
+.field public static final tv_login_time:I
+.field public static final tv_masked_phone:I
+.field public static final tv_message:I
+.field public static final tv_nav_title:I
+.field public static final tv_new_phone_title:I
+.field public static final tv_os_version:I
+.field public static final tv_phone:I
+.field public static final tv_resend:I
+.field public static final tv_resend_code:I
+.field public static final tv_resend_new:I
+.field public static final tv_resend_old:I
+.field public static final tv_step2_title:I
+.field public static final tv_subtitle:I
+.field public static final tv_switch:I
+.field public static final tv_title:I
+.field public static final tv_verify_desc:I
+.field public static final tv_verify_new_hint:I
+.field public static final tv_verify_old_hint:I
+.field public static final verify_code_group:I
+.field public static final verify_code_input:I
+.field public static final verify_new_input:I
+.field public static final verify_old_input:I
+.field public static final view_flipper:I
+.field public static final webview:I
+
+
+.method private constructor <init>()void
+    .registers 1
+    # ins_size=1
+    invoke-direct v0, Ljava/lang/Object;-><init>()V
+    return-void 
+.end method

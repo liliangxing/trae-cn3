@@ -1,0 +1,136 @@
+# Decompiled TRAE business class
+# Source DEX: classes5.dex
+.class public final Lcom/bytedance/trae/conversation/R$layout;
+.super Ljava/lang/Object;
+
+.field public static final bottom_sheet_device_flow_container:I
+.field public static final bottom_sheet_device_target_select:I
+.field public static final bottom_sheet_new_feature_prompt:I
+.field public static final bottom_sheet_plugins:I
+.field public static final bottom_sheet_skills:I
+.field public static final conversation_expanded_text_popup:I
+.field public static final conversation_message_popup_menu:I
+.field public static final conversation_popup_menu:I
+.field public static final dialog_ai_data_notice:I
+.field public static final dialog_chat_attachment:I
+.field public static final dialog_chat_attachment_voice:I
+.field public static final fragment_connect_computer_guide:I
+.field public static final fragment_directory_bottom_sheet:I
+.field public static final include_device_target_select_item:I
+.field public static final item_chat_attachment_entry:I
+.field public static final item_conversation_plugin:I
+.field public static final item_conversation_skill:I
+.field public static final item_directory_node:I
+.field public static final item_directory_node_editing:I
+.field public static final loading_progress_bar_voice:I
+.field public static final trae_activity_artifact_list:I
+.field public static final trae_activity_brainstorm:I
+.field public static final trae_activity_code_changed_list:I
+.field public static final trae_activity_conversation:I
+.field public static final trae_activity_diff_view:I
+.field public static final trae_activity_pure_show_widget_fullscreen:I
+.field public static final trae_activity_web_preview:I
+.field public static final trae_activity_webview:I
+.field public static final trae_avatar_fast_tooltip:I
+.field public static final trae_bottom_sheet_device_activate:I
+.field public static final trae_bottom_sheet_plugin_auth_qrcode:I
+.field public static final trae_device_tips_pop_window:I
+.field public static final trae_dialog_branch_select:I
+.field public static final trae_dialog_cli_selection:I
+.field public static final trae_dialog_code_device_select:I
+.field public static final trae_dialog_document_select:I
+.field public static final trae_dialog_git_repo_select:I
+.field public static final trae_dialog_human_checkpoint:I
+.field public static final trae_dialog_ide_project:I
+.field public static final trae_dialog_process_detail:I
+.field public static final trae_dialog_recent_folder:I
+.field public static final trae_dialog_share_link:I
+.field public static final trae_dialog_task_location:I
+.field public static final trae_express_pass_pop_window:I
+.field public static final trae_express_pass_toggle_tooltip:I
+.field public static final trae_fragment_agent_detail:I
+.field public static final trae_fragment_brainstorm_discuss:I
+.field public static final trae_fragment_brainstorm_intro:I
+.field public static final trae_fragment_conversation_detail:I
+.field public static final trae_fragment_file_tree_bottom_sheet:I
+.field public static final trae_fragment_input:I
+.field public static final trae_fragment_sub_agent_group_detail:I
+.field public static final trae_fragment_todo_group_detail:I
+.field public static final trae_fragment_tool_detail:I
+.field public static final trae_fragment_tool_list:I
+.field public static final trae_fragment_tool_list_detail:I
+.field public static final trae_fragment_toolcall_group_detail:I
+.field public static final trae_fragment_welcome:I
+.field public static final trae_input_preview:I
+.field public static final trae_item_agent_message:I
+.field public static final trae_item_artifact:I
+.field public static final trae_item_attachment:I
+.field public static final trae_item_audio_device:I
+.field public static final trae_item_brainstorm_ai_subtitle:I
+.field public static final trae_item_brainstorm_attachment:I
+.field public static final trae_item_brainstorm_attachment_group:I
+.field public static final trae_item_brainstorm_file_cell:I
+.field public static final trae_item_brainstorm_image_cell:I
+.field public static final trae_item_brainstorm_message_ai:I
+.field public static final trae_item_brainstorm_message_user:I
+.field public static final trae_item_brainstorm_subtitle:I
+.field public static final trae_item_brainstorm_subtitle_footer:I
+.field public static final trae_item_brainstorm_thinking_dots:I
+.field public static final trae_item_branch:I
+.field public static final trae_item_chat_attachment:I
+.field public static final trae_item_chat_image:I
+.field public static final trae_item_chat_tag:I
+.field public static final trae_item_checkpoint_input:I
+.field public static final trae_item_checkpoint_option:I
+.field public static final trae_item_cli:I
+.field public static final trae_item_code_changed:I
+.field public static final trae_item_code_device:I
+.field public static final trae_item_code_device_add:I
+.field public static final trae_item_conversation_title:I
+.field public static final trae_item_detail_sub_agent:I
+.field public static final trae_item_detail_thought:I
+.field public static final trae_item_detail_todo_write:I
+.field public static final trae_item_detail_toolcall:I
+.field public static final trae_item_document:I
+.field public static final trae_item_file_tree:I
+.field public static final trae_item_git_repo:I
+.field public static final trae_item_ide_project:I
+.field public static final trae_item_multi_image_preview:I
+.field public static final trae_item_revert_file:I
+.field public static final trae_item_task_location:I
+.field public static final trae_item_task_location_add:I
+.field public static final trae_item_task_template:I
+.field public static final trae_item_todo_entry:I
+.field public static final trae_item_tool_list:I
+.field public static final trae_item_user_message:I
+.field public static final trae_item_voice_history_assistant:I
+.field public static final trae_item_voice_history_user:I
+.field public static final trae_layout_artifact_preview:I
+.field public static final trae_layout_audio_device_switcher:I
+.field public static final trae_layout_brainstorm_summary:I
+.field public static final trae_layout_brainstorm_top_bar:I
+.field public static final trae_layout_brainstorm_voice_history:I
+.field public static final trae_layout_html_artifact_preview:I
+.field public static final trae_layout_multi_image_preview:I
+.field public static final trae_layout_network_error:I
+.field public static final trae_layout_participant_card:I
+.field public static final trae_layout_task_templates:I
+.field public static final trae_media_choose_activity:I
+.field public static final trae_media_choose_activity_preview:I
+.field public static final trae_media_choose_fragment:I
+.field public static final trae_media_choose_item_camera:I
+.field public static final trae_media_choose_item_media:I
+.field public static final trae_media_choose_item_preview_page:I
+.field public static final trae_plugin_authorization_checkpoint_content:I
+.field public static final trae_revert_dialog:I
+.field public static final trae_select_project_permission:I
+.field public static final trae_view_minimized_voice_bar:I
+.field public static final trae_widget_suggestion_chips:I
+
+
+.method private constructor <init>()void
+    .registers 1
+    # ins_size=1
+    invoke-direct v0, Ljava/lang/Object;-><init>()V
+    return-void 
+.end method

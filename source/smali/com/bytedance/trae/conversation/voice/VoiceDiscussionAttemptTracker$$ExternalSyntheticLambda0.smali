@@ -1,0 +1,25 @@
+# Decompiled TRAE business class
+# Source DEX: classes5.dex
+.class public final synthetic Lcom/bytedance/trae/conversation/voice/VoiceDiscussionAttemptTracker$$ExternalSyntheticLambda0;
+.super Ljava/lang/Object;
+.source "D8$$SyntheticClass"
+
+.implements Lkotlin/jvm/functions/Function0;
+
+
+.method public synthetic constructor <init>()void
+    .registers 1
+    # ins_size=1
+    invoke-direct v0, Ljava/lang/Object;-><init>()V
+    return-void 
+.end method
+
+.method public final invoke()java.lang.Object
+    .registers 3
+    # ins_size=1
+    invoke-static Lcom/bytedance/trae/conversation/voice/VoiceDiscussionAttemptTracker;->$r8$lambda$Z9LZWnIdVbxCHi1zfJJXsVbL4AE()J
+    move-result-wide v0
+    invoke-static v0, v1, Ljava/lang/Long;->valueOf(J)Ljava/lang/Long;
+    move-result-object v0
+    return-object v0
+.end method

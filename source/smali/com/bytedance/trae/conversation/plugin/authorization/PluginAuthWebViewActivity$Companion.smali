@@ -1,0 +1,42 @@
+# Decompiled TRAE business class
+# Source DEX: classes5.dex
+.class public final Lcom/bytedance/trae/conversation/plugin/authorization/PluginAuthWebViewActivity$Companion;
+.super Ljava/lang/Object;
+.source "PluginAuthWebViewActivity.kt"
+
+
+.method private constructor <init>()void
+    .registers 1
+    # ins_size=1
+    invoke-direct v0, Ljava/lang/Object;-><init>()V
+    return-void 
+.end method
+
+.method public synthetic constructor <init>(kotlin.jvm.internal.DefaultConstructorMarker)void
+    .registers 2
+    # ins_size=2
+    invoke-direct v0, Lcom/bytedance/trae/conversation/plugin/authorization/PluginAuthWebViewActivity$Companion;-><init>()V
+    return-void 
+.end method
+
+.method public final start(android.content.Context  java.lang.String  java.lang.String)void
+    .registers 6
+    # ins_size=4
+    const-string v0, "context"
+    invoke-static v3, v0, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object; Ljava/lang/String;)V
+    const-string/jumbo v0, url
+    invoke-static v4, v0, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object; Ljava/lang/String;)V
+    const-string v0, "provider"
+    invoke-static v5, v0, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object; Ljava/lang/String;)V
+    new-instance v0, Landroid/content/Intent;
+    const-class v1, Lcom/bytedance/trae/conversation/plugin/authorization/PluginAuthWebViewActivity;
+    invoke-direct v0, v3, v1, Landroid/content/Intent;-><init>(Landroid/content/Context; Ljava/lang/Class;)V
+    const-string v1, "extra_url"
+    invoke-virtual v0, v1, v4, Landroid/content/Intent;->putExtra(Ljava/lang/String; Ljava/lang/String;)Landroid/content/Intent;
+    const-string v4, "extra_provider"
+    invoke-virtual v0, v4, v5, Landroid/content/Intent;->putExtra(Ljava/lang/String; Ljava/lang/String;)Landroid/content/Intent;
+    const/high16 v4, 268435456
+    invoke-virtual v0, v4, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    invoke-virtual v3, v0, Landroid/content/Context;->startActivity(Landroid/content/Intent;)V
+    return-void 
+.end method

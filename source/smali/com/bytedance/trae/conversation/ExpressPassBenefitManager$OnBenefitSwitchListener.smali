@@ -1,0 +1,10 @@
+# Decompiled TRAE business class
+# Source DEX: classes5.dex
+.class public interface abstract Lcom/bytedance/trae/conversation/ExpressPassBenefitManager$OnBenefitSwitchListener;
+.super Ljava/lang/Object;
+.source "ExpressPassBenefitManager.kt"
+
+
+.method public abstract onBenefitSwitched(boolean)void
+    # abstract or native
+.end method

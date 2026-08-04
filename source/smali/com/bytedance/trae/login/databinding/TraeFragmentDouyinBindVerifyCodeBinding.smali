@@ -1,0 +1,118 @@
+# Decompiled TRAE business class
+# Source DEX: classes4.dex
+.class public final Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;
+.super Ljava/lang/Object;
+.source "TraeFragmentDouyinBindVerifyCodeBinding.java"
+
+.implements Landroidx/viewbinding/ViewBinding;
+
+.field private final rootView:Landroid/widget/LinearLayout;
+.field public final tvCodeHint:Landroid/widget/TextView;
+.field public final tvMaskedPhone:Landroid/widget/TextView;
+.field public final tvResend:Landroid/widget/TextView;
+.field public final verifyCodeGroup:Landroid/widget/LinearLayout;
+.field public final verifyCodeInput:Lcom/bytedance/trae/login/widget/VerifyCodeInputView;
+
+
+.method private constructor <init>(android.widget.LinearLayout  android.widget.TextView  android.widget.TextView  android.widget.TextView  android.widget.LinearLayout  com.bytedance.trae.login.widget.VerifyCodeInputView)void
+    .registers 7
+    # ins_size=7
+    invoke-direct v0, Ljava/lang/Object;-><init>()V
+    iput-object v1, v0, Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;->rootView Landroid/widget/LinearLayout;
+    iput-object v2, v0, Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;->tvCodeHint Landroid/widget/TextView;
+    iput-object v3, v0, Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;->tvMaskedPhone Landroid/widget/TextView;
+    iput-object v4, v0, Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;->tvResend Landroid/widget/TextView;
+    iput-object v5, v0, Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;->verifyCodeGroup Landroid/widget/LinearLayout;
+    iput-object v6, v0, Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;->verifyCodeInput Lcom/bytedance/trae/login/widget/VerifyCodeInputView;
+    return-void 
+.end method
+
+.method public static bind(android.view.View)com.bytedance.trae.login.databinding.TraeFragmentDouyinBindVerifyCodeBinding
+    .registers 10
+    # ins_size=1
+    sget v0, Lcom/bytedance/trae/login/R$id;->tv_code_hint I
+    invoke-static v9, v0, Landroidx/viewbinding/ViewBindings;->findChildViewById(Landroid/view/View; I)Landroid/view/View;
+    move-result-object v1
+    move-object v4, v1
+    check-cast v4, Landroid/widget/TextView;
+    if-eqz v4, +038h
+    sget v0, Lcom/bytedance/trae/login/R$id;->tv_masked_phone I
+    invoke-static v9, v0, Landroidx/viewbinding/ViewBindings;->findChildViewById(Landroid/view/View; I)Landroid/view/View;
+    move-result-object v1
+    move-object v5, v1
+    check-cast v5, Landroid/widget/TextView;
+    if-eqz v5, +02dh
+    sget v0, Lcom/bytedance/trae/login/R$id;->tv_resend I
+    invoke-static v9, v0, Landroidx/viewbinding/ViewBindings;->findChildViewById(Landroid/view/View; I)Landroid/view/View;
+    move-result-object v1
+    move-object v6, v1
+    check-cast v6, Landroid/widget/TextView;
+    if-eqz v6, +022h
+    sget v0, Lcom/bytedance/trae/login/R$id;->verify_code_group I
+    invoke-static v9, v0, Landroidx/viewbinding/ViewBindings;->findChildViewById(Landroid/view/View; I)Landroid/view/View;
+    move-result-object v1
+    move-object v7, v1
+    check-cast v7, Landroid/widget/LinearLayout;
+    if-eqz v7, +017h
+    sget v0, Lcom/bytedance/trae/login/R$id;->verify_code_input I
+    invoke-static v9, v0, Landroidx/viewbinding/ViewBindings;->findChildViewById(Landroid/view/View; I)Landroid/view/View;
+    move-result-object v1
+    move-object v8, v1
+    check-cast v8, Lcom/bytedance/trae/login/widget/VerifyCodeInputView;
+    if-eqz v8, +00ch
+    new-instance v0, Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;
+    move-object v3, v9
+    check-cast v3, Landroid/widget/LinearLayout;
+    move-object v2, v0
+    invoke-direct/range v2 ... v8, Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;-><init>(Landroid/widget/LinearLayout; Landroid/widget/TextView; Landroid/widget/TextView; Landroid/widget/TextView; Landroid/widget/LinearLayout; Lcom/bytedance/trae/login/widget/VerifyCodeInputView;)V
+    return-object v0
+    invoke-virtual v9, Landroid/view/View;->getResources()Landroid/content/res/Resources;
+    move-result-object v9
+    invoke-virtual v9, v0, Landroid/content/res/Resources;->getResourceName(I)Ljava/lang/String;
+    move-result-object v9
+    new-instance v0, Ljava/lang/NullPointerException;
+    const-string v1, "Missing required view with ID: "
+    invoke-virtual v1, v9, Ljava/lang/String;->concat(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v9
+    invoke-direct v0, v9, Ljava/lang/NullPointerException;-><init>(Ljava/lang/String;)V
+    throw v0
+.end method
+
+.method public static inflate(android.view.LayoutInflater)com.bytedance.trae.login.databinding.TraeFragmentDouyinBindVerifyCodeBinding
+    .registers 3
+    # ins_size=1
+    const/4 v0, 0
+    const/4 v1, 0
+    invoke-static v2, v0, v1, Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;->inflate(Landroid/view/LayoutInflater; Landroid/view/ViewGroup; Z)Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;
+    move-result-object v2
+    return-object v2
+.end method
+
+.method public static inflate(android.view.LayoutInflater  android.view.ViewGroup  boolean)com.bytedance.trae.login.databinding.TraeFragmentDouyinBindVerifyCodeBinding
+    .registers 5
+    # ins_size=3
+    sget v0, Lcom/bytedance/trae/login/R$layout;->trae_fragment_douyin_bind_verify_code I
+    const/4 v1, 0
+    invoke-virtual v2, v0, v3, v1, Landroid/view/LayoutInflater;->inflate(I Landroid/view/ViewGroup; Z)Landroid/view/View;
+    move-result-object v2
+    if-eqz v4, +005h
+    invoke-virtual v3, v2, Landroid/view/ViewGroup;->addView(Landroid/view/View;)V
+    invoke-static v2, Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;->bind(Landroid/view/View;)Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;
+    move-result-object v2
+    return-object v2
+.end method
+
+.method public bridge synthetic getRoot()android.view.View
+    .registers 2
+    # ins_size=1
+    invoke-virtual v1, Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;->getRoot()Landroid/widget/LinearLayout;
+    move-result-object v0
+    return-object v0
+.end method
+
+.method public getRoot()android.widget.LinearLayout
+    .registers 2
+    # ins_size=1
+    iget-object v0, v1, Lcom/bytedance/trae/login/databinding/TraeFragmentDouyinBindVerifyCodeBinding;->rootView Landroid/widget/LinearLayout;
+    return-object v0
+.end method

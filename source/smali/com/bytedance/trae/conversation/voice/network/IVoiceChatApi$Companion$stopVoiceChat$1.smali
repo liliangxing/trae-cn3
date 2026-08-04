@@ -1,0 +1,41 @@
+# Decompiled TRAE business class
+# Source DEX: classes5.dex
+.class final Lcom/bytedance/trae/conversation/voice/network/IVoiceChatApi$Companion$stopVoiceChat$1;
+.super Lkotlin/coroutines/jvm/internal/ContinuationImpl;
+.source "IVoiceChatApi.kt"
+
+.field  label:I
+.field synthetic result:Ljava/lang/Object;
+.field final synthetic this$0:Lcom/bytedance/trae/conversation/voice/network/IVoiceChatApi$Companion;
+
+
+.method constructor <init>(com.bytedance.trae.conversation.voice.network.IVoiceChatApi$Companion  kotlin.coroutines.Continuation)void
+    .registers 3
+    # ins_size=3
+    iput-object v1, v0, Lcom/bytedance/trae/conversation/voice/network/IVoiceChatApi$Companion$stopVoiceChat$1;->this$0 Lcom/bytedance/trae/conversation/voice/network/IVoiceChatApi$Companion;
+    invoke-direct v0, v2, Lkotlin/coroutines/jvm/internal/ContinuationImpl;-><init>(Lkotlin/coroutines/Continuation;)V
+    return-void 
+.end method
+
+.method public final invokeSuspend(java.lang.Object)java.lang.Object
+    .registers 11
+    # ins_size=2
+    iput-object v10, v9, Lcom/bytedance/trae/conversation/voice/network/IVoiceChatApi$Companion$stopVoiceChat$1;->result Ljava/lang/Object;
+    iget v10, v9, Lcom/bytedance/trae/conversation/voice/network/IVoiceChatApi$Companion$stopVoiceChat$1;->label I
+    const/high16 v0, -2147483648
+    or-int/2addr v10, v0
+    iput v10, v9, Lcom/bytedance/trae/conversation/voice/network/IVoiceChatApi$Companion$stopVoiceChat$1;->label I
+    iget-object v0, v9, Lcom/bytedance/trae/conversation/voice/network/IVoiceChatApi$Companion$stopVoiceChat$1;->this$0 Lcom/bytedance/trae/conversation/voice/network/IVoiceChatApi$Companion;
+    const/4 v1, 0
+    const/4 v2, 0
+    const/4 v3, 0
+    const/4 v4, 0
+    const/4 v5, 0
+    const/4 v6, 0
+    const/4 v7, 0
+    move-object v8, v9
+    check-cast v8, Lkotlin/coroutines/Continuation;
+    invoke-virtual/range v0 ... v8, Lcom/bytedance/trae/conversation/voice/network/IVoiceChatApi$Companion;->stopVoiceChat(Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    move-result-object v10
+    return-object v10
+.end method

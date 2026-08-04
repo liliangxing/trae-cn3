@@ -1,0 +1,22 @@
+# Decompiled TRAE business class
+# Source DEX: classes4.dex
+.class public final synthetic Lcom/bytedance/trae/login/traeauth/LazyLoginBindDevice$$ExternalSyntheticLambda2;
+.super Ljava/lang/Object;
+.source "D8$$SyntheticClass"
+
+.implements Ljava/lang/Runnable;
+
+
+.method public synthetic constructor <init>()void
+    .registers 1
+    # ins_size=1
+    invoke-direct v0, Ljava/lang/Object;-><init>()V
+    return-void 
+.end method
+
+.method public final run()void
+    .registers 1
+    # ins_size=1
+    invoke-static Lcom/bytedance/trae/login/traeauth/LazyLoginBindDevice;->$r8$lambda$ci-gkuDY79F0O71tNk5i9J8kDtE()V
+    return-void 
+.end method

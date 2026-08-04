@@ -1,0 +1,14 @@
+# Decompiled TRAE business class
+# Source DEX: classes5.dex
+.class public interface abstract Lcom/bytedance/trae/home/solo/setting/data/SettingsCreditsRepository;
+.super Ljava/lang/Object;
+.source "SettingsCreditsRepository.kt"
+
+
+.method public abstract getCreditsState()kotlinx.coroutines.flow.StateFlow
+    # abstract or native
+.end method
+
+.method public abstract refresh(kotlin.coroutines.Continuation)java.lang.Object
+    # abstract or native
+.end method

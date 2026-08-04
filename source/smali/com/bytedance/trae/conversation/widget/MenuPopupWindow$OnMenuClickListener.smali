@@ -1,0 +1,22 @@
+# Decompiled TRAE business class
+# Source DEX: classes5.dex
+.class public interface abstract Lcom/bytedance/trae/conversation/widget/MenuPopupWindow$OnMenuClickListener;
+.super Ljava/lang/Object;
+.source "MenuPopupWindow.java"
+
+
+.method public abstract onArtifactClick()void
+    # abstract or native
+.end method
+
+.method public abstract onDeleteClick()void
+    # abstract or native
+.end method
+
+.method public abstract onPinClick()void
+    # abstract or native
+.end method
+
+.method public abstract onRenameClick()void
+    # abstract or native
+.end method

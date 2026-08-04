@@ -1,0 +1,49 @@
+# Decompiled TRAE business class
+# Source DEX: classes5.dex
+.class final Lcom/bytedance/trae/conversation/products/FileDownloadHelper$downloadFile$1;
+.super Lkotlin/coroutines/jvm/internal/ContinuationImpl;
+.source "FileDownloadHelper.kt"
+
+.field  J$0:J
+.field  L$0:Ljava/lang/Object;
+.field  L$1:Ljava/lang/Object;
+.field  L$2:Ljava/lang/Object;
+.field  L$3:Ljava/lang/Object;
+.field  L$4:Ljava/lang/Object;
+.field  L$5:Ljava/lang/Object;
+.field  L$6:Ljava/lang/Object;
+.field  Z$0:Z
+.field  label:I
+.field synthetic result:Ljava/lang/Object;
+.field final synthetic this$0:Lcom/bytedance/trae/conversation/products/FileDownloadHelper;
+
+
+.method constructor <init>(com.bytedance.trae.conversation.products.FileDownloadHelper  kotlin.coroutines.Continuation)void
+    .registers 3
+    # ins_size=3
+    iput-object v1, v0, Lcom/bytedance/trae/conversation/products/FileDownloadHelper$downloadFile$1;->this$0 Lcom/bytedance/trae/conversation/products/FileDownloadHelper;
+    invoke-direct v0, v2, Lkotlin/coroutines/jvm/internal/ContinuationImpl;-><init>(Lkotlin/coroutines/Continuation;)V
+    return-void 
+.end method
+
+.method public final invokeSuspend(java.lang.Object)java.lang.Object
+    .registers 11
+    # ins_size=2
+    iput-object v10, v9, Lcom/bytedance/trae/conversation/products/FileDownloadHelper$downloadFile$1;->result Ljava/lang/Object;
+    iget v10, v9, Lcom/bytedance/trae/conversation/products/FileDownloadHelper$downloadFile$1;->label I
+    const/high16 v0, -2147483648
+    or-int/2addr v10, v0
+    iput v10, v9, Lcom/bytedance/trae/conversation/products/FileDownloadHelper$downloadFile$1;->label I
+    iget-object v0, v9, Lcom/bytedance/trae/conversation/products/FileDownloadHelper$downloadFile$1;->this$0 Lcom/bytedance/trae/conversation/products/FileDownloadHelper;
+    const/4 v1, 0
+    const/4 v2, 0
+    const/4 v3, 0
+    const/4 v4, 0
+    const/4 v5, 0
+    const-wide/16 v6, 0
+    move-object v8, v9
+    check-cast v8, Lkotlin/coroutines/Continuation;
+    invoke-static/range v0 ... v8, Lcom/bytedance/trae/conversation/products/FileDownloadHelper;->access$downloadFile(Lcom/bytedance/trae/conversation/products/FileDownloadHelper; Landroid/content/Context; Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Z J Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    move-result-object v10
+    return-object v10
+.end method

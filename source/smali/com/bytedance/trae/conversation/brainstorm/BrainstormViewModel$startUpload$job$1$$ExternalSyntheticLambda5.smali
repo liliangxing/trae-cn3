@@ -1,0 +1,28 @@
+# Decompiled TRAE business class
+# Source DEX: classes5.dex
+.class public final synthetic Lcom/bytedance/trae/conversation/brainstorm/BrainstormViewModel$startUpload$job$1$$ExternalSyntheticLambda5;
+.super Ljava/lang/Object;
+.source "D8$$SyntheticClass"
+
+.implements Lkotlin/jvm/functions/Function1;
+
+.field public final synthetic f$0:I
+
+
+.method public synthetic constructor <init>(int)void
+    .registers 2
+    # ins_size=2
+    invoke-direct v0, Ljava/lang/Object;-><init>()V
+    iput v1, v0, Lcom/bytedance/trae/conversation/brainstorm/BrainstormViewModel$startUpload$job$1$$ExternalSyntheticLambda5;->f$0 I
+    return-void 
+.end method
+
+.method public final invoke(java.lang.Object)java.lang.Object
+    .registers 3
+    # ins_size=2
+    iget v0, v1, Lcom/bytedance/trae/conversation/brainstorm/BrainstormViewModel$startUpload$job$1$$ExternalSyntheticLambda5;->f$0 I
+    check-cast v2, Lcom/bytedance/trae/conversation/brainstorm/model/BrainstormAttachment;
+    invoke-static v0, v2, Lcom/bytedance/trae/conversation/brainstorm/BrainstormViewModel$startUpload$job$1;->$r8$lambda$xqSaMVxE4gpt1vbsFK4b46y-NzE(I Lcom/bytedance/trae/conversation/brainstorm/model/BrainstormAttachment;)Lcom/bytedance/trae/conversation/brainstorm/model/BrainstormAttachment;
+    move-result-object v2
+    return-object v2
+.end method

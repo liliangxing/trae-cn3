@@ -1,0 +1,98 @@
+# Decompiled TRAE business class
+# Source DEX: classes5.dex
+.class final Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;
+.super Lkotlin/coroutines/jvm/internal/SuspendLambda;
+.source "BrainstormActivity.kt"
+
+.implements Lkotlin/jvm/functions/Function2;
+
+.field  label:I
+.field final synthetic this$0:Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity;
+
+
+.method constructor <init>(com.bytedance.trae.conversation.brainstorm.BrainstormActivity  kotlin.coroutines.Continuation)void
+    .registers 3
+    # ins_size=3
+    iput-object v1, v0, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;->this$0 Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity;
+    const/4 v1, 2
+    invoke-direct v0, v1, v2, Lkotlin/coroutines/jvm/internal/SuspendLambda;-><init>(I Lkotlin/coroutines/Continuation;)V
+    return-void 
+.end method
+
+.method public final create(java.lang.Object  kotlin.coroutines.Continuation)kotlin.coroutines.Continuation
+    .registers 4
+    # ins_size=3
+    new-instance v2, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;
+    iget-object v0, v1, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;->this$0 Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity;
+    invoke-direct v2, v0, v3, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;-><init>(Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity; Lkotlin/coroutines/Continuation;)V
+    check-cast v2, Lkotlin/coroutines/Continuation;
+    return-object v2
+.end method
+
+.method public bridge synthetic invoke(java.lang.Object  java.lang.Object)java.lang.Object
+    .registers 3
+    # ins_size=3
+    check-cast v1, Lkotlinx/coroutines/CoroutineScope;
+    check-cast v2, Lkotlin/coroutines/Continuation;
+    invoke-virtual v0, v1, v2, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;->invoke(Lkotlinx/coroutines/CoroutineScope; Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    move-result-object v1
+    return-object v1
+.end method
+
+.method public final invoke(kotlinx.coroutines.CoroutineScope  kotlin.coroutines.Continuation)java.lang.Object
+    .registers 3
+    # ins_size=3
+    invoke-virtual v0, v1, v2, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;->create(Ljava/lang/Object; Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;
+    move-result-object v1
+    check-cast v1, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;
+    sget-object v2, Lkotlin/Unit;->INSTANCE Lkotlin/Unit;
+    invoke-virtual v1, v2, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
+    move-result-object v1
+    return-object v1
+.end method
+
+.method public final invokeSuspend(java.lang.Object)java.lang.Object
+    .registers 6
+    # ins_size=2
+    invoke-static Lkotlin/coroutines/intrinsics/IntrinsicsKt;->getCOROUTINE_SUSPENDED()Ljava/lang/Object;
+    move-result-object v0
+    iget v1, v4, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;->label I
+    const/4 v2, 1
+    if-eqz v1, +010h
+    if-ne v1, v2, +006h
+    invoke-static v5, Lkotlin/ResultKt;->throwOnFailure(Ljava/lang/Object;)V
+    goto +41h
+    new-instance v5, Ljava/lang/IllegalStateException;
+    const-string v0, "call to 'resume' before 'invoke' with coroutine"
+    invoke-direct v5, v0, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
+    throw v5
+    invoke-static v5, Lkotlin/ResultKt;->throwOnFailure(Ljava/lang/Object;)V
+    iget-object v5, v4, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;->this$0 Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity;
+    invoke-static v5, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity;->access$getViewModel$p(Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity;)Lcom/bytedance/trae/conversation/brainstorm/BrainstormViewModel;
+    move-result-object v5
+    if-nez v5, +009h
+    const-string/jumbo v5, viewModel
+    invoke-static v5, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
+    const/4 v5, 0
+    invoke-virtual v5, Lcom/bytedance/trae/conversation/brainstorm/BrainstormViewModel;->getUiState()Lkotlinx/coroutines/flow/StateFlow;
+    move-result-object v5
+    check-cast v5, Lkotlinx/coroutines/flow/Flow;
+    new-instance v1, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1$invokeSuspend$$inlined$map$1;
+    invoke-direct v1, v5, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1$invokeSuspend$$inlined$map$1;-><init>(Lkotlinx/coroutines/flow/Flow;)V
+    check-cast v1, Lkotlinx/coroutines/flow/Flow;
+    invoke-static v1, Lkotlinx/coroutines/flow/FlowKt;->distinctUntilChanged(Lkotlinx/coroutines/flow/Flow;)Lkotlinx/coroutines/flow/Flow;
+    move-result-object v5
+    new-instance v1, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1$2;
+    iget-object v3, v4, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;->this$0 Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity;
+    invoke-direct v1, v3, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1$2;-><init>(Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity;)V
+    check-cast v1, Lkotlinx/coroutines/flow/FlowCollector;
+    move-object v3, v4
+    check-cast v3, Lkotlin/coroutines/Continuation;
+    iput v2, v4, Lcom/bytedance/trae/conversation/brainstorm/BrainstormActivity$observePhaseNavigation$1;->label I
+    invoke-interface v5, v1, v3, Lkotlinx/coroutines/flow/Flow;->collect(Lkotlinx/coroutines/flow/FlowCollector; Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    move-result-object v5
+    if-ne v5, v0, +003h
+    return-object v0
+    sget-object v5, Lkotlin/Unit;->INSTANCE Lkotlin/Unit;
+    return-object v5
+.end method
