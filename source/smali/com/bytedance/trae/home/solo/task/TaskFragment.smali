@@ -3750,6 +3750,12 @@
     .locals 6
 
     :try_start_ec
+    const-string v0, "ExtractConversation"
+
+    const-string v1, "extractConversation() entered"
+
+    invoke-static {v0, v1}, Lcom/bytedance/trae/conversation/extract/FileLogger;->log(Ljava/lang/String;Ljava/lang/String;)V
+
     invoke-virtual {p1}, Lcom/bytedance/trae/home/solo/task/TaskModel;->getTitle()Ljava/lang/String;
 
     move-result-object v0
@@ -3795,6 +3801,12 @@
 
     if-nez v4, :cond_activity
 
+    const-string v0, "ExtractConversation"
+
+    const-string v1, "requireActivity() returned null"
+
+    invoke-static {v0, v1}, Lcom/bytedance/trae/conversation/extract/FileLogger;->log(Ljava/lang/String;Ljava/lang/String;)V
+
     sget-object v5, Lkotlin/Unit;->INSTANCE:Lkotlin/Unit;
 
     return-object v5
@@ -3802,12 +3814,36 @@
     :cond_activity
     check-cast v4, Landroid/app/Activity;
 
+    const-string v5, "ExtractConversation"
+
+    new-instance v2, Ljava/lang/StringBuilder;
+
+    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v6, "Calling ExtractHelper.start title="
+
+    invoke-virtual {v2, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v2, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    const-string v6, " taskId="
+
+    invoke-virtual {v2, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v2}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v2
+
+    invoke-static {v5, v2}, Lcom/bytedance/trae/conversation/extract/FileLogger;->log(Ljava/lang/String;Ljava/lang/String;)V
+
     sget-object v5, Lcom/bytedance/trae/conversation/extract/ExtractHelper;->INSTANCE:Lcom/bytedance/trae/conversation/extract/ExtractHelper;
 
     invoke-virtual {v5, v4, v3, v0}, Lcom/bytedance/trae/conversation/extract/ExtractHelper;->start(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)V
 
     :try_end_ec
-    .catch Ljava/lang/Exception; {:try_start_ec .. :try_end_ec} :catch_ec
+    .catch Ljava/lang/Throwable; {:try_start_ec .. :try_end_ec} :catch_ec
 
     sget-object v5, Lkotlin/Unit;->INSTANCE:Lkotlin/Unit;
 
