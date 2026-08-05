@@ -46,7 +46,7 @@
 
 # direct methods
 .method constructor <init>(Lcom/bytedance/trae/conversation/ConversationActivity;)V
-    .registers 2
+    .locals 0
 
     iput-object p1, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
@@ -59,25 +59,23 @@
 
 # virtual methods
 .method public onArtifactClick()V
-    .registers 11
+    .locals 10
 
     .line 1279
     iget-object v0, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
-    # getter for: Lcom/bytedance/trae/conversation/ConversationActivity;->menuPopupWindow:Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;
     invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getMenuPopupWindow$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;
 
     move-result-object v0
 
-    if-eqz v0, :cond_b
+    if-eqz v0, :cond_0
 
     invoke-virtual {v0}, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;->dismiss()V
 
     .line 1281
-    :cond_b
+    :cond_0
     iget-object v0, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
-    # getter for: Lcom/bytedance/trae/conversation/ConversationActivity;->viewModel:Lcom/bytedance/trae/conversation/ConversationViewModel;
     invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getViewModel$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/ConversationViewModel;
 
     move-result-object v0
@@ -86,13 +84,13 @@
 
     const/4 v2, 0x0
 
-    if-nez v0, :cond_1b
+    if-nez v0, :cond_1
 
     invoke-static {v1}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
 
     move-object v0, v2
 
-    :cond_1b
+    :cond_1
     invoke-virtual {v0}, Lcom/bytedance/trae/conversation/ConversationViewModel;->getConversation()Lkotlinx/coroutines/flow/StateFlow;
 
     move-result-object v0
@@ -106,31 +104,30 @@
     .line 1282
     iget-object v3, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
-    # invokes: Lcom/bytedance/trae/conversation/ConversationActivity;->getDetailFragment()Lcom/bytedance/trae/conversation/chat/ConversationDetailFragment;
     invoke-static {v3}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getDetailFragment(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/chat/ConversationDetailFragment;
 
     move-result-object v3
 
-    if-eqz v3, :cond_32
+    if-eqz v3, :cond_2
 
     invoke-virtual {v3}, Lcom/bytedance/trae/conversation/chat/ConversationDetailFragment;->getLastMessage()Lcom/bytedance/trae/im/model/ParsedChatMessage;
 
     move-result-object v3
 
-    goto :goto_33
+    goto :goto_0
 
-    :cond_32
+    :cond_2
     move-object v3, v2
 
-    :goto_33
-    if-eqz v0, :cond_77
+    :goto_0
+    if-eqz v0, :cond_9
 
-    if-nez v3, :cond_38
+    if-nez v3, :cond_3
 
-    goto :goto_77
+    goto :goto_4
 
     .line 1287
-    :cond_38
+    :cond_3
     sget-object v4, Lcom/bytedance/trae/conversation/products/ArtifactListActivity;->Companion:Lcom/bytedance/trae/conversation/products/ArtifactListActivity$Companion;
 
     .line 1288
@@ -145,54 +142,53 @@
 
     const-string v7, ""
 
-    if-nez v6, :cond_47
+    if-nez v6, :cond_4
 
     move-object v6, v7
 
     .line 1290
-    :cond_47
+    :cond_4
     invoke-virtual {v3}, Lcom/bytedance/trae/im/model/ParsedChatMessage;->getTurnId()Ljava/lang/String;
 
     move-result-object v3
 
-    if-nez v3, :cond_4e
+    if-nez v3, :cond_5
 
     move-object v3, v7
 
     .line 1291
-    :cond_4e
+    :cond_5
     invoke-virtual {v0}, Lcom/bytedance/trae/im/service/Conversation;->getEnvironment()Ljava/lang/String;
 
     move-result-object v0
 
-    if-nez v0, :cond_56
+    if-nez v0, :cond_6
 
     move-object v8, v7
 
-    goto :goto_57
+    goto :goto_1
 
-    :cond_56
+    :cond_6
     move-object v8, v0
 
     .line 1292
-    :goto_57
+    :goto_1
     iget-object v0, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
-    # getter for: Lcom/bytedance/trae/conversation/ConversationActivity;->viewModel:Lcom/bytedance/trae/conversation/ConversationViewModel;
     invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getViewModel$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/ConversationViewModel;
 
     move-result-object v0
 
-    if-nez v0, :cond_63
+    if-nez v0, :cond_7
 
     invoke-static {v1}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
 
-    goto :goto_64
+    goto :goto_2
 
-    :cond_63
+    :cond_7
     move-object v2, v0
 
-    :goto_64
+    :goto_2
     invoke-virtual {v2}, Lcom/bytedance/trae/conversation/ConversationViewModel;->getConversationId()Lkotlinx/coroutines/flow/StateFlow;
 
     move-result-object v0
@@ -203,71 +199,134 @@
 
     check-cast v0, Ljava/lang/String;
 
-    if-nez v0, :cond_72
+    if-nez v0, :cond_8
 
     move-object v9, v7
 
-    goto :goto_73
+    goto :goto_3
 
-    :cond_72
+    :cond_8
     move-object v9, v0
 
-    :goto_73
+    :goto_3
     move-object v7, v3
 
     .line 1287
     invoke-virtual/range {v4 .. v9}, Lcom/bytedance/trae/conversation/products/ArtifactListActivity$Companion;->start(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 
-    :cond_77
-    :goto_77
+    :cond_9
+    :goto_4
     return-void
 .end method
 
 .method public onDeleteClick()V
-    .registers 2
+    .locals 1
 
     .line 1311
     iget-object v0, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
-    # getter for: Lcom/bytedance/trae/conversation/ConversationActivity;->menuPopupWindow:Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;
     invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getMenuPopupWindow$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;
 
     move-result-object v0
 
-    if-eqz v0, :cond_b
+    if-eqz v0, :cond_0
 
     invoke-virtual {v0}, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;->dismiss()V
 
     .line 1312
-    :cond_b
+    :cond_0
     iget-object v0, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
-    # invokes: Lcom/bytedance/trae/conversation/ConversationActivity;->showDeleteDialog()V
     invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$showDeleteDialog(Lcom/bytedance/trae/conversation/ConversationActivity;)V
 
     return-void
 .end method
 
+.method public onExtractClick()V
+    .locals 5
+
+    iget-object v0, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
+
+    invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getMenuPopupWindow$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;
+
+    move-result-object v1
+
+    if-eqz v1, :cond_0
+
+    invoke-virtual {v1}, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;->dismiss()V
+
+    :cond_0
+    invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getViewModel$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/ConversationViewModel;
+
+    move-result-object v1
+
+    const/4 v2, 0x0
+
+    const-string/jumbo v3, "viewModel"
+
+    if-nez v1, :cond_1
+
+    invoke-static {v3}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
+
+    move-object v1, v2
+
+    :cond_1
+    invoke-virtual {v1}, Lcom/bytedance/trae/conversation/ConversationViewModel;->getConversation()Lkotlinx/coroutines/flow/StateFlow;
+
+    move-result-object v1
+
+    invoke-interface {v1}, Lkotlinx/coroutines/flow/StateFlow;->getValue()Ljava/lang/Object;
+
+    move-result-object v1
+
+    check-cast v1, Lcom/bytedance/trae/im/service/Conversation;
+
+    if-eqz v1, :cond_done
+
+    invoke-virtual {v1}, Lcom/bytedance/trae/im/service/Conversation;->getLatestTaskId()Ljava/lang/String;
+
+    move-result-object v3
+
+    if-nez v3, :cond_2
+
+    const-string v3, ""
+
+    :cond_2
+    invoke-virtual {v1}, Lcom/bytedance/trae/im/service/Conversation;->getTitle()Ljava/lang/String;
+
+    move-result-object v4
+
+    if-nez v4, :cond_3
+
+    const-string v4, "conversation"
+
+    :cond_3
+    sget-object v2, Lcom/bytedance/trae/conversation/extract/ExtractHelper;->INSTANCE:Lcom/bytedance/trae/conversation/extract/ExtractHelper;
+
+    invoke-virtual {v2, v0, v3, v4}, Lcom/bytedance/trae/conversation/extract/ExtractHelper;->start(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)V
+
+    :cond_done
+    return-void
+.end method
+
 .method public onPinClick()V
-    .registers 5
+    .locals 4
 
     .line 1297
     iget-object v0, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
-    # getter for: Lcom/bytedance/trae/conversation/ConversationActivity;->menuPopupWindow:Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;
     invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getMenuPopupWindow$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;
 
     move-result-object v0
 
-    if-eqz v0, :cond_b
+    if-eqz v0, :cond_0
 
     invoke-virtual {v0}, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;->dismiss()V
 
     .line 1298
-    :cond_b
+    :cond_0
     iget-object v0, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
-    # getter for: Lcom/bytedance/trae/conversation/ConversationActivity;->viewModel:Lcom/bytedance/trae/conversation/ConversationViewModel;
     invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getViewModel$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/ConversationViewModel;
 
     move-result-object v0
@@ -276,13 +335,13 @@
 
     const-string/jumbo v2, "viewModel"
 
-    if-nez v0, :cond_1b
+    if-nez v0, :cond_1
 
     invoke-static {v2}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
 
     move-object v0, v1
 
-    :cond_1b
+    :cond_1
     invoke-virtual {v0}, Lcom/bytedance/trae/conversation/ConversationViewModel;->getConversation()Lkotlinx/coroutines/flow/StateFlow;
 
     move-result-object v0
@@ -293,7 +352,7 @@
 
     check-cast v0, Lcom/bytedance/trae/im/service/Conversation;
 
-    if-eqz v0, :cond_35
+    if-eqz v0, :cond_2
 
     invoke-virtual {v0}, Lcom/bytedance/trae/im/service/Conversation;->isPinned()Ljava/lang/Boolean;
 
@@ -309,101 +368,78 @@
 
     move-result v0
 
-    goto :goto_36
+    goto :goto_0
 
-    :cond_35
+    :cond_2
     const/4 v0, 0x0
 
-    :goto_36
-    if-eqz v0, :cond_49
+    :goto_0
+    if-eqz v0, :cond_4
 
     .line 1299
     iget-object v0, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
-    # getter for: Lcom/bytedance/trae/conversation/ConversationActivity;->viewModel:Lcom/bytedance/trae/conversation/ConversationViewModel;
     invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getViewModel$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/ConversationViewModel;
 
     move-result-object v0
 
-    if-nez v0, :cond_44
+    if-nez v0, :cond_3
 
     invoke-static {v2}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
 
-    goto :goto_45
+    goto :goto_1
 
-    :cond_44
+    :cond_3
     move-object v1, v0
 
-    :goto_45
+    :goto_1
     invoke-virtual {v1}, Lcom/bytedance/trae/conversation/ConversationViewModel;->unpinConversation()V
 
-    goto :goto_59
+    goto :goto_3
 
     .line 1301
-    :cond_49
+    :cond_4
     iget-object v0, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
-    # getter for: Lcom/bytedance/trae/conversation/ConversationActivity;->viewModel:Lcom/bytedance/trae/conversation/ConversationViewModel;
     invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getViewModel$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/ConversationViewModel;
 
     move-result-object v0
 
-    if-nez v0, :cond_55
+    if-nez v0, :cond_5
 
     invoke-static {v2}, Lkotlin/jvm/internal/Intrinsics;->throwUninitializedPropertyAccessException(Ljava/lang/String;)V
 
-    goto :goto_56
+    goto :goto_2
 
-    :cond_55
+    :cond_5
     move-object v1, v0
 
-    :goto_56
+    :goto_2
     invoke-virtual {v1}, Lcom/bytedance/trae/conversation/ConversationViewModel;->pinConversation()V
 
-    :goto_59
+    :goto_3
     return-void
 .end method
 
 .method public onRenameClick()V
-    .registers 2
+    .locals 1
 
     .line 1306
     iget-object v0, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
-    # getter for: Lcom/bytedance/trae/conversation/ConversationActivity;->menuPopupWindow:Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;
     invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$getMenuPopupWindow$p(Lcom/bytedance/trae/conversation/ConversationActivity;)Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;
 
     move-result-object v0
 
-    if-eqz v0, :cond_b
+    if-eqz v0, :cond_0
 
     invoke-virtual {v0}, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;->dismiss()V
 
     .line 1307
-    :cond_b
+    :cond_0
     iget-object v0, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
 
-    # invokes: Lcom/bytedance/trae/conversation/ConversationActivity;->showRenameDialog()V
     invoke-static {v0}, Lcom/bytedance/trae/conversation/ConversationActivity;->access$showRenameDialog(Lcom/bytedance/trae/conversation/ConversationActivity;)V
-
-    return-void
-.end method
-
-.method public onExtractClick()V
-    .registers 5
-
-    .line 1315
-    sget-object v0, Lcom/bytedance/trae/conversation/extract/ExtractHelper;->INSTANCE:Lcom/bytedance/trae/conversation/extract/ExtractHelper;
-
-    .line 1316
-    iget-object v1, p0, Lcom/bytedance/trae/conversation/ConversationActivity$initTitleBar$3$1;->this$0:Lcom/bytedance/trae/conversation/ConversationActivity;
-
-    const-string v2, ""
-
-    const-string v3, ""
-
-    .line 1315
-    invoke-virtual/range {v0 .. v3}, Lcom/bytedance/trae/conversation/extract/ExtractHelper;->start(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
 
     return-void
 .end method

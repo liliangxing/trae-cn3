@@ -12,7 +12,7 @@
 
 # direct methods
 .method public synthetic constructor <init>(Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;)V
-    .registers 2
+    .locals 0
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
@@ -24,7 +24,7 @@
 
 # virtual methods
 .method public final onClick(Landroid/view/View;)V
-    .registers 3
+    .locals 1
 
     iget-object v0, p0, Lcom/bytedance/trae/conversation/widget/MenuPopupWindow$$ExternalSyntheticLambda5;->f$0:Lcom/bytedance/trae/conversation/widget/MenuPopupWindow;
 
