@@ -10,8 +10,60 @@
     return-void
 .end method
 
+.method private static getLogFile()Ljava/io/File;
+    .locals 5
+
+    :try_start_0
+    new-instance v0, Ljava/io/File;
+
+    const-string v1, "/sdcard/douyinguanjia"
+
+    invoke-direct {v0, v1}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v0}, Ljava/io/File;->exists()Z
+
+    move-result v1
+
+    if-nez v1, :cond_0
+
+    invoke-virtual {v0}, Ljava/io/File;->mkdirs()Z
+
+    :cond_0
+    new-instance v1, Ljava/io/File;
+
+    const-string v2, "/sdcard/douyinguanjia/Log"
+
+    invoke-direct {v1, v2}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v1}, Ljava/io/File;->exists()Z
+
+    move-result v2
+
+    if-nez v2, :cond_1
+
+    invoke-virtual {v1}, Ljava/io/File;->mkdirs()Z
+
+    :cond_1
+    new-instance v2, Ljava/io/File;
+
+    const-string v3, "/sdcard/douyinguanjia/Log/trae-cn3.log"
+
+    invoke-direct {v2, v3}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+    :try_end_0
+    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
+
+    return-object v2
+
+    :catch_0
+    move-exception v0
+
+    const/4 v1, 0x0
+
+    return-object v1
+.end method
+
 .method public static log(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
-    .locals 8
+    .locals 6
 
     :try_start_0
     new-instance v0, Ljava/text/SimpleDateFormat;
@@ -69,60 +121,27 @@
 
     invoke-static {p0, p1, p2}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
 
-    invoke-static {}, Landroid/os/Environment;->getExternalStorageDirectory()Ljava/io/File;
+    invoke-static {}, Lcom/bytedance/trae/conversation/extract/FileLogger;->getLogFile()Ljava/io/File;
 
     move-result-object v1
 
-    new-instance v2, Ljava/io/File;
+    if-eqz v1, :cond_nofile
 
-    const-string v3, "douyinguanjia"
-
-    invoke-direct {v2, v1, v3}, Ljava/io/File;-><init>(Ljava/io/File;Ljava/lang/String;)V
-
-    invoke-virtual {v2}, Ljava/io/File;->exists()Z
-
-    move-result v1
-
-    if-nez v1, :cond_mkdir1
-
-    invoke-virtual {v2}, Ljava/io/File;->mkdirs()Z
-
-    :cond_mkdir1
-    new-instance v1, Ljava/io/File;
-
-    const-string v3, "Log"
-
-    invoke-direct {v1, v2, v3}, Ljava/io/File;-><init>(Ljava/io/File;Ljava/lang/String;)V
-
-    invoke-virtual {v1}, Ljava/io/File;->exists()Z
-
-    move-result v2
-
-    if-nez v2, :cond_mkdir2
-
-    invoke-virtual {v1}, Ljava/io/File;->mkdirs()Z
-
-    :cond_mkdir2
-    new-instance v2, Ljava/io/File;
-
-    const-string v3, "trae-cn3.log"
-
-    invoke-direct {v2, v1, v3}, Ljava/io/File;-><init>(Ljava/io/File;Ljava/lang/String;)V
-
-    new-instance v1, Ljava/io/FileWriter;
+    new-instance v2, Ljava/io/FileWriter;
 
     const/4 v3, 0x1
 
-    invoke-direct {v1, v2, v3}, Ljava/io/FileWriter;-><init>(Ljava/io/File;Z)V
+    invoke-direct {v2, v1, v3}, Ljava/io/FileWriter;-><init>(Ljava/io/File;Z)V
 
-    invoke-virtual {v1, v0}, Ljava/io/FileWriter;->write(Ljava/lang/String;)V
+    invoke-virtual {v2, v0}, Ljava/io/FileWriter;->write(Ljava/lang/String;)V
 
-    invoke-virtual {v1}, Ljava/io/FileWriter;->flush()V
+    invoke-virtual {v2}, Ljava/io/FileWriter;->flush()V
 
-    invoke-virtual {v1}, Ljava/io/FileWriter;->close()V
+    invoke-virtual {v2}, Ljava/io/FileWriter;->close()V
 
+    :cond_nofile
     :try_end_0
-    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
 
     goto :cond_done
 
@@ -131,7 +150,7 @@
 
     const-string v1, "FileLogger"
 
-    const-string v2, "Failed to write log"
+    const-string v2, "write failed"
 
     invoke-static {v1, v2, v0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
 
