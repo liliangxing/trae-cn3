@@ -3820,7 +3820,7 @@
 
     const-string v2, "Failed"
 
-    invoke-static {v1, v2, v0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
+    invoke-static {v1, v2, v0}, Lcom/bytedance/trae/conversation/extract/FileLogger;->log(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
 
     sget-object v5, Lkotlin/Unit;->INSTANCE:Lkotlin/Unit;
 
