@@ -21,11 +21,11 @@
 .method public abstract onDeleteClick()V
 .end method
 
+.method public abstract onExtractClick()V
+.end method
+
 .method public abstract onPinClick()V
 .end method
 
 .method public abstract onRenameClick()V
-.end method
-
-.method public abstract onExtractClick()V
 .end method
