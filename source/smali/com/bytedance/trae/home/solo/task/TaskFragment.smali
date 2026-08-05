@@ -3746,9 +3746,10 @@
     return-object v9
 .end method
 
-.method private static final extractConversation(Lcom/bytedance/trae/home/solo/task/TaskFragment;Lcom/bytedance/trae/home/solo/task/TaskModel;)Lkotlin/Unit;
+.method public static final extractConversation(Lcom/bytedance/trae/home/solo/task/TaskFragment;Lcom/bytedance/trae/home/solo/task/TaskModel;)Lkotlin/Unit;
     .locals 6
 
+    :try_start_ec
     invoke-virtual {p1}, Lcom/bytedance/trae/home/solo/task/TaskModel;->getTitle()Ljava/lang/String;
 
     move-result-object v0
@@ -3804,6 +3805,22 @@
     sget-object v5, Lcom/bytedance/trae/conversation/extract/ExtractHelper;->INSTANCE:Lcom/bytedance/trae/conversation/extract/ExtractHelper;
 
     invoke-virtual {v5, v4, v3, v0}, Lcom/bytedance/trae/conversation/extract/ExtractHelper;->start(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)V
+
+    :try_end_ec
+    .catch Ljava/lang/Exception; {:try_start_ec .. :try_end_ec} :catch_ec
+
+    sget-object v5, Lkotlin/Unit;->INSTANCE:Lkotlin/Unit;
+
+    return-object v5
+
+    :catch_ec
+    move-exception v0
+
+    const-string v1, "ExtractConversation"
+
+    const-string v2, "Failed"
+
+    invoke-static {v1, v2, v0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
 
     sget-object v5, Lkotlin/Unit;->INSTANCE:Lkotlin/Unit;
 
