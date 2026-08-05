@@ -275,7 +275,7 @@
 
     const-string v3, "Push failed"
 
-    invoke-static {v2, v3, v1}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
+    invoke-static {v2, v3, v1}, Lcom/bytedance/trae/conversation/extract/FileLogger;->log(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
 
     :cond_done
     return v0
