@@ -1,0 +1,122 @@
+package com.bytedance.sdk.account.platform;
+
+import android.os.Bundle;
+import com.bytedance.sdk.account.platform.PlatformBindAdapter;
+import com.bytedance.sdk.account.platform.PlatformDelegate;
+import com.bytedance.sdk.account.platform.PlatformLoginAdapter;
+import com.bytedance.sdk.account.platform.PlatformProfileAdapter;
+
+/* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes5.dex */
+public class TouTiaoPlatformDelegate extends PlatformDelegate {
+    private String authCode;
+    private String grantedPermission;
+    private PlatformBindAdapter.BindCallback mBindCallback;
+    private PlatformLoginAdapter.LoginCallback mLoginCallback;
+    private PlatformProfileAdapter.ProfileCallback mProfileCallback;
+    private String state;
+
+    TouTiaoPlatformDelegate(PlatformBindAdapter platformBindAdapter) {
+        super(platformBindAdapter);
+    }
+
+    TouTiaoPlatformDelegate(PlatformLoginAdapter platformLoginAdapter) {
+        super(platformLoginAdapter);
+    }
+
+    TouTiaoPlatformDelegate(PlatformProfileAdapter platformProfileAdapter) {
+        super(platformProfileAdapter);
+    }
+
+    private void parseData(Bundle bundle) {
+        this.authCode = bundle.getString("auth_code");
+        this.state = bundle.getString("state");
+        this.grantedPermission = bundle.getString("grantedPermissions");
+    }
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    @Override // com.bytedance.sdk.account.platform.PlatformDelegate
+    public void requestLogin(Bundle bundle) {
+        if (this.loginDelegate != null) {
+            parseData(bundle);
+            PlatformLoginAdapter platformLoginAdapter = this.loginDelegate;
+            platformLoginAdapter.getClass();
+            this.mLoginCallback = new PlatformLoginAdapter.LoginCallback();
+            if (this.loginDelegate.isShareLogin) {
+                this.loginDelegate.api.shareLogin(this.authCode, this.loginDelegate.platformId, this.loginDelegate.platform, this.loginDelegate.mExtendParam, this.mLoginCallback);
+            } else {
+                this.loginDelegate.api.ssoWithAuthCodeLogin(this.loginDelegate.platformId, this.loginDelegate.platform, this.authCode, 0L, this.loginDelegate.mExtendParam, this.mLoginCallback);
+            }
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    @Override // com.bytedance.sdk.account.platform.PlatformDelegate
+    public void requestBind(Bundle bundle) {
+        if (this.bindDelegate != null) {
+            parseData(bundle);
+            PlatformBindAdapter platformBindAdapter = this.bindDelegate;
+            platformBindAdapter.getClass();
+            this.mBindCallback = new PlatformBindAdapter.BindCallback();
+            this.bindDelegate.api.ssoWithAuthCodeBind(this.bindDelegate.platformId, this.bindDelegate.platform, this.authCode, 0L, this.bindDelegate.mExtendParam, this.mBindCallback);
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    @Override // com.bytedance.sdk.account.platform.PlatformDelegate
+    public void requestProfile(Bundle bundle) {
+        if (this.profileAdapter != null) {
+            parseData(bundle);
+            this.profileAdapter.api.getOauthProfileByCode(this.profileAdapter.platformId, this.profileAdapter.platform, this.authCode, 0L, this.profileAdapter.mExtendParam, this.mProfileCallback);
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    @Override // com.bytedance.sdk.account.platform.PlatformDelegate
+    public void cancelLogin() {
+        PlatformLoginAdapter.LoginCallback loginCallback = this.mLoginCallback;
+        if (loginCallback != null) {
+            loginCallback.cancel();
+            this.mLoginCallback = null;
+        }
+        this.loginDelegate = null;
+    }
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    @Override // com.bytedance.sdk.account.platform.PlatformDelegate
+    public void cancelBind() {
+        PlatformBindAdapter.BindCallback bindCallback = this.mBindCallback;
+        if (bindCallback != null) {
+            bindCallback.cancel();
+            this.mBindCallback = null;
+        }
+        this.bindDelegate = null;
+    }
+
+    @Override // com.bytedance.sdk.account.platform.PlatformDelegate
+    void cancelProfile() {
+        PlatformProfileAdapter.ProfileCallback profileCallback = this.mProfileCallback;
+        if (profileCallback != null) {
+            profileCallback.cancel();
+            this.mProfileCallback = null;
+        }
+        this.profileAdapter = null;
+    }
+
+    /* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes5.dex */
+    public static class Factory implements PlatformDelegate.IFactory {
+        @Override // com.bytedance.sdk.account.platform.PlatformDelegate.IFactory
+        public PlatformDelegate createLogin(PlatformLoginAdapter platformLoginAdapter) {
+            return new TouTiaoPlatformDelegate(platformLoginAdapter);
+        }
+
+        @Override // com.bytedance.sdk.account.platform.PlatformDelegate.IFactory
+        public PlatformDelegate createBind(PlatformBindAdapter platformBindAdapter) {
+            return new TouTiaoPlatformDelegate(platformBindAdapter);
+        }
+
+        @Override // com.bytedance.sdk.account.platform.PlatformDelegate.IFactory
+        public PlatformDelegate createProfile(PlatformProfileAdapter platformProfileAdapter) {
+            return new TouTiaoPlatformDelegate(platformProfileAdapter);
+        }
+    }
+}

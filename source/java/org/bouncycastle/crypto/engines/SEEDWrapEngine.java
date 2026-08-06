@@ -1,0 +1,8 @@
+package org.bouncycastle.crypto.engines;
+
+/* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes8.dex */
+public class SEEDWrapEngine extends RFC3394WrapEngine {
+    public SEEDWrapEngine() {
+        super(new SEEDEngine());
+    }
+}

@@ -1,0 +1,51 @@
+package com.lynx.tasm;
+
+/* loaded from: classes6.dex */
+public class LynxErrorBehavior {
+    public static final int EB_APP_BUNDLE_LOAD = 102;
+    public static final int EB_APP_BUNDLE_RELOAD = 105;
+    public static final int EB_APP_BUNDLE_VERIFY = 107;
+    public static final int EB_BTS_LIFECYCLE_LISTENER_ERROR = 203;
+    public static final int EB_BTS_PLATFORM_CALL_JS_FUNCTION = 202;
+    public static final int EB_BTS_RUNTIME_ERROR = 201;
+    public static final int EB_COMPONENT_API = 2201;
+    public static final int EB_COMPONENT_CUSTOM = 2298;
+    public static final int EB_COMPONENT_IMAGE = 2203;
+    public static final int EB_COMPONENT_LIST = 2202;
+    public static final int EB_CSS = 1301;
+    public static final int EB_CSS_COMPUTED_CSS_VALUE = 1302;
+    public static final int EB_CSS_PARSER = 1303;
+    public static final int EB_DATA_FLOW_UPDATE = 401;
+    public static final int EB_ELEMENT_API = 501;
+    public static final int EB_ELEMENT_UPDATE = 502;
+    public static final int EB_EVENT_EXCEPTION = 1099;
+    public static final int EB_EXCEPTION_JNI = 9902;
+    public static final int EB_EXCEPTION_PLATFORM = 9901;
+    public static final int EB_LAYOUT_INTERNAL = 601;
+    public static final int EB_LAYOUT_PERF = 602;
+    public static final int EB_LAYOUT_PLATFORM = 604;
+    public static final int EB_LAYOUT_UPDATE = 603;
+    public static final int EB_LAZY_BUNDLE_LOAD = 1601;
+    public static final int EB_MTS_BRIDGE_MODULE = 2001;
+    public static final int EB_MTS_RENDERER_FUNCTION = 1111;
+    public static final int EB_MTS_RUNTIME_ERROR = 1101;
+    public static final int EB_NATIVE_MODULES_COMMON = 901;
+    public static final int EB_NATIVE_MODULES_CUSTOM_ERROR = 998;
+    public static final int EB_NATIVE_MODULES_EXCEPTION = 999;
+    public static final int EB_NATIVE_MODULES_NETWORK = 908;
+    public static final int EB_RESOURCE_CUSTOM = 398;
+    public static final int EB_RESOURCE_EXCEPTION = 399;
+    public static final int EB_RESOURCE_EXTERNAL_RESOURCE = 303;
+    public static final int EB_RESOURCE_FONT = 302;
+    public static final int EB_RESOURCE_I18N = 304;
+    public static final int EB_RESOURCE_IMAGE = 301;
+    public static final int EB_RESOURCE_MODULE = 321;
+    public static final int EB_SSR_DECODE = 1401;
+    public static final int EB_SSR_HYDRATE = 1404;
+    public static final int EB_SSR_LOAD = 1402;
+    public static final int EB_SUCCESS = 0;
+    public static final int EB_THREAD_WRONG_THREAD = 1202;
+    public static final int EB_WORKLET_MODULE_EXCEPTION = 1903;
+    public static final int EB_WORKLET_MTS_CALL_EXCEPTION = 1901;
+    public static final int EB_WORKLET_RAF_CALL_EXCEPTION = 1902;
+}

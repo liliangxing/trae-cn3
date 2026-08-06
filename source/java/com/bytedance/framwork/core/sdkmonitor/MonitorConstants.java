@@ -1,0 +1,52 @@
+package com.bytedance.framwork.core.sdkmonitor;
+
+/* loaded from: classes2.dex */
+public class MonitorConstants {
+    public static final String COLLECT_PATH = "/monitor/collect/";
+    public static String COMPRESS_TYPE = "compress_type";
+    public static final int DISABLE_ERROR_API = 0;
+    public static final int ENABLE_NET_STATA = 0;
+    public static final long FETCH_SETTING_INTERVAL = 1200;
+    public static final String HOST_APP_ID = "host_aid";
+    public static final String HOST_APP_PACKAGE_NAME = "package_name";
+    public static final String KEY_AID = "aid";
+    static final String KEY_APP_VERSION = "app_version";
+    static final String KEY_CHANNEL = "channel";
+    static final String KEY_DEVICE_BRAND = "device_brand";
+    public static final String KEY_DEVICE_ID = "device_id";
+    static final String KEY_DEVICE_MANUFACTURER = "device_manufacturer";
+    static final String KEY_DEVICE_MODEL = "device_model";
+    public static final String KEY_MONITOR_FROM = "monitor_from";
+    public static final String KEY_MONITOR_VERSION = "sdkmonitor_version";
+    static final String KEY_OS = "os";
+    static final String KEY_OS_API = "os_api";
+    static final String KEY_OS_VERSION = "os_version";
+    static final String KEY_OVERSEA = "oversea";
+    static final String KEY_PLATFORM = "device_platform";
+    public static final String KEY_QUERY_MINOR_VERSION = "minor_version";
+    static final String KEY_VERSION_CODE = "version_code";
+    static final String KEY_VERSION_NAME = "version_name";
+    public static final int LOG_REPORT_COUNT = 100;
+    public static final int LOG_REPORT_INTERVAL = 60;
+    public static final long MIN_FETCH_SETTING_INTERVAL = 600;
+    public static final String MONITOR_CONFIG = "monitor_config";
+    public static final String MONITOR_CONFIG_CALCULATE_TIME = "monitor_last_calculate_timestamp";
+    public static final String MONITOR_CONFIG_FULL_CALCULATE_TIME = "monitor_last_full_calculate_timestamp";
+    public static final String MONITOR_CONFIG_REFRESH_TIME = "monitor_configure_refresh_time";
+    public static final String MONITOR_CONFIG_UPDATE = "monitor_config_update";
+    public static final String MONITOR_FROM_SDK = "sdk";
+    public static final String MONITOR_NET_CONFIG = "monitor_net_config";
+    public static final String MONITOR_TYPE_API_ALL = "api_all";
+    public static final String MONITOR_TYPE_API_ERROR = "api_error";
+    public static final String MONITOR_TYPE_SERVICE_MONITOR = "service_monitor";
+    public static String SETTING_CUSTOM_EVENT = "custom_event_settings";
+    public static String SETTING_GENERAL = "general";
+    public static String SETTING_GENERAL_API = "slardar_api_settings";
+    public static String SETTING_GENERAL_API_FETCH = "fetch_setting";
+    public static String SETTING_GENERAL_API_FETCH_INTERVAL = "fetch_setting_interval";
+    public static String SETTING_GENERAL_API_REPORT = "report_setting";
+    public static String SETTING_GENERAL_ENABLE_REPORT_INTERNAL_EXCEPTION = "enable_report_internal_exception";
+    public static String SETTING_NETWORK = "network";
+    public static String SETTING_NETWORK_IMAGE_MODULES = "network_image_modules";
+    public static final String SETTING_V5_PATH = "/monitor/appmonitor/v5/batch_settings";
+}

@@ -1,0 +1,539 @@
+package androidx.compose.p002ui.graphics;
+
+import androidx.compose.foundation.text.input.internal.PartialGapBuffer;
+import androidx.compose.p002ui.graphics.colorspace.ColorModel;
+import androidx.compose.p002ui.graphics.colorspace.ColorSpace;
+import androidx.compose.p002ui.graphics.colorspace.ColorSpaces;
+import androidx.compose.p002ui.graphics.colorspace.DoubleFunction;
+import androidx.compose.p002ui.graphics.colorspace.Rgb;
+import androidx.compose.runtime.ComposerKt;
+import androidx.compose.ui.util.MathHelpersKt;
+import kotlin.Metadata;
+import kotlin.ULong;
+import kotlin.jvm.functions.Function0;
+import kotlin.jvm.internal.Intrinsics;
+
+/* compiled from: Color.kt */
+@Metadata(d1 = {"\u0000F\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0004\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u0007\n\u0002\b\u0004\n\u0002\u0018\u0002\n\u0002\b\u0003\n\u0002\u0010\b\n\u0000\n\u0002\u0010\t\n\u0002\b\u0013\n\u0002\u0010\u0014\n\u0002\b\t\n\u0002\u0010\u000b\n\u0002\b\t\n\u0002\u0018\u0002\n\u0002\b\u0003\u001a9\u0010\u0005\u001a\u00020\u00062\u0006\u0010\u0007\u001a\u00020\b2\u0006\u0010\t\u001a\u00020\b2\u0006\u0010\n\u001a\u00020\b2\b\b\u0002\u0010\u000b\u001a\u00020\b2\b\b\u0002\u0010\f\u001a\u00020\rH\u0007¢\u0006\u0002\u0010\u000e\u001a9\u0010\u000f\u001a\u00020\u00062\u0006\u0010\u0007\u001a\u00020\b2\u0006\u0010\t\u001a\u00020\b2\u0006\u0010\n\u001a\u00020\b2\b\b\u0002\u0010\u000b\u001a\u00020\b2\b\b\u0002\u0010\f\u001a\u00020\rH\u0001¢\u0006\u0002\u0010\u000e\u001a\u0017\u0010\u0005\u001a\u00020\u00062\b\b\u0001\u0010\u0010\u001a\u00020\u0011H\u0007¢\u0006\u0002\u0010\u0012\u001a\u0015\u0010\u0005\u001a\u00020\u00062\u0006\u0010\u0010\u001a\u00020\u0013H\u0007¢\u0006\u0002\u0010\u0014\u001a5\u0010\u0005\u001a\u00020\u00062\b\b\u0001\u0010\u0007\u001a\u00020\u00112\b\b\u0001\u0010\t\u001a\u00020\u00112\b\b\u0001\u0010\n\u001a\u00020\u00112\b\b\u0003\u0010\u000b\u001a\u00020\u0011H\u0007¢\u0006\u0002\u0010\u0015\u001a)\u0010\u0016\u001a\u00020\u00062\u0006\u0010\u0017\u001a\u00020\u00062\u0006\u0010\u0018\u001a\u00020\u00062\b\b\u0001\u0010\u0019\u001a\u00020\bH\u0007¢\u0006\u0004\b\u001a\u0010\u001b\u001a\u001b\u0010\u001c\u001a\u00020\u0006*\u00020\u00062\u0006\u0010\u001d\u001a\u00020\u0006H\u0007¢\u0006\u0004\b\u001e\u0010\u001f\u001a1\u0010 \u001a\u00020\b2\u0006\u0010!\u001a\u00020\b2\u0006\u0010\"\u001a\u00020\b2\u0006\u0010#\u001a\u00020\b2\u0006\u0010$\u001a\u00020\b2\u0006\u0010%\u001a\u00020\bH\u0082\b\u001a\u0013\u0010&\u001a\u00020'*\u00020\u0006H\u0003¢\u0006\u0004\b(\u0010)\u001a\u0013\u0010*\u001a\u00020\b*\u00020\u0006H\u0007¢\u0006\u0004\b+\u0010,\u001a\u0013\u0010-\u001a\u00020\u0011*\u00020\u0006H\u0007¢\u0006\u0004\b.\u0010/\u001a\"\u00109\u001a\u00020\u0006*\u00020\u00062\f\u0010:\u001a\b\u0012\u0004\u0012\u00020\u00060;H\u0086\b¢\u0006\u0004\b<\u0010=\"\u0018\u0010\u0000\u001a\u00020\u00018\u0000X\u0081T¢\u0006\n\n\u0002\u0010\u0004\u0012\u0004\b\u0002\u0010\u0003\"\u001f\u00100\u001a\u000201*\u00020\u00068Æ\u0002X\u0087\u0004¢\u0006\f\u0012\u0004\b2\u00103\u001a\u0004\b4\u00105\"\u001f\u00106\u001a\u000201*\u00020\u00068Æ\u0002X\u0087\u0004¢\u0006\f\u0012\u0004\b7\u00103\u001a\u0004\b8\u00105¨\u0006>"}, d2 = {"UnspecifiedColor", "Lkotlin/ULong;", "getUnspecifiedColor$annotations", "()V", "J", "Color", "Landroidx/compose/ui/graphics/Color;", "red", "", "green", "blue", "alpha", "colorSpace", "Landroidx/compose/ui/graphics/colorspace/ColorSpace;", "(FFFFLandroidx/compose/ui/graphics/colorspace/ColorSpace;)J", "UncheckedColor", "color", "", "(I)J", "", "(J)J", "(IIII)J", "lerp", "start", "stop", "fraction", "lerp-jxsXWHM", "(JJF)J", "compositeOver", "background", "compositeOver--OWjLjI", "(JJ)J", "compositeComponent", "fgC", "bgC", "fgA", "bgA", "a", "getComponents", "", "getComponents-8_81llA", "(J)[F", "luminance", "luminance-8_81llA", "(J)F", "toArgb", "toArgb-8_81llA", "(J)I", "isSpecified", "", "isSpecified-8_81llA$annotations", "(J)V", "isSpecified-8_81llA", "(J)Z", "isUnspecified", "isUnspecified-8_81llA$annotations", "isUnspecified-8_81llA", "takeOrElse", "block", "Lkotlin/Function0;", "takeOrElse-DxMtmZc", "(JLkotlin/jvm/functions/Function0;)J", "ui-graphics_release"}, k = 2, mv = {2, 0, 0}, xi = 48)
+/* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes.dex */
+public final class ColorKt {
+    public static final long UnspecifiedColor = 16;
+
+    private static final float compositeComponent(float f, float f2, float f3, float f4, float f5) {
+        if (f5 == 0.0f) {
+            return 0.0f;
+        }
+        return ((f * f3) + ((f2 * f4) * (1.0f - f3))) / f5;
+    }
+
+    public static /* synthetic */ void getUnspecifiedColor$annotations() {
+    }
+
+    /* renamed from: isSpecified-8_81llA, reason: not valid java name */
+    public static final boolean m4886isSpecified8_81llA(long j) {
+        return j != 16;
+    }
+
+    /* renamed from: isSpecified-8_81llA$annotations, reason: not valid java name */
+    public static /* synthetic */ void m4887isSpecified8_81llA$annotations(long j) {
+    }
+
+    /* renamed from: isUnspecified-8_81llA, reason: not valid java name */
+    public static final boolean m4888isUnspecified8_81llA(long j) {
+        return j == 16;
+    }
+
+    /* renamed from: isUnspecified-8_81llA$annotations, reason: not valid java name */
+    public static /* synthetic */ void m4889isUnspecified8_81llA$annotations(long j) {
+    }
+
+    public static /* synthetic */ long Color$default(float f, float f2, float f3, float f4, ColorSpace colorSpace, int i, Object obj) {
+        if ((i & 8) != 0) {
+            f4 = 1.0f;
+        }
+        if ((i & 16) != 0) {
+            colorSpace = ColorSpaces.INSTANCE.getSrgb();
+        }
+        return Color(f, f2, f3, f4, colorSpace);
+    }
+
+    /* JADX WARN: Removed duplicated region for block: B:102:0x0124  */
+    /* JADX WARN: Removed duplicated region for block: B:57:0x0108  */
+    /* JADX WARN: Removed duplicated region for block: B:60:0x010f  */
+    /* JADX WARN: Removed duplicated region for block: B:63:0x011c  */
+    /* JADX WARN: Removed duplicated region for block: B:69:0x0169  */
+    /* JADX WARN: Removed duplicated region for block: B:72:0x0170  */
+    /* JADX WARN: Removed duplicated region for block: B:75:0x017d  */
+    /* JADX WARN: Removed duplicated region for block: B:80:0x01c1  */
+    /* JADX WARN: Removed duplicated region for block: B:83:0x01c8  */
+    /* JADX WARN: Removed duplicated region for block: B:87:0x0182  */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+    */
+    public static final long Color(float f, float f2, float f3, float f4, ColorSpace colorSpace) {
+        int i;
+        int i2;
+        int i3;
+        float minValue;
+        float maxValue;
+        int i4;
+        int i5;
+        int i6;
+        int i7;
+        float minValue2;
+        float maxValue2;
+        int i8;
+        int i9;
+        int i10;
+        if (colorSpace.getIsSrgb()) {
+            float f5 = f4 < 0.0f ? 0.0f : f4;
+            if (f5 > 1.0f) {
+                f5 = 1.0f;
+            }
+            int i11 = ((int) ((f5 * 255.0f) + 0.5f)) << 24;
+            float f6 = f < 0.0f ? 0.0f : f;
+            if (f6 > 1.0f) {
+                f6 = 1.0f;
+            }
+            int i12 = i11 | (((int) ((f6 * 255.0f) + 0.5f)) << 16);
+            float f7 = f2 < 0.0f ? 0.0f : f2;
+            if (f7 > 1.0f) {
+                f7 = 1.0f;
+            }
+            int i13 = i12 | (((int) ((f7 * 255.0f) + 0.5f)) << 8);
+            return Color.m4835constructorimpl(ULong.constructor-impl(ULong.constructor-impl(i13 | ((int) ((((f3 >= 0.0f ? f3 : 0.0f) <= 1.0f ? r5 : 1.0f) * 255.0f) + 0.5f))) << 32));
+        }
+        if (!(colorSpace.getComponentCount() == 3)) {
+            InlineClassHelperKt.throwIllegalArgumentException("Color only works with ColorSpaces with 3 components");
+        }
+        int id = colorSpace.getId();
+        if (!(id != -1)) {
+            InlineClassHelperKt.throwIllegalArgumentException("Unknown color space, please use a color space in ColorSpaces");
+        }
+        float minValue3 = colorSpace.getMinValue(0);
+        float maxValue3 = colorSpace.getMaxValue(0);
+        if (f >= minValue3) {
+            minValue3 = f;
+        }
+        if (minValue3 <= maxValue3) {
+            maxValue3 = minValue3;
+        }
+        int floatToRawIntBits = Float.floatToRawIntBits(maxValue3);
+        int i14 = floatToRawIntBits >>> 31;
+        int i15 = (floatToRawIntBits >>> 23) & PartialGapBuffer.BUF_SIZE;
+        int i16 = floatToRawIntBits & 8388607;
+        int i17 = 31;
+        if (i15 == 255) {
+            i2 = i16 != 0 ? Fields.RotationY : 0;
+            i = 31;
+        } else {
+            i = i15 + ComposerKt.defaultsKey + 15;
+            if (i >= 31) {
+                i = 49;
+                i2 = 0;
+            } else if (i <= 0) {
+                if (i >= -10) {
+                    int i18 = (i16 | 8388608) >> (1 - i);
+                    if ((i18 & Fields.TransformOrigin) != 0) {
+                        i18 += Fields.Shape;
+                    }
+                    i2 = i18 >> 13;
+                } else {
+                    i2 = 0;
+                }
+                i = 0;
+            } else {
+                int i19 = i16 >> 13;
+                if ((i16 & Fields.TransformOrigin) != 0) {
+                    i3 = (((i << 10) | i19) + 1) | (i14 << 15);
+                    short s = (short) i3;
+                    minValue = colorSpace.getMinValue(1);
+                    maxValue = colorSpace.getMaxValue(1);
+                    if (f2 >= minValue) {
+                        minValue = f2;
+                    }
+                    if (minValue <= maxValue) {
+                        maxValue = minValue;
+                    }
+                    int floatToRawIntBits2 = Float.floatToRawIntBits(maxValue);
+                    int i20 = floatToRawIntBits2 >>> 31;
+                    i4 = (floatToRawIntBits2 >>> 23) & PartialGapBuffer.BUF_SIZE;
+                    int i21 = floatToRawIntBits2 & 8388607;
+                    if (i4 != 255) {
+                        i6 = i21 != 0 ? Fields.RotationY : 0;
+                        i5 = 31;
+                    } else {
+                        i5 = i4 + ComposerKt.defaultsKey + 15;
+                        if (i5 >= 31) {
+                            i5 = 49;
+                            i6 = 0;
+                        } else if (i5 <= 0) {
+                            if (i5 >= -10) {
+                                int i22 = (i21 | 8388608) >> (1 - i5);
+                                if ((i22 & Fields.TransformOrigin) != 0) {
+                                    i22 += Fields.Shape;
+                                }
+                                i6 = i22 >> 13;
+                            } else {
+                                i6 = 0;
+                            }
+                            i5 = 0;
+                        } else {
+                            int i23 = i21 >> 13;
+                            if ((i21 & Fields.TransformOrigin) != 0) {
+                                i7 = (((i5 << 10) | i23) + 1) | (i20 << 15);
+                                short s2 = (short) i7;
+                                minValue2 = colorSpace.getMinValue(2);
+                                maxValue2 = colorSpace.getMaxValue(2);
+                                if (f3 >= minValue2) {
+                                    minValue2 = f3;
+                                }
+                                if (minValue2 <= maxValue2) {
+                                    maxValue2 = minValue2;
+                                }
+                                int floatToRawIntBits3 = Float.floatToRawIntBits(maxValue2);
+                                int i24 = floatToRawIntBits3 >>> 31;
+                                i8 = (floatToRawIntBits3 >>> 23) & PartialGapBuffer.BUF_SIZE;
+                                int i25 = floatToRawIntBits3 & 8388607;
+                                if (i8 == 255) {
+                                    if (i25 != 0) {
+                                        i9 = Fields.RotationY;
+                                        i10 = (i24 << 15) | (i17 << 10) | i9;
+                                        short s3 = (short) i10;
+                                        return Color.m4835constructorimpl(ULong.constructor-impl((id & 63) | ((((int) ((((f4 >= 0.0f ? f4 : 0.0f) <= 1.0f ? r5 : 1.0f) * 1023.0f) + 0.5f)) & 1023) << 6) | ((s & 65535) << 48) | ((s2 & 65535) << 32) | ((65535 & s3) << 16)));
+                                    }
+                                    i9 = 0;
+                                    i10 = (i24 << 15) | (i17 << 10) | i9;
+                                    short s32 = (short) i10;
+                                    if (f4 >= 0.0f) {
+                                    }
+                                    return Color.m4835constructorimpl(ULong.constructor-impl((id & 63) | ((((int) ((((f4 >= 0.0f ? f4 : 0.0f) <= 1.0f ? r5 : 1.0f) * 1023.0f) + 0.5f)) & 1023) << 6) | ((s & 65535) << 48) | ((s2 & 65535) << 32) | ((65535 & s32) << 16)));
+                                }
+                                int i26 = i8 + ComposerKt.defaultsKey + 15;
+                                if (i26 < 31) {
+                                    if (i26 > 0) {
+                                        int i27 = i25 >> 13;
+                                        if ((i25 & Fields.TransformOrigin) != 0) {
+                                            i10 = (((i26 << 10) | i27) + 1) | (i24 << 15);
+                                            short s322 = (short) i10;
+                                            if (f4 >= 0.0f) {
+                                            }
+                                            return Color.m4835constructorimpl(ULong.constructor-impl((id & 63) | ((((int) ((((f4 >= 0.0f ? f4 : 0.0f) <= 1.0f ? r5 : 1.0f) * 1023.0f) + 0.5f)) & 1023) << 6) | ((s & 65535) << 48) | ((s2 & 65535) << 32) | ((65535 & s322) << 16)));
+                                        }
+                                        i9 = i27;
+                                        i17 = i26;
+                                    } else if (i26 >= -10) {
+                                        int i28 = (i25 | 8388608) >> (1 - i26);
+                                        if ((i28 & Fields.TransformOrigin) != 0) {
+                                            i28 += Fields.Shape;
+                                        }
+                                        i9 = i28 >> 13;
+                                        i17 = 0;
+                                    } else {
+                                        i17 = 0;
+                                    }
+                                    i10 = (i24 << 15) | (i17 << 10) | i9;
+                                    short s3222 = (short) i10;
+                                    if (f4 >= 0.0f) {
+                                    }
+                                    return Color.m4835constructorimpl(ULong.constructor-impl((id & 63) | ((((int) ((((f4 >= 0.0f ? f4 : 0.0f) <= 1.0f ? r5 : 1.0f) * 1023.0f) + 0.5f)) & 1023) << 6) | ((s & 65535) << 48) | ((s2 & 65535) << 32) | ((65535 & s3222) << 16)));
+                                }
+                                i17 = 49;
+                                i9 = 0;
+                                i10 = (i24 << 15) | (i17 << 10) | i9;
+                                short s32222 = (short) i10;
+                                if (f4 >= 0.0f) {
+                                }
+                                return Color.m4835constructorimpl(ULong.constructor-impl((id & 63) | ((((int) ((((f4 >= 0.0f ? f4 : 0.0f) <= 1.0f ? r5 : 1.0f) * 1023.0f) + 0.5f)) & 1023) << 6) | ((s & 65535) << 48) | ((s2 & 65535) << 32) | ((65535 & s32222) << 16)));
+                            }
+                            i6 = i23;
+                        }
+                    }
+                    i7 = i6 | (i20 << 15) | (i5 << 10);
+                    short s22 = (short) i7;
+                    minValue2 = colorSpace.getMinValue(2);
+                    maxValue2 = colorSpace.getMaxValue(2);
+                    if (f3 >= minValue2) {
+                    }
+                    if (minValue2 <= maxValue2) {
+                    }
+                    int floatToRawIntBits32 = Float.floatToRawIntBits(maxValue2);
+                    int i242 = floatToRawIntBits32 >>> 31;
+                    i8 = (floatToRawIntBits32 >>> 23) & PartialGapBuffer.BUF_SIZE;
+                    int i252 = floatToRawIntBits32 & 8388607;
+                    if (i8 == 255) {
+                    }
+                } else {
+                    i2 = i19;
+                }
+            }
+        }
+        i3 = i2 | (i14 << 15) | (i << 10);
+        short s4 = (short) i3;
+        minValue = colorSpace.getMinValue(1);
+        maxValue = colorSpace.getMaxValue(1);
+        if (f2 >= minValue) {
+        }
+        if (minValue <= maxValue) {
+        }
+        int floatToRawIntBits22 = Float.floatToRawIntBits(maxValue);
+        int i202 = floatToRawIntBits22 >>> 31;
+        i4 = (floatToRawIntBits22 >>> 23) & PartialGapBuffer.BUF_SIZE;
+        int i212 = floatToRawIntBits22 & 8388607;
+        if (i4 != 255) {
+        }
+        i7 = i6 | (i202 << 15) | (i5 << 10);
+        short s222 = (short) i7;
+        minValue2 = colorSpace.getMinValue(2);
+        maxValue2 = colorSpace.getMaxValue(2);
+        if (f3 >= minValue2) {
+        }
+        if (minValue2 <= maxValue2) {
+        }
+        int floatToRawIntBits322 = Float.floatToRawIntBits(maxValue2);
+        int i2422 = floatToRawIntBits322 >>> 31;
+        i8 = (floatToRawIntBits322 >>> 23) & PartialGapBuffer.BUF_SIZE;
+        int i2522 = floatToRawIntBits322 & 8388607;
+        if (i8 == 255) {
+        }
+    }
+
+    public static /* synthetic */ long UncheckedColor$default(float f, float f2, float f3, float f4, ColorSpace colorSpace, int i, Object obj) {
+        if ((i & 8) != 0) {
+            f4 = 1.0f;
+        }
+        if ((i & 16) != 0) {
+            colorSpace = ColorSpaces.INSTANCE.getSrgb();
+        }
+        return UncheckedColor(f, f2, f3, f4, colorSpace);
+    }
+
+    /* JADX WARN: Removed duplicated region for block: B:14:0x009a  */
+    /* JADX WARN: Removed duplicated region for block: B:20:0x00e5  */
+    /* JADX WARN: Removed duplicated region for block: B:27:0x00ee  */
+    /* JADX WARN: Removed duplicated region for block: B:41:0x00a2  */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+    */
+    public static final long UncheckedColor(float f, float f2, float f3, float f4, ColorSpace colorSpace) {
+        int i;
+        int i2;
+        int i3;
+        int i4;
+        int i5;
+        int i6;
+        int i7;
+        int i8;
+        int i9;
+        if (colorSpace.getIsSrgb()) {
+            return Color.m4835constructorimpl(ULong.constructor-impl(ULong.constructor-impl((((((int) ((f4 * 255.0f) + 0.5f)) << 24) | (((int) ((f * 255.0f) + 0.5f)) << 16)) | (((int) ((f2 * 255.0f) + 0.5f)) << 8)) | ((int) ((255.0f * f3) + 0.5f))) << 32));
+        }
+        int floatToRawIntBits = Float.floatToRawIntBits(f);
+        int i10 = floatToRawIntBits >>> 31;
+        int i11 = (floatToRawIntBits >>> 23) & PartialGapBuffer.BUF_SIZE;
+        int i12 = floatToRawIntBits & 8388607;
+        int i13 = 49;
+        int i14 = 0;
+        if (i11 == 255) {
+            i2 = i12 != 0 ? Fields.RotationY : 0;
+            i = 31;
+        } else {
+            i = i11 + ComposerKt.defaultsKey + 15;
+            if (i >= 31) {
+                i = 49;
+                i2 = 0;
+            } else if (i > 0) {
+                int i15 = i12 >> 13;
+                if ((i12 & Fields.TransformOrigin) != 0) {
+                    i3 = (((i << 10) | i15) + 1) | (i10 << 15);
+                    short s = (short) i3;
+                    int floatToRawIntBits2 = Float.floatToRawIntBits(f2);
+                    int i16 = floatToRawIntBits2 >>> 31;
+                    i4 = (floatToRawIntBits2 >>> 23) & PartialGapBuffer.BUF_SIZE;
+                    int i17 = floatToRawIntBits2 & 8388607;
+                    if (i4 != 255) {
+                        i6 = i17 != 0 ? Fields.RotationY : 0;
+                        i5 = 31;
+                    } else {
+                        i5 = i4 + ComposerKt.defaultsKey + 15;
+                        if (i5 >= 31) {
+                            i5 = 49;
+                            i6 = 0;
+                        } else if (i5 > 0) {
+                            int i18 = i17 >> 13;
+                            if ((i17 & Fields.TransformOrigin) != 0) {
+                                i7 = (((i5 << 10) | i18) + 1) | (i16 << 15);
+                                short s2 = (short) i7;
+                                int floatToRawIntBits3 = Float.floatToRawIntBits(f3);
+                                int i19 = floatToRawIntBits3 >>> 31;
+                                i8 = (floatToRawIntBits3 >>> 23) & PartialGapBuffer.BUF_SIZE;
+                                int i20 = floatToRawIntBits3 & 8388607;
+                                if (i8 == 255) {
+                                    i14 = i20 != 0 ? Fields.RotationY : 0;
+                                    i13 = 31;
+                                } else {
+                                    int i21 = i8 + ComposerKt.defaultsKey + 15;
+                                    if (i21 < 31) {
+                                        if (i21 > 0) {
+                                            i14 = i20 >> 13;
+                                            if ((i20 & Fields.TransformOrigin) != 0) {
+                                                i9 = (((i21 << 10) | i14) + 1) | (i19 << 15);
+                                                return Color.m4835constructorimpl(ULong.constructor-impl(((s2 & 65535) << 32) | ((s & 65535) << 48) | ((((short) i9) & 65535) << 16) | ((((int) ((Math.max(0.0f, Math.min(f4, 1.0f)) * 1023.0f) + 0.5f)) & 1023) << 6) | (colorSpace.getId() & 63)));
+                                            }
+                                            i13 = i21;
+                                        } else if (i21 >= -10) {
+                                            int i22 = (i20 | 8388608) >> (1 - i21);
+                                            if ((i22 & Fields.TransformOrigin) != 0) {
+                                                i22 += Fields.Shape;
+                                            }
+                                            i13 = 0;
+                                            i14 = i22 >> 13;
+                                        } else {
+                                            i13 = 0;
+                                        }
+                                    }
+                                }
+                                i9 = (i19 << 15) | (i13 << 10) | i14;
+                                return Color.m4835constructorimpl(ULong.constructor-impl(((s2 & 65535) << 32) | ((s & 65535) << 48) | ((((short) i9) & 65535) << 16) | ((((int) ((Math.max(0.0f, Math.min(f4, 1.0f)) * 1023.0f) + 0.5f)) & 1023) << 6) | (colorSpace.getId() & 63)));
+                            }
+                            i6 = i18;
+                        } else if (i5 >= -10) {
+                            int i23 = (i17 | 8388608) >> (1 - i5);
+                            if ((i23 & Fields.TransformOrigin) != 0) {
+                                i23 += Fields.Shape;
+                            }
+                            i6 = i23 >> 13;
+                            i5 = 0;
+                        } else {
+                            i6 = 0;
+                            i5 = 0;
+                        }
+                    }
+                    i7 = i6 | (i16 << 15) | (i5 << 10);
+                    short s22 = (short) i7;
+                    int floatToRawIntBits32 = Float.floatToRawIntBits(f3);
+                    int i192 = floatToRawIntBits32 >>> 31;
+                    i8 = (floatToRawIntBits32 >>> 23) & PartialGapBuffer.BUF_SIZE;
+                    int i202 = floatToRawIntBits32 & 8388607;
+                    if (i8 == 255) {
+                    }
+                    i9 = (i192 << 15) | (i13 << 10) | i14;
+                    return Color.m4835constructorimpl(ULong.constructor-impl(((s22 & 65535) << 32) | ((s & 65535) << 48) | ((((short) i9) & 65535) << 16) | ((((int) ((Math.max(0.0f, Math.min(f4, 1.0f)) * 1023.0f) + 0.5f)) & 1023) << 6) | (colorSpace.getId() & 63)));
+                }
+                i2 = i15;
+            } else if (i >= -10) {
+                int i24 = (i12 | 8388608) >> (1 - i);
+                if ((i24 & Fields.TransformOrigin) != 0) {
+                    i24 += Fields.Shape;
+                }
+                i2 = i24 >> 13;
+                i = 0;
+            } else {
+                i2 = 0;
+                i = 0;
+            }
+        }
+        i3 = i2 | (i10 << 15) | (i << 10);
+        short s3 = (short) i3;
+        int floatToRawIntBits22 = Float.floatToRawIntBits(f2);
+        int i162 = floatToRawIntBits22 >>> 31;
+        i4 = (floatToRawIntBits22 >>> 23) & PartialGapBuffer.BUF_SIZE;
+        int i172 = floatToRawIntBits22 & 8388607;
+        if (i4 != 255) {
+        }
+        i7 = i6 | (i162 << 15) | (i5 << 10);
+        short s222 = (short) i7;
+        int floatToRawIntBits322 = Float.floatToRawIntBits(f3);
+        int i1922 = floatToRawIntBits322 >>> 31;
+        i8 = (floatToRawIntBits322 >>> 23) & PartialGapBuffer.BUF_SIZE;
+        int i2022 = floatToRawIntBits322 & 8388607;
+        if (i8 == 255) {
+        }
+        i9 = (i1922 << 15) | (i13 << 10) | i14;
+        return Color.m4835constructorimpl(ULong.constructor-impl(((s222 & 65535) << 32) | ((s3 & 65535) << 48) | ((((short) i9) & 65535) << 16) | ((((int) ((Math.max(0.0f, Math.min(f4, 1.0f)) * 1023.0f) + 0.5f)) & 1023) << 6) | (colorSpace.getId() & 63)));
+    }
+
+    public static final long Color(int i) {
+        return Color.m4835constructorimpl(ULong.constructor-impl(ULong.constructor-impl(i) << 32));
+    }
+
+    public static final long Color(long j) {
+        return Color.m4835constructorimpl(ULong.constructor-impl(j << 32));
+    }
+
+    public static /* synthetic */ long Color$default(int i, int i2, int i3, int i4, int i5, Object obj) {
+        if ((i5 & 8) != 0) {
+            i4 = PartialGapBuffer.BUF_SIZE;
+        }
+        return Color(i, i2, i3, i4);
+    }
+
+    public static final long Color(int i, int i2, int i3, int i4) {
+        return Color(((i & PartialGapBuffer.BUF_SIZE) << 16) | ((i4 & PartialGapBuffer.BUF_SIZE) << 24) | ((i2 & PartialGapBuffer.BUF_SIZE) << 8) | (i3 & PartialGapBuffer.BUF_SIZE));
+    }
+
+    /* renamed from: lerp-jxsXWHM, reason: not valid java name */
+    public static final long m4890lerpjxsXWHM(long j, long j2, float f) {
+        ColorSpace oklab = ColorSpaces.INSTANCE.getOklab();
+        long m4836convertvNxB06k = Color.m4836convertvNxB06k(j, oklab);
+        long m4836convertvNxB06k2 = Color.m4836convertvNxB06k(j2, oklab);
+        float m4841getAlphaimpl = Color.m4841getAlphaimpl(m4836convertvNxB06k);
+        float m4845getRedimpl = Color.m4845getRedimpl(m4836convertvNxB06k);
+        float m4844getGreenimpl = Color.m4844getGreenimpl(m4836convertvNxB06k);
+        float m4842getBlueimpl = Color.m4842getBlueimpl(m4836convertvNxB06k);
+        float m4841getAlphaimpl2 = Color.m4841getAlphaimpl(m4836convertvNxB06k2);
+        float m4845getRedimpl2 = Color.m4845getRedimpl(m4836convertvNxB06k2);
+        float m4844getGreenimpl2 = Color.m4844getGreenimpl(m4836convertvNxB06k2);
+        float m4842getBlueimpl2 = Color.m4842getBlueimpl(m4836convertvNxB06k2);
+        if (f < 0.0f) {
+            f = 0.0f;
+        }
+        if (f > 1.0f) {
+            f = 1.0f;
+        }
+        return Color.m4836convertvNxB06k(UncheckedColor(MathHelpersKt.lerp(m4845getRedimpl, m4845getRedimpl2, f), MathHelpersKt.lerp(m4844getGreenimpl, m4844getGreenimpl2, f), MathHelpersKt.lerp(m4842getBlueimpl, m4842getBlueimpl2, f), MathHelpersKt.lerp(m4841getAlphaimpl, m4841getAlphaimpl2, f), oklab), Color.m4843getColorSpaceimpl(j2));
+    }
+
+    /* renamed from: compositeOver--OWjLjI, reason: not valid java name */
+    public static final long m4884compositeOverOWjLjI(long j, long j2) {
+        long m4836convertvNxB06k = Color.m4836convertvNxB06k(j, Color.m4843getColorSpaceimpl(j2));
+        float m4841getAlphaimpl = Color.m4841getAlphaimpl(j2);
+        float m4841getAlphaimpl2 = Color.m4841getAlphaimpl(m4836convertvNxB06k);
+        float f = 1.0f - m4841getAlphaimpl2;
+        float f2 = (m4841getAlphaimpl * f) + m4841getAlphaimpl2;
+        return UncheckedColor((f2 > 0.0f ? 1 : (f2 == 0.0f ? 0 : -1)) == 0 ? 0.0f : ((Color.m4845getRedimpl(m4836convertvNxB06k) * m4841getAlphaimpl2) + ((Color.m4845getRedimpl(j2) * m4841getAlphaimpl) * f)) / f2, (f2 > 0.0f ? 1 : (f2 == 0.0f ? 0 : -1)) == 0 ? 0.0f : ((Color.m4844getGreenimpl(m4836convertvNxB06k) * m4841getAlphaimpl2) + ((Color.m4844getGreenimpl(j2) * m4841getAlphaimpl) * f)) / f2, f2 == 0.0f ? 0.0f : ((Color.m4842getBlueimpl(m4836convertvNxB06k) * m4841getAlphaimpl2) + ((Color.m4842getBlueimpl(j2) * m4841getAlphaimpl) * f)) / f2, f2, Color.m4843getColorSpaceimpl(j2));
+    }
+
+    /* renamed from: getComponents-8_81llA, reason: not valid java name */
+    private static final float[] m4885getComponents8_81llA(long j) {
+        return new float[]{Color.m4845getRedimpl(j), Color.m4844getGreenimpl(j), Color.m4842getBlueimpl(j), Color.m4841getAlphaimpl(j)};
+    }
+
+    /* renamed from: luminance-8_81llA, reason: not valid java name */
+    public static final float m4891luminance8_81llA(long j) {
+        ColorSpace m4843getColorSpaceimpl = Color.m4843getColorSpaceimpl(j);
+        if (!ColorModel.m5266equalsimpl0(m4843getColorSpaceimpl.getModel(), ColorModel.INSTANCE.m5273getRgbxdoWZVw())) {
+            InlineClassHelperKt.throwIllegalArgumentException("The specified color must be encoded in an RGB color space. The supplied color space is " + ((Object) ColorModel.m5269toStringimpl(m4843getColorSpaceimpl.getModel())));
+        }
+        Intrinsics.checkNotNull(m4843getColorSpaceimpl, "null cannot be cast to non-null type androidx.compose.ui.graphics.colorspace.Rgb");
+        DoubleFunction eotfFunc = ((Rgb) m4843getColorSpaceimpl).getEotfFunc();
+        float invoke = (float) ((eotfFunc.invoke(Color.m4845getRedimpl(j)) * 0.2126d) + (eotfFunc.invoke(Color.m4844getGreenimpl(j)) * 0.7152d) + (eotfFunc.invoke(Color.m4842getBlueimpl(j)) * 0.0722d));
+        if (invoke < 0.0f) {
+            invoke = 0.0f;
+        }
+        if (invoke > 1.0f) {
+            return 1.0f;
+        }
+        return invoke;
+    }
+
+    /* renamed from: toArgb-8_81llA, reason: not valid java name */
+    public static final int m4893toArgb8_81llA(long j) {
+        return (int) ULong.constructor-impl(Color.m4836convertvNxB06k(j, ColorSpaces.INSTANCE.getSrgb()) >>> 32);
+    }
+
+    /* renamed from: takeOrElse-DxMtmZc, reason: not valid java name */
+    public static final long m4892takeOrElseDxMtmZc(long j, Function0<Color> function0) {
+        return (j > 16L ? 1 : (j == 16L ? 0 : -1)) != 0 ? j : ((Color) function0.invoke()).m4849unboximpl();
+    }
+}

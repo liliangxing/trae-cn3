@@ -1,0 +1,50 @@
+package com.ss.android.common;
+
+/* loaded from: classes7.dex */
+public class ApiConstants {
+    public static final String API_HOST_API = "isub.snssdk.com";
+    public static final String API_HOST_API_SNSSDK = "isub.snssdk.com";
+    public static final String API_HOST_I = "ib.snssdk.com";
+    public static final String API_HOST_II_SNSSDK = "is.snssdk.com";
+    public static final String API_HOST_I_SNSSDK = "ib.snssdk.com";
+    public static final String API_HOST_LOG = "log.snssdk.com";
+    public static final String API_HOST_MON = "mon.snssdk.com";
+    public static final String API_HOST_SI = "security.snssdk.com";
+    public static final String API_HOST_SI_SNSSDK = "security.snssdk.com";
+    public static final String API_HOST_SRV = "ichannel.snssdk.com";
+    public static final String API_HOST_SRV_SNSSDK = "ichannel.snssdk.com";
+    public static final String API_HOST_XG_II = "is.snssdk.com";
+    public static final String API_URL_PREFIX_API = "https://isub.snssdk.com";
+    public static final String API_URL_PREFIX_I = "https://ib.snssdk.com";
+    public static final String API_URL_PREFIX_II = "https://is.snssdk.com";
+    public static final String API_URL_PREFIX_SI = "https://security.snssdk.com";
+    public static final String API_URL_PREFIX_SRV = "https://ichannel.snssdk.com";
+    public static final String KEY_DATA = "data";
+    public static final String KEY_MESSAGE = "message";
+    public static final int MSG_ERROR = 11;
+    public static final int MSG_OK = 10;
+    public static final int OP_ERROR_ANTISPAM = 110;
+    public static final int OP_ERROR_API_ERROR = 17;
+    public static final int OP_ERROR_CONNECT_SWITCH = 111;
+    public static final int OP_ERROR_CONNECT_TIMEOUT = 13;
+    public static final int OP_ERROR_HIJACK_DATA = 23;
+    public static final int OP_ERROR_INTERUPTED = 22;
+    public static final int OP_ERROR_INVALID_NAME = 107;
+    public static final int OP_ERROR_ITEM_ACTION_FAIL = 109;
+    public static final int OP_ERROR_NAME_EXISTED = 106;
+    public static final int OP_ERROR_NETWORK_ERROR = 15;
+    public static final int OP_ERROR_NETWORK_TIMEOUT = 14;
+    public static final int OP_ERROR_NOT_LOGIN = 113;
+    public static final int OP_ERROR_NO_CONNECTION = 12;
+    public static final int OP_ERROR_PLATFORM_EXPIRE = 108;
+    public static final int OP_ERROR_RESPONSE_LENGTH_EXCEED = 20;
+    public static final int OP_ERROR_SERVER_ERROR = 16;
+    public static final int OP_ERROR_SERVICE_UNAVAILABLE = 19;
+    public static final int OP_ERROR_SESSION_EXPIRE = 105;
+    public static final int OP_ERROR_SSL = 21;
+    public static final int OP_ERROR_UGC_POST_ACTIVITY_END = 113;
+    public static final int OP_ERROR_UGC_POST_TOO_FAST = 112;
+    public static final int OP_ERROR_UNKNOWN = 18;
+    public static final String STATUS_ERROR = "error";
+    public static final String STATUS_SUCCESS = "success";
+}

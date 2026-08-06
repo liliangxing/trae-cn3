@@ -1,0 +1,24 @@
+package androidx.room;
+
+import androidx.room.RoomDatabase;
+import androidx.sqlite.p004db.SupportSQLiteOpenHelper;
+import java.util.concurrent.Executor;
+
+/* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes2.dex */
+final class QueryInterceptorOpenHelperFactory implements SupportSQLiteOpenHelper.Factory {
+    private final SupportSQLiteOpenHelper.Factory mDelegate;
+    private final RoomDatabase.QueryCallback mQueryCallback;
+    private final Executor mQueryCallbackExecutor;
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    public QueryInterceptorOpenHelperFactory(SupportSQLiteOpenHelper.Factory factory, RoomDatabase.QueryCallback queryCallback, Executor executor) {
+        this.mDelegate = factory;
+        this.mQueryCallback = queryCallback;
+        this.mQueryCallbackExecutor = executor;
+    }
+
+    @Override // androidx.sqlite.db.SupportSQLiteOpenHelper.Factory
+    public SupportSQLiteOpenHelper create(SupportSQLiteOpenHelper.Configuration configuration) {
+        return new QueryInterceptorOpenHelper(this.mDelegate.create(configuration), this.mQueryCallback, this.mQueryCallbackExecutor);
+    }
+}
