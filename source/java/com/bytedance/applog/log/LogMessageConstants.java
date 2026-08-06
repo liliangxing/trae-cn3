@@ -1,0 +1,51 @@
+package com.bytedance.applog.log;
+
+/* loaded from: classes3.dex */
+public class LogMessageConstants {
+    public static String CONFIG_APPLOG_REGION = "AppLog版本地区";
+    public static String CONFIG_APPLOG_VERSION = "AppLog版本号";
+    public static String CONFIG_APP_NAME = "应用名称";
+    public static String CONFIG_AUTO_ACTIVE_SWITCH = "自动激活";
+    public static String CONFIG_AUTO_START_SWITCH = "自动启动";
+    public static String CONFIG_CACHE_DB_NAME = "数据库文件名称";
+    public static String CONFIG_CACHE_SP_NAME = "缓存文件名称";
+    public static String CONFIG_CURRENT_PROCESS = "当前进程";
+    public static String CONFIG_DAU_FIX_SWITCH = "DAU虚高修复";
+    public static String CONFIG_DISABLE_PERSONALIZATION_SWITCH = "禁用个性化";
+    public static String CONFIG_EVENT_PRIORITY = "事件分级";
+    public static String CONFIG_EVENT_SAMPLING = "事件采样";
+    public static String CONFIG_EVENT_USER_ID = "采集USER ID";
+    public static String CONFIG_EXPECTED_BATCH_INTERVAL = "预期上报频率";
+    public static String CONFIG_FORWARD_OPEN = "双发开关";
+    public static String CONFIG_HTTP_PROXY = "HTTP代理";
+    public static String CONFIG_LANGUAGE = "语言";
+    public static String CONFIG_LISTEN_LIFE_CYCLE_SWITCH = "监听生命周期";
+    public static String CONFIG_LOG_CUSTOM = "自定义日志打印";
+    public static String CONFIG_LOG_SWITCH = "调试日志";
+    public static String CONFIG_MINOR_VERSION = "小版本号";
+    public static String CONFIG_NEW_USER_MODE = "新用户模式";
+    public static String CONFIG_PLAY_SWITCH = "PLAY开关";
+    public static String CONFIG_REGION = "地区";
+    public static String CONFIG_REQUEST_ENCRYPT_SWITCH = "接口加密";
+    public static String CONFIG_SERVER_DOMAIN_CONFIG = "服务域名配置";
+    public static String CONFIG_SILENCE_IN_BG_SWITCH = "后台静默";
+    public static String CONFIG_TEA_EVENT_SAMPLING = "Tea还原采样";
+    public static String CONFIG_TERMINATE_IMMEDIATELY_SWITCH = "立即Terminate开关";
+    public static String CONFIG_TOURIST_MODE_EVENT_SWITCH = "游客模式采集事件";
+    public static String CONFIG_TOURIST_MODE_SWITCH = "游客模式";
+    public static String CONFIG_VERSION = "版本号";
+    public static String CONFIG_VERSION_CODE = "版本号编码";
+    public static String SETTINGS_AB_FETCH_INTERVAL = "AB实验更新周期";
+    public static String SETTINGS_AB_SWITCH = "AB实验";
+    public static String SETTINGS_BATCH_EVENT_INTERVAL = "事件上报周期";
+    public static String SETTINGS_BAV_SWITCH = "全埋点";
+    public static String SETTINGS_BG_SESSION_INTERVAL = "后台会话时长";
+    public static String SETTINGS_FORBID_DETAIL_SWITCH = "禁止采集手机详情";
+    public static String SETTINGS_IGNORE_EVENT_PRIORITY = "忽略分级";
+    public static String SETTINGS_LOG_BACK = "LogBack配置";
+    public static String SETTINGS_LOG_COMPRESS_TYPE = "日志压缩方式";
+    public static String SETTINGS_MAX_PACK_SIZE = "包最大体积";
+    public static String SETTINGS_PACK_SIZE_LIMIT = "包大小限制";
+    public static String SETTINGS_REAL_EVENTS = "实时埋点事件";
+    public static String SETTINGS_REMOTE_FETCH_INTERVAL = "服务端配置更新周期";
+}

@@ -1,0 +1,11 @@
+package com.bytedance.ies.bullet.pool.api;
+
+import androidx.exifinterface.media.ExifInterface;
+import com.bytedance.bdturing.methods.JsCallParser;
+import kotlin.Metadata;
+
+/* compiled from: IPool.kt */
+@Metadata(bv = {1, 0, 3}, d1 = {"\u0000 \n\u0002\b\u0003\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0010\u0002\n\u0002\b\u0005*Ä\u0001\u0010\u0000\u001a\u0004\b\u0000\u0010\u0001\u001a\u0004\b\u0001\u0010\u0002\"Y\u0012\u0013\u0012\u0011H\u0001¢\u0006\f\b\u0004\u0012\b\b\u0005\u0012\u0004\b\b(\u0006\u0012\u0013\u0012\u0011H\u0001¢\u0006\f\b\u0004\u0012\b\b\u0005\u0012\u0004\b\b(\u0007\u0012%\u0012#\u0012\u0004\u0012\u00020\t\u0012\u0004\u0012\u0002H\u0002\u0012\u0004\u0012\u00020\n0\b¢\u0006\f\b\u0004\u0012\b\b\u0005\u0012\u0004\b\b(\u000b\u0012\u0004\u0012\u00020\n0\u00032Y\u0012\u0013\u0012\u0011H\u0001¢\u0006\f\b\u0004\u0012\b\b\u0005\u0012\u0004\b\b(\u0006\u0012\u0013\u0012\u0011H\u0001¢\u0006\f\b\u0004\u0012\b\b\u0005\u0012\u0004\b\b(\u0007\u0012%\u0012#\u0012\u0004\u0012\u00020\t\u0012\u0004\u0012\u0002H\u0002\u0012\u0004\u0012\u00020\n0\b¢\u0006\f\b\u0004\u0012\b\b\u0005\u0012\u0004\b\b(\u000b\u0012\u0004\u0012\u00020\n0\u0003*\u009a\u0001\u0010\f\u001a\u0004\b\u0000\u0010\u0002\u001a\u0004\b\u0001\u0010\r\"D\u0012\u0013\u0012\u0011H\u0002¢\u0006\f\b\u0004\u0012\b\b\u0005\u0012\u0004\b\b(\u000e\u0012%\u0012#\u0012\u0004\u0012\u00020\t\u0012\u0004\u0012\u0002H\r\u0012\u0004\u0012\u00020\n0\b¢\u0006\f\b\u0004\u0012\b\b\u0005\u0012\u0004\b\b(\u000b\u0012\u0004\u0012\u00020\n0\b2D\u0012\u0013\u0012\u0011H\u0002¢\u0006\f\b\u0004\u0012\b\b\u0005\u0012\u0004\b\b(\u000e\u0012%\u0012#\u0012\u0004\u0012\u00020\t\u0012\u0004\u0012\u0002H\r\u0012\u0004\u0012\u00020\n0\b¢\u0006\f\b\u0004\u0012\b\b\u0005\u0012\u0004\b\b(\u000b\u0012\u0004\u0012\u00020\n0\b¨\u0006\u000f"}, d2 = {"PreRenderOperation", ExifInterface.LATITUDE_SOUTH, "C", "Lkotlin/Function3;", "Lkotlin/ParameterName;", "name", "originSchema", "uniqueSchema", "Lkotlin/Function2;", "Lcom/bytedance/ies/bullet/service/base/CacheItemStatus;", "", JsCallParser.VALUE_CALLBACK, "PreRenderOperationWithKey", "U", "cacheKey", "anniex_release"}, k = 2, mv = {1, 4, 3}, xi = 48)
+/* loaded from: classes4.dex */
+public final class IPoolKt {
+}

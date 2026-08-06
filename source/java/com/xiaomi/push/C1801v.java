@@ -1,0 +1,334 @@
+package com.xiaomi.push;
+
+import android.text.TextUtils;
+import com.xiaomi.channel.commonutils.logger.AbstractC1417b;
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.util.Date;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+/* renamed from: com.xiaomi.push.v */
+/* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes7.dex */
+public class C1801v {
+
+    /* renamed from: a */
+    public static final String[] f3270a = {"jpg", "png", "bmp", "gif", "webp"};
+
+    /* renamed from: a */
+    public static void m4106a(File file, File file2) {
+        ZipOutputStream zipOutputStream;
+        ZipOutputStream zipOutputStream2 = null;
+        try {
+            try {
+                zipOutputStream = new ZipOutputStream(new FileOutputStream(file, false));
+            } catch (Throwable th) {
+                th = th;
+            }
+        } catch (FileNotFoundException unused) {
+            m4105a(zipOutputStream2);
+        } catch (IOException e) {
+            e = e;
+        }
+        try {
+            m4108a(zipOutputStream, file2, null, null);
+            m4105a(zipOutputStream);
+        } catch (FileNotFoundException unused2) {
+            zipOutputStream2 = zipOutputStream;
+            m4105a(zipOutputStream2);
+        } catch (IOException e2) {
+            e = e2;
+            zipOutputStream2 = zipOutputStream;
+            AbstractC1417b.m1089a("zip file failure + " + e.getMessage());
+            m4105a(zipOutputStream2);
+        } catch (Throwable th2) {
+            th = th2;
+            zipOutputStream2 = zipOutputStream;
+            m4105a(zipOutputStream2);
+            throw th;
+        }
+    }
+
+    /* renamed from: a */
+    public static void m4108a(ZipOutputStream zipOutputStream, File file, String str, FileFilter fileFilter) {
+        File[] listFiles;
+        String str2 = "";
+        if (str == null) {
+            str = "";
+        }
+        FileInputStream fileInputStream = null;
+        try {
+            try {
+                if (file.isDirectory()) {
+                    if (fileFilter != null) {
+                        listFiles = file.listFiles(fileFilter);
+                    } else {
+                        listFiles = file.listFiles();
+                    }
+                    zipOutputStream.putNextEntry(new ZipEntry(str + File.separator));
+                    if (!TextUtils.isEmpty(str)) {
+                        str2 = str + File.separator;
+                    }
+                    for (int i = 0; i < listFiles.length; i++) {
+                        m4108a(zipOutputStream, listFiles[i], str2 + listFiles[i].getName(), null);
+                    }
+                    File[] listFiles2 = file.listFiles(new FileFilter() { // from class: com.xiaomi.push.v.1
+                        @Override // java.io.FileFilter
+                        public boolean accept(File file2) {
+                            return file2.isDirectory();
+                        }
+                    });
+                    if (listFiles2 != null) {
+                        for (File file2 : listFiles2) {
+                            m4108a(zipOutputStream, file2, str2 + File.separator + file2.getName(), fileFilter);
+                        }
+                    }
+                } else {
+                    if (!TextUtils.isEmpty(str)) {
+                        zipOutputStream.putNextEntry(new ZipEntry(str));
+                    } else {
+                        zipOutputStream.putNextEntry(new ZipEntry(String.valueOf(new Date().getTime()) + ".txt"));
+                    }
+                    FileInputStream fileInputStream2 = new FileInputStream(file);
+                    try {
+                        byte[] bArr = new byte[1024];
+                        while (true) {
+                            int read = fileInputStream2.read(bArr);
+                            if (read == -1) {
+                                break;
+                            } else {
+                                zipOutputStream.write(bArr, 0, read);
+                            }
+                        }
+                        fileInputStream = fileInputStream2;
+                    } catch (IOException e) {
+                        e = e;
+                        fileInputStream = fileInputStream2;
+                        AbstractC1417b.m1103d("zipFiction failed with exception:" + e.toString());
+                        m4105a((Closeable) fileInputStream);
+                    } catch (Throwable th) {
+                        th = th;
+                        fileInputStream = fileInputStream2;
+                        m4105a((Closeable) fileInputStream);
+                        throw th;
+                    }
+                }
+            } catch (Throwable th2) {
+                th = th2;
+            }
+        } catch (IOException e2) {
+            e = e2;
+        }
+        m4105a((Closeable) fileInputStream);
+    }
+
+    /* renamed from: a */
+    public static void m4105a(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception unused) {
+            }
+        }
+    }
+
+    /* JADX WARN: Not initialized variable reg: 2, insn: 0x0066: MOVE (r1 I:??[OBJECT, ARRAY]) = (r2 I:??[OBJECT, ARRAY]), block:B:22:0x0066 */
+    /* renamed from: a */
+    public static String m4104a(File file) {
+        InputStreamReader inputStreamReader;
+        Closeable closeable;
+        StringWriter stringWriter = new StringWriter();
+        Closeable closeable2 = null;
+        try {
+            try {
+                inputStreamReader = new InputStreamReader(new BufferedInputStream(new FileInputStream(file)));
+                try {
+                    char[] cArr = new char[2048];
+                    while (true) {
+                        int read = inputStreamReader.read(cArr);
+                        if (read != -1) {
+                            stringWriter.write(cArr, 0, read);
+                        } else {
+                            String stringWriter2 = stringWriter.toString();
+                            m4105a(inputStreamReader);
+                            m4105a(stringWriter);
+                            return stringWriter2;
+                        }
+                    }
+                } catch (IOException e) {
+                    e = e;
+                    AbstractC1417b.m1101c("read file :" + file.getAbsolutePath() + " failure :" + e.getMessage());
+                    m4105a(inputStreamReader);
+                    m4105a(stringWriter);
+                    return null;
+                }
+            } catch (Throwable th) {
+                th = th;
+                closeable2 = closeable;
+                m4105a(closeable2);
+                m4105a(stringWriter);
+                throw th;
+            }
+        } catch (IOException e2) {
+            e = e2;
+            inputStreamReader = null;
+        } catch (Throwable th2) {
+            th = th2;
+            m4105a(closeable2);
+            m4105a(stringWriter);
+            throw th;
+        }
+    }
+
+    /* renamed from: a */
+    public static void m4107a(File file, String str) {
+        BufferedWriter bufferedWriter;
+        if (!file.exists()) {
+            AbstractC1417b.m1101c("mkdir " + file.getAbsolutePath());
+            file.getParentFile().mkdirs();
+        }
+        BufferedWriter bufferedWriter2 = null;
+        try {
+            try {
+                bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
+            } catch (Throwable th) {
+                th = th;
+            }
+        } catch (IOException e) {
+            e = e;
+        }
+        try {
+            bufferedWriter.write(str);
+            m4105a(bufferedWriter);
+        } catch (IOException e2) {
+            e = e2;
+            bufferedWriter2 = bufferedWriter;
+            AbstractC1417b.m1101c("write file :" + file.getAbsolutePath() + " failure :" + e.getMessage());
+            m4105a(bufferedWriter2);
+        } catch (Throwable th2) {
+            th = th2;
+            bufferedWriter2 = bufferedWriter;
+            m4105a(bufferedWriter2);
+            throw th;
+        }
+    }
+
+    /* renamed from: b */
+    public static void m4112b(File file, File file2) {
+        FileOutputStream fileOutputStream;
+        if (file.getAbsolutePath().equals(file2.getAbsolutePath())) {
+            return;
+        }
+        FileInputStream fileInputStream = null;
+        try {
+            FileInputStream fileInputStream2 = new FileInputStream(file);
+            try {
+                fileOutputStream = new FileOutputStream(file2);
+                try {
+                    byte[] bArr = new byte[1024];
+                    while (true) {
+                        int read = fileInputStream2.read(bArr);
+                        if (read >= 0) {
+                            fileOutputStream.write(bArr, 0, read);
+                        } else {
+                            fileInputStream2.close();
+                            fileOutputStream.close();
+                            return;
+                        }
+                    }
+                } catch (Throwable th) {
+                    th = th;
+                    fileInputStream = fileInputStream2;
+                    if (fileInputStream != null) {
+                        fileInputStream.close();
+                    }
+                    if (fileOutputStream != null) {
+                        fileOutputStream.close();
+                    }
+                    throw th;
+                }
+            } catch (Throwable th2) {
+                th = th2;
+                fileOutputStream = null;
+            }
+        } catch (Throwable th3) {
+            th = th3;
+            fileOutputStream = null;
+        }
+    }
+
+    /* renamed from: a */
+    public static byte[] m4110a(InputStream inputStream) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        byte[] bArr = new byte[8192];
+        while (true) {
+            try {
+                try {
+                    int read = inputStream.read(bArr, 0, 8192);
+                    if (read > 0) {
+                        byteArrayOutputStream.write(bArr, 0, read);
+                    } else {
+                        return byteArrayOutputStream.toByteArray();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    m4105a((Closeable) inputStream);
+                    m4105a(byteArrayOutputStream);
+                    return null;
+                }
+            } finally {
+                m4105a((Closeable) inputStream);
+                m4105a(byteArrayOutputStream);
+            }
+        }
+    }
+
+    /* renamed from: a */
+    public static boolean m4109a(File file) {
+        try {
+            if (file.isDirectory()) {
+                return false;
+            }
+            if (file.exists()) {
+                return true;
+            }
+            File parentFile = file.getParentFile();
+            if (parentFile.exists() || parentFile.mkdirs()) {
+                return file.createNewFile();
+            }
+            return false;
+        } catch (Throwable th) {
+            th.printStackTrace();
+            return false;
+        }
+    }
+
+    /* renamed from: a */
+    public static byte[] m4111a(byte[] bArr) {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            GZIPOutputStream gZIPOutputStream = new GZIPOutputStream(byteArrayOutputStream);
+            gZIPOutputStream.write(bArr);
+            gZIPOutputStream.finish();
+            gZIPOutputStream.close();
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+            byteArrayOutputStream.close();
+            return byteArray;
+        } catch (Exception unused) {
+            return bArr;
+        }
+    }
+}

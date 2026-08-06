@@ -1,0 +1,11 @@
+package com.bytedance.common.network;
+
+/* loaded from: classes3.dex */
+public class MimeTypeParseException extends Exception {
+    public MimeTypeParseException() {
+    }
+
+    public MimeTypeParseException(String str) {
+        super(str);
+    }
+}

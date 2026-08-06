@@ -1,0 +1,82 @@
+package com.bytedance.vmsdk.inspector_new.server.websocket;
+
+import android.util.Base64;
+import com.bytedance.vmsdk.inspector_new.server.SocketLike;
+import com.bytedance.vmsdk.inspector_new.server.http.HttpHandler;
+import com.bytedance.vmsdk.inspector_new.server.http.LightHttpBody;
+import com.bytedance.vmsdk.inspector_new.server.http.LightHttpMessage;
+import com.bytedance.vmsdk.inspector_new.server.http.LightHttpRequest;
+import com.bytedance.vmsdk.inspector_new.server.http.LightHttpResponse;
+import com.bytedance.vmsdk.inspector_new.server.http.LightHttpServer;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+/* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes6.dex */
+public class WebSocketHandler implements HttpHandler {
+    private static final String HEADER_CONNECTION = "Connection";
+    private static final String HEADER_CONNECTION_UPGRADE = "Upgrade";
+    private static final String HEADER_SEC_WEBSOCKET_ACCEPT = "Sec-WebSocket-Accept";
+    private static final String HEADER_SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key";
+    private static final String HEADER_SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
+    private static final String HEADER_SEC_WEBSOCKET_VERSION = "Sec-WebSocket-Version";
+    private static final String HEADER_SEC_WEBSOCKET_VERSION_13 = "13";
+    private static final String HEADER_UPGRADE = "Upgrade";
+    private static final String HEADER_UPGRADE_WEBSOCKET = "websocket";
+    private static final String SERVER_KEY_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    private final SimpleEndpoint mEndpoint;
+
+    public WebSocketHandler(SimpleEndpoint simpleEndpoint) {
+        this.mEndpoint = simpleEndpoint;
+    }
+
+    @Override // com.bytedance.vmsdk.inspector_new.server.http.HttpHandler
+    public boolean handleRequest(SocketLike socketLike, LightHttpRequest lightHttpRequest, LightHttpResponse lightHttpResponse) throws IOException {
+        if (!isSupportableUpgradeRequest(lightHttpRequest)) {
+            lightHttpResponse.code = 501;
+            lightHttpResponse.reasonPhrase = "Not Implemented";
+            lightHttpResponse.body = LightHttpBody.create("Not a supported WebSocket upgrade request\n", "text/plain");
+            return true;
+        }
+        doUpgrade(socketLike, lightHttpRequest, lightHttpResponse);
+        return false;
+    }
+
+    private static boolean isSupportableUpgradeRequest(LightHttpRequest lightHttpRequest) {
+        return HEADER_UPGRADE_WEBSOCKET.equalsIgnoreCase(getFirstHeaderValue(lightHttpRequest, "Upgrade")) && "Upgrade".equals(getFirstHeaderValue(lightHttpRequest, HEADER_CONNECTION)) && HEADER_SEC_WEBSOCKET_VERSION_13.equals(getFirstHeaderValue(lightHttpRequest, HEADER_SEC_WEBSOCKET_VERSION));
+    }
+
+    private void doUpgrade(SocketLike socketLike, LightHttpRequest lightHttpRequest, LightHttpResponse lightHttpResponse) throws IOException {
+        lightHttpResponse.code = 101;
+        lightHttpResponse.reasonPhrase = "Switching Protocols";
+        lightHttpResponse.addHeader("Upgrade", HEADER_UPGRADE_WEBSOCKET);
+        lightHttpResponse.addHeader(HEADER_CONNECTION, "Upgrade");
+        lightHttpResponse.body = null;
+        String firstHeaderValue = getFirstHeaderValue(lightHttpRequest, HEADER_SEC_WEBSOCKET_KEY);
+        if (firstHeaderValue != null) {
+            lightHttpResponse.addHeader(HEADER_SEC_WEBSOCKET_ACCEPT, generateServerKey(firstHeaderValue));
+        }
+        InputStream input = socketLike.getInput();
+        OutputStream output = socketLike.getOutput();
+        LightHttpServer.writeResponseMessage(lightHttpResponse, new LightHttpServer.HttpMessageWriter(new BufferedOutputStream(output)));
+        new WebSocketSession(input, output, this.mEndpoint).handle();
+    }
+
+    private static String generateServerKey(String str) {
+        try {
+            String str2 = str + SERVER_KEY_GUID;
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
+            messageDigest.update(Utf8Charset.encodeUTF8(str2));
+            return Base64.encodeToString(messageDigest.digest(), 2);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String getFirstHeaderValue(LightHttpMessage lightHttpMessage, String str) {
+        return lightHttpMessage.getFirstHeaderValue(str);
+    }
+}

@@ -1,0 +1,11 @@
+package com.cmic.sso.sdk.e;
+
+import android.content.Context;
+
+/* compiled from: PermissionUtils.java */
+/* loaded from: classes6.dex */
+public class g {
+    public static boolean a(Context context, String str) {
+        return context.getPackageManager().checkPermission(str, context.getPackageName()) == 0;
+    }
+}

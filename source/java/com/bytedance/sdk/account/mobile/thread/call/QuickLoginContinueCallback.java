@@ -1,0 +1,9 @@
+package com.bytedance.sdk.account.mobile.thread.call;
+
+import com.bytedance.sdk.account.NeedCaptchaCallBack;
+import com.bytedance.sdk.account.api.call.MobileApiResponse;
+import com.bytedance.sdk.account.mobile.query.QuickLoginContinueQueryObj;
+
+/* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes5.dex */
+public abstract class QuickLoginContinueCallback extends NeedCaptchaCallBack<MobileApiResponse<QuickLoginContinueQueryObj>, QuickLoginContinueQueryObj> {
+}

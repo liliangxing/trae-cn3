@@ -1,0 +1,53 @@
+package com.bytedance.push.event.sync;
+
+/* loaded from: classes4.dex */
+public interface ISignalReportConstants {
+    public static final String CLEAR_TYPE_ALL = "all";
+    public static final String CLEAR_TYPE_SINGLE = "single";
+    public static final String EVENT_NAME_BDPUSH_CLIENT_SIGNAL = "bdpush_client_signal";
+    public static final String EXITS_REASON_BACK = "back";
+    public static final String EXITS_REASON_HOME = "home";
+    public static final String KEY_APP_DISPLAY = "app_display_setting";
+    public static final String KEY_BUSINESS_EXTRA_STRING = "extra_string";
+    public static final String KEY_CLEAR_TYPE = "clear_type";
+    public static final String KEY_CLIENT_TIME = "client_time";
+    public static final String KEY_DEVICE_HEIGHT = "device_height";
+    public static final String KEY_DEVICE_WIDTH = "device_width";
+    public static final String KEY_DISPLAY_APP_DARK_MODE = "dark_mode_enabled";
+    public static final String KEY_DISPLAY_APP_FOLLOW_SYSTEM = "font_follow_system_enabled";
+    public static final String KEY_DISPLAY_APP_FONT_LARGE_MODE = "font_large_mode_enabled";
+    public static final String KEY_DISPLAY_APP_FONT_SCALE = "font_scale";
+    public static final String KEY_DISPLAY_AUTO_BRIGHTNESS = "auto_brightness_enabled";
+    public static final String KEY_DISPLAY_BRIGHTNESS = "brightness";
+    public static final String KEY_DISPLAY_DARK_MODE = "dark_mode_enabled";
+    public static final String KEY_DISPLAY_FONT_SCALE = "font_scale";
+    public static final String KEY_EVENT_VERSION = "event_version";
+    public static final String KEY_EXTRA_INFO = "extra_info";
+    public static final String KEY_ICON_BOTTOM = "icon_bottom";
+    public static final String KEY_ICON_HEIGHT = "icon_height";
+    public static final String KEY_ICON_LEFT = "icon_left";
+    public static final String KEY_ICON_RIGHT = "icon_right";
+    public static final String KEY_ICON_TOP = "icon_top";
+    public static final String KEY_ICON_WIDTH = "icon_width";
+    public static final String KEY_LAST_PAGE = "last_page";
+    public static final String KEY_MESSAGE = "message";
+    public static final String KEY_REASON = "reason";
+    public static final String KEY_SCREEN_STATUS_SCREEN_OFF = "screen_off";
+    public static final String KEY_SCREEN_STATUS_SCREEN_ON = "screen_on";
+    public static final String KEY_SCREEN_STATUS_UNLOCK = "unlock";
+    public static final String KEY_SIGNAL_NAME = "signal_name";
+    public static final String KEY_SYSTEM_DISPLAY = "system_display_setting";
+    public static final String KEY_TRIGGER_SCENE = "trigger_scene";
+    public static final String MONITOR_NAME_BDPUSH_CLIENT_SIGNAL = "push_monitor_signal_trigger";
+    public static final String SIGNAL_NAME_APP_POSITION = "app_position";
+    public static final String SIGNAL_NAME_CLEAR_NOTIFICATION = "clear_notification";
+    public static final String SIGNAL_NAME_HEAD_SET_STATUS = "headset_status";
+    public static final String SIGNAL_NAME_HW_SCREEN_STATUS = "hw_screen_status";
+    public static final String SIGNAL_NAME_PULL_DOWN_NOTIFICATION_BAR = "pull_down_notification_bar";
+    public static final String SIGNAL_NAME_RINGTONES_INFO = "ringtones_info";
+    public static final String SIGNAL_NAME_USER_DISPLAY_INFO = "user_display_info";
+    public static final String SIGNAL_NAME_USER_EXITS = "user_exits";
+    public static final int SIGNAL_TYPE_APPLOG = 2;
+    public static final int SIGNAL_TYPE_HTTP = 1;
+    public static final int VALUE_EVENT_VERSION_V1 = 1;
+}

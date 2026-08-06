@@ -1,0 +1,10 @@
+package com.xiaomi.push;
+
+import android.content.Context;
+
+/* loaded from: classes7.dex */
+public interface bw {
+    void a(Context context, String str, String str2);
+
+    void b(Context context, String str, String str2);
+}

@@ -1,0 +1,35 @@
+package androidx.compose.foundation.text;
+
+import androidx.compose.runtime.Composer;
+import androidx.compose.runtime.ComposerKt;
+import kotlin.Metadata;
+import kotlin.jvm.functions.Function2;
+
+/* compiled from: ContextMenu.android.kt */
+@Metadata(k = 3, mv = {2, 0, 0}, xi = 176)
+/* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes.dex */
+public final class ContextMenu_androidKt$TextItem$1 implements Function2<Composer, Integer, String> {
+    final /* synthetic */ TextContextMenuItems $label;
+
+    public ContextMenu_androidKt$TextItem$1(TextContextMenuItems textContextMenuItems) {
+        this.$label = textContextMenuItems;
+    }
+
+    public /* bridge */ /* synthetic */ Object invoke(Object obj, Object obj2) {
+        return invoke((Composer) obj, ((Number) obj2).intValue());
+    }
+
+    public final String invoke(Composer composer, int i) {
+        composer.startReplaceGroup(-1744780674);
+        ComposerKt.sourceInformation(composer, "C202@8220L16:ContextMenu.android.kt#423gt5");
+        if (ComposerKt.isTraceInProgress()) {
+            ComposerKt.traceEventStart(-1744780674, i, -1, "androidx.compose.foundation.text.TextItem.<anonymous> (ContextMenu.android.kt:202)");
+        }
+        String resolvedString = this.$label.resolvedString(composer, 0);
+        if (ComposerKt.isTraceInProgress()) {
+            ComposerKt.traceEventEnd();
+        }
+        composer.endReplaceGroup();
+        return resolvedString;
+    }
+}

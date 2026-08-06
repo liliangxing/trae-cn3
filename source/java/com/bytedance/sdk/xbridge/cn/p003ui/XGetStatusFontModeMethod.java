@@ -1,0 +1,49 @@
+package com.bytedance.sdk.xbridge.cn.p003ui;
+
+import android.app.Activity;
+import android.os.Build;
+import android.view.Window;
+import android.view.WindowInsetsController;
+import com.bytedance.sdk.xbridge.annotations.XBridgeMethod;
+import com.bytedance.sdk.xbridge.cn.p003ui.AbsXGetStatusStyleModeMethodIDL;
+import com.bytedance.sdk.xbridge.cn.registry.core.IBDXBridgeContext;
+import com.bytedance.sdk.xbridge.cn.registry.core.model.idl.CompletionBlock;
+import com.bytedance.sdk.xbridge.cn.registry.core.model.idl.XBaseModel;
+import com.bytedance.sdk.xbridge.cn.registry.core.model.idl.XBaseResultModel;
+import com.bytedance.sdk.xbridge.cn.registry.core.utils.XBridgeKTXKt;
+import kotlin.Metadata;
+import kotlin.jvm.internal.Intrinsics;
+import kotlin.jvm.internal.Reflection;
+import kotlin.reflect.KClass;
+
+/* compiled from: XGetStatusFontModeMethod.kt */
+@XBridgeMethod(name = "x.getStatusStyleMode")
+@Metadata(bv = {1, 0, 3}, d1 = {"\u0000(\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0010\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0007\u0018\u00002\u00020\u0001B\u0005¢\u0006\u0002\u0010\u0002J&\u0010\u0003\u001a\u00020\u00042\u0006\u0010\u0005\u001a\u00020\u00062\u0006\u0010\u0007\u001a\u00020\b2\f\u0010\t\u001a\b\u0012\u0004\u0012\u00020\u000b0\nH\u0016¨\u0006\f"}, d2 = {"Lcom/bytedance/sdk/xbridge/cn/ui/XGetStatusFontModeMethod;", "Lcom/bytedance/sdk/xbridge/cn/ui/AbsXGetStatusStyleModeMethodIDL;", "()V", "handle", "", "bridgeContext", "Lcom/bytedance/sdk/xbridge/cn/registry/core/IBDXBridgeContext;", "params", "Lcom/bytedance/sdk/xbridge/cn/ui/AbsXGetStatusStyleModeMethodIDL$XGetStatusStyleModeParamModel;", "callback", "Lcom/bytedance/sdk/xbridge/cn/registry/core/model/idl/CompletionBlock;", "Lcom/bytedance/sdk/xbridge/cn/ui/AbsXGetStatusStyleModeMethodIDL$XGetStatusStyleModeResultModel;", "anniex_release"}, k = 1, mv = {1, 4, 3}, xi = 48)
+/* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes5.dex */
+public final class XGetStatusFontModeMethod extends AbsXGetStatusStyleModeMethodIDL {
+    @Override // com.bytedance.sdk.xbridge.cn.registry.core.bridgeInterfaces.XCoreIDLBridgeMethod
+    public void handle(IBDXBridgeContext bridgeContext, AbsXGetStatusStyleModeMethodIDL.XGetStatusStyleModeParamModel params, CompletionBlock<AbsXGetStatusStyleModeMethodIDL.XGetStatusStyleModeResultModel> callback) {
+        Intrinsics.checkNotNullParameter(bridgeContext, "bridgeContext");
+        Intrinsics.checkNotNullParameter(params, "params");
+        Intrinsics.checkNotNullParameter(callback, "callback");
+        Activity ownerActivity = bridgeContext.getOwnerActivity();
+        Window window = ownerActivity != null ? ownerActivity.getWindow() : null;
+        if (window == null) {
+            CompletionBlock.DefaultImpls.onFailure$default(callback, 0, "window is null", null, 4, null);
+            return;
+        }
+        if (Build.VERSION.SDK_INT >= 30) {
+            WindowInsetsController insetsController = window.getInsetsController();
+            if (insetsController != null) {
+                boolean z = (insetsController.getSystemBarsAppearance() & 8) != 0;
+                XBaseModel createXModel = XBridgeKTXKt.createXModel((KClass<XBaseModel>) Reflection.getOrCreateKotlinClass(AbsXGetStatusStyleModeMethodIDL.XGetStatusStyleModeResultModel.class));
+                ((AbsXGetStatusStyleModeMethodIDL.XGetStatusStyleModeResultModel) createXModel).setStatusFontMode(z ? "dark" : "light");
+                CompletionBlock.DefaultImpls.onSuccess$default(callback, (XBaseResultModel) createXModel, null, 2, null);
+                return;
+            }
+            CompletionBlock.DefaultImpls.onFailure$default(callback, 0, "wic is null", null, 4, null);
+            return;
+        }
+        CompletionBlock.DefaultImpls.onFailure$default(callback, 0, "Build.VERSION.SDK_INT < Build.VERSION_CODES.R", null, 4, null);
+    }
+}
