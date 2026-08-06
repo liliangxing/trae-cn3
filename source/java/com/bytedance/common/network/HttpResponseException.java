@@ -1,0 +1,20 @@
+package com.bytedance.common.network;
+
+/* loaded from: classes3.dex */
+public class HttpResponseException extends Exception {
+    public String message;
+    public int statusCode;
+
+    public HttpResponseException(int i, String str) {
+        this.statusCode = i;
+        this.message = str;
+    }
+
+    public int getStatusCode() {
+        return this.statusCode;
+    }
+
+    public String getMsg() {
+        return this.message;
+    }
+}

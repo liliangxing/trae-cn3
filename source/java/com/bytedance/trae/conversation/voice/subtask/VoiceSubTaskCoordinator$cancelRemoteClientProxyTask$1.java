@@ -1,0 +1,35 @@
+package com.bytedance.trae.conversation.voice.subtask;
+
+import com.bytedance.sdk.account.api.AccountErrorCode;
+import kotlin.Metadata;
+import kotlin.coroutines.Continuation;
+import kotlin.coroutines.jvm.internal.ContinuationImpl;
+import kotlin.coroutines.jvm.internal.DebugMetadata;
+
+/* JADX INFO: Access modifiers changed from: package-private */
+/* compiled from: VoiceSubTaskCoordinator.kt */
+@Metadata(k = 3, mv = {2, 0, 0}, xi = 48)
+@DebugMetadata(c = "com.bytedance.trae.conversation.voice.subtask.VoiceSubTaskCoordinator", f = "VoiceSubTaskCoordinator.kt", i = {0, 0}, l = {AccountErrorCode.SMS_CODE_FREQ_ERROR}, m = "cancelRemoteClientProxyTask", n = {"localTaskId", "reason"}, s = {"L$0", "L$1"})
+/* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes5.dex */
+public final class VoiceSubTaskCoordinator$cancelRemoteClientProxyTask$1 extends ContinuationImpl {
+    Object L$0;
+    Object L$1;
+    int label;
+    /* synthetic */ Object result;
+    final /* synthetic */ VoiceSubTaskCoordinator this$0;
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public VoiceSubTaskCoordinator$cancelRemoteClientProxyTask$1(VoiceSubTaskCoordinator voiceSubTaskCoordinator, Continuation<? super VoiceSubTaskCoordinator$cancelRemoteClientProxyTask$1> continuation) {
+        super(continuation);
+        this.this$0 = voiceSubTaskCoordinator;
+    }
+
+    public final Object invokeSuspend(Object obj) {
+        Object cancelRemoteClientProxyTask;
+        this.result = obj;
+        this.label |= Integer.MIN_VALUE;
+        cancelRemoteClientProxyTask = this.this$0.cancelRemoteClientProxyTask(null, null, null, (Continuation) this);
+        return cancelRemoteClientProxyTask;
+    }
+}

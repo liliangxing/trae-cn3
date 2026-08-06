@@ -1,0 +1,18 @@
+package com.bytedance.platform.godzilla.lib;
+
+/* renamed from: com.bytedance.platform.godzilla.lib.R */
+/* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes4.dex */
+public final class C0467R {
+
+    /* renamed from: com.bytedance.platform.godzilla.lib.R$string */
+    /* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes4.dex */
+    public static final class string {
+        public static final int app_name = 2131689519;
+
+        private string() {
+        }
+    }
+
+    private C0467R() {
+    }
+}

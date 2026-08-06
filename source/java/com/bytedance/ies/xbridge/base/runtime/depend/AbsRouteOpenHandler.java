@@ -1,0 +1,35 @@
+package com.bytedance.ies.xbridge.base.runtime.depend;
+
+import android.content.Context;
+import com.bytedance.ies.xbridge.XBridgePlatformType;
+import java.util.List;
+import java.util.Map;
+import kotlin.Metadata;
+
+/* compiled from: AbsRouteOpenHandler.kt */
+@Metadata(bv = {1, 0, 3}, d1 = {"\u00006\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\b\n\u0002\u0010 \n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u000b\n\u0000\n\u0002\u0010\u000e\n\u0000\n\u0002\u0010$\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u0002\n\u0002\b\u0003\b&\u0018\u00002\u00020\u0001B\u0005¢\u0006\u0002\u0010\u0002J\u000e\u0010\t\u001a\b\u0012\u0004\u0012\u00020\u000b0\nH&J.\u0010\f\u001a\u00020\r2\u0006\u0010\u000e\u001a\u00020\u000f2\u0012\u0010\u0010\u001a\u000e\u0012\u0004\u0012\u00020\u000f\u0012\u0004\u0012\u00020\u00010\u00112\b\u0010\u0012\u001a\u0004\u0018\u00010\u0013H&J\u0010\u0010\u0014\u001a\u00020\u00152\b\u0010\u0016\u001a\u0004\u0018\u00010\u0000J\u0010\u0010\u0017\u001a\u00020\u00152\b\u0010\u0016\u001a\u0004\u0018\u00010\u0000R\"\u0010\u0004\u001a\u0004\u0018\u00010\u00002\b\u0010\u0003\u001a\u0004\u0018\u00010\u0000@BX\u0086\u000e¢\u0006\b\n\u0000\u001a\u0004\b\u0005\u0010\u0006R\"\u0010\u0007\u001a\u0004\u0018\u00010\u00002\b\u0010\u0003\u001a\u0004\u0018\u00010\u0000@BX\u0086\u000e¢\u0006\b\n\u0000\u001a\u0004\b\b\u0010\u0006¨\u0006\u0018"}, d2 = {"Lcom/bytedance/ies/xbridge/base/runtime/depend/AbsRouteOpenHandler;", "", "()V", "<set-?>", "exceptionHandler", "getExceptionHandler", "()Lcom/bytedance/ies/xbridge/base/runtime/depend/AbsRouteOpenHandler;", "nextHandler", "getNextHandler", "getSupportPlatformTypeList", "", "Lcom/bytedance/ies/xbridge/XBridgePlatformType;", "openSchema", "", "schema", "", "extraInfo", "", "context", "Landroid/content/Context;", "setExceptionHandler", "", "handler", "setNextHandler", "anniex_release"}, k = 1, mv = {1, 4, 3}, xi = 48)
+/* loaded from: classes4.dex */
+public abstract class AbsRouteOpenHandler {
+    private AbsRouteOpenHandler exceptionHandler;
+    private AbsRouteOpenHandler nextHandler;
+
+    public abstract List<XBridgePlatformType> getSupportPlatformTypeList();
+
+    public abstract boolean openSchema(String schema, Map<String, ? extends Object> extraInfo, Context context);
+
+    public final AbsRouteOpenHandler getNextHandler() {
+        return this.nextHandler;
+    }
+
+    public final AbsRouteOpenHandler getExceptionHandler() {
+        return this.exceptionHandler;
+    }
+
+    public final void setNextHandler(AbsRouteOpenHandler handler) {
+        this.nextHandler = handler;
+    }
+
+    public final void setExceptionHandler(AbsRouteOpenHandler handler) {
+        this.exceptionHandler = handler;
+    }
+}

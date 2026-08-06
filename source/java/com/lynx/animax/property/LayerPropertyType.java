@@ -1,0 +1,59 @@
+package com.lynx.animax.property;
+
+import com.bytedance.crash.constants.Constants;
+import com.facebook.imageutils.JfifUtil;
+import com.ss.ttm.player.MediaPlayer;
+
+/* loaded from: classes6.dex */
+public enum LayerPropertyType {
+    VISIBILITY(1),
+    TRANSFORM_OPACITY(2),
+    TRANSFORM_ANCHOR(3),
+    TRANSFORM_POSITION(4),
+    TRANSFORM_SCALE(5),
+    TRANSFORM_ROTATION(6),
+    TRANSFORM_SKEW(7),
+    TRANSFORM_SKEW_ANGLE(8),
+    TRANSFORM_START_OPACITY(9),
+    TRANSFORM_END_OPACITY(10),
+    TRANSFORM_ROTATION_X(11),
+    TRANSFORM_ROTATION_Y(12),
+    TRANSFORM_ROTATION_Z(13),
+    TEXT_VALUE(101),
+    TEXT_SIZE(102),
+    TEXT_COLOR(103),
+    TEXT_TRACKING(104),
+    COLOR(201),
+    COLOR_FILTER(202),
+    STROKE_COLOR(203),
+    STROKE_WIDTH(204),
+    OPACITY(205),
+    BLUR_RADIUS(206),
+    ELLIPSE_SIZE(207),
+    RECTANGLE_SIZE(208),
+    CORNER_RADIUS(209),
+    POSITION(210),
+    REPEATER_COPIES(211),
+    REPEATER_OFFSET(212),
+    POLYSTAR_POINTS(213),
+    POLYSTAR_ROTATION(Constants.UPLOAD_DISASTER_ESCAPE),
+    POLYSTAR_INNER_RADIUS(215),
+    POLYSTAR_OUTER_RADIUS(216),
+    POLYSTAR_INNER_ROUNDED(JfifUtil.MARKER_EOI),
+    POLYSTAR_OUTER_ROUNDED(JfifUtil.MARKER_SOS),
+    DROP_SHADOW_COLOR(219),
+    DROP_SHADOW_OPACITY(MediaPlayer.MEDIA_PLAYER_OPTION_FASTOPEN_LIVE_STREAM),
+    DROP_SHADOW_DIRECTION(MediaPlayer.MEDIA_PLAYER_OPTION_VIDEO_DECODER_ERROR),
+    DROP_SHADOW_DISTANCE(MediaPlayer.MEDIA_PLAYER_OPTION_AUDIO_DECODER_ERROR),
+    DROP_SHADOW_RADIUS(MediaPlayer.MEDIA_PLAYER_OPTION_OUTPUT_LOG);
+
+    private final int mValue;
+
+    LayerPropertyType(int i) {
+        this.mValue = i;
+    }
+
+    public int getValue() {
+        return this.mValue;
+    }
+}

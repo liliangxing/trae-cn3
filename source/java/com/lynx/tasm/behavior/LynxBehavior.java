@@ -1,0 +1,17 @@
+package com.lynx.tasm.behavior;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+/* loaded from: classes7.dex */
+public @interface LynxBehavior {
+    boolean isCreateAsync() default false;
+
+    boolean needProcessDirection() default false;
+
+    String[] tagName();
+}

@@ -1,0 +1,726 @@
+package com.bytedance.lego.init;
+
+import com.bytedance.lego.init.generate.DelayTaskCollector__trae_android_app;
+import com.bytedance.lego.init.generate.FeedShowTaskCollector__trae_android_app;
+import com.bytedance.lego.init.generate.PeriodTaskCollector__trae_android_app;
+import com.bytedance.lego.init.model.DelayTaskInfo;
+import com.bytedance.lego.init.model.FeedShowTaskInfo;
+import com.bytedance.lego.init.model.IdleTaskInfo;
+import com.bytedance.lego.init.model.InitPeriod;
+import com.bytedance.lego.init.model.InitTaskInfo;
+import com.bytedance.lego.init.model.InitTaskProcess;
+import com.bytedance.lego.init.model.PeriodTaskInfo;
+import com.bytedance.trae.init.task.InitALogTask;
+import com.bytedance.trae.init.task.InitAbTestSdkTask;
+import com.bytedance.trae.init.task.InitAccountTask;
+import com.bytedance.trae.init.task.InitAnnieXTask;
+import com.bytedance.trae.init.task.InitApmTask;
+import com.bytedance.trae.init.task.InitAppLog;
+import com.bytedance.trae.init.task.InitFacebookSdkTask;
+import com.bytedance.trae.init.task.InitHotPatchTask;
+import com.bytedance.trae.init.task.InitImageTask;
+import com.bytedance.trae.init.task.InitLoadRemoteHotPatchTask;
+import com.bytedance.trae.init.task.InitMarkdownTask;
+import com.bytedance.trae.init.task.InitMsSdkServiceTask;
+import com.bytedance.trae.init.task.InitNpthTask;
+import com.bytedance.trae.init.task.InitPraiseDialogTask;
+import com.bytedance.trae.init.task.InitPushTask;
+import com.bytedance.trae.init.task.InitQueueWorkTask;
+import com.bytedance.trae.init.task.InitSettingsTask;
+import com.bytedance.trae.init.task.InitShareSdk;
+import com.bytedance.trae.init.task.InitStarlingOnlineTextTask;
+import com.bytedance.trae.init.task.InitTTnetTask;
+import com.bytedance.trae.init.task.InitTimonTask;
+import com.bytedance.trae.init.task.InitWebViewFixMainProcessTask;
+import com.bytedance.trae.init.task.InitWebViewFixOtherProcessTask;
+import com.bytedance.trae.init.task.InitWebViewStartupTask;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+/* loaded from: /data/user/work/trae_cn3_decoded/build/apk/classes4.dex */
+public class TaskCollectorManager {
+    private static final List<IPeriodTaskCollector> sCollectors = new ArrayList();
+    private static final List<IDelayTaskCollector> sDelayTaskCollectors = new ArrayList();
+    private static final List<IFeedShowTaskCollector> sFeedShowTaskCollectors = new ArrayList();
+    private static List<PeriodTaskInfo> sPeriodTaskInfoList = null;
+    private static List<DelayTaskInfo> sDelayTaskInfoList = null;
+    private static List<FeedShowTaskInfo> sFeedShowTaskInfoList = null;
+    private static final Map<String, InitTaskInfo> taskIndexs = new HashMap();
+    private static List<IdleTaskInfo> uiIdleTaskInfo = new LinkedList();
+    private static List<IdleTaskInfo> nonUiIdleTaskInfo = new LinkedList();
+
+    public static List<DelayTaskInfo> getAllDelayTaskInfo() {
+        if (sDelayTaskInfoList == null) {
+            sDelayTaskInfoList = new ArrayList();
+            Iterator<IDelayTaskCollector> it = getDelayTaskCollectors().iterator();
+            while (it.hasNext()) {
+                it.next().collectDelayTask(sDelayTaskInfoList);
+            }
+        }
+        return sDelayTaskInfoList;
+    }
+
+    public static List<FeedShowTaskInfo> getAllFeedShowTaskInfo() {
+        if (sFeedShowTaskInfoList == null) {
+            sFeedShowTaskInfoList = new ArrayList();
+            Iterator<IFeedShowTaskCollector> it = getFeedShowTaskCollectors().iterator();
+            while (it.hasNext()) {
+                it.next().collectTask(sFeedShowTaskInfoList);
+            }
+        }
+        return sFeedShowTaskInfoList;
+    }
+
+    public static List<PeriodTaskInfo> getAllPeriodTaskInfo() {
+        if (sPeriodTaskInfoList == null) {
+            sPeriodTaskInfoList = new ArrayList();
+            Iterator<IPeriodTaskCollector> it = getCollectors().iterator();
+            while (it.hasNext()) {
+                it.next().collectPeriodTask(sPeriodTaskInfoList);
+            }
+        }
+        return sPeriodTaskInfoList;
+    }
+
+    private static List<IPeriodTaskCollector> getCollectors() {
+        List<IPeriodTaskCollector> list = sCollectors;
+        if (list.isEmpty()) {
+            initPeriodCollectors();
+        }
+        return list;
+    }
+
+    private static List<IDelayTaskCollector> getDelayTaskCollectors() {
+        List<IDelayTaskCollector> list = sDelayTaskCollectors;
+        if (list.isEmpty()) {
+            initDelayTaskCollectors();
+        }
+        return list;
+    }
+
+    private static List<IFeedShowTaskCollector> getFeedShowTaskCollectors() {
+        List<IFeedShowTaskCollector> list = sFeedShowTaskCollectors;
+        if (list.isEmpty()) {
+            initFeedShowTaskCollectors();
+        }
+        return list;
+    }
+
+    public static Map<String, InitTaskInfo> getInitTaskIndexs() {
+        Map<String, InitTaskInfo> map = taskIndexs;
+        if (map.isEmpty()) {
+            initTasksIndexs();
+        }
+        return map;
+    }
+
+    public static List<IdleTaskInfo> getNonUiIdleTaskInfo() {
+        if (nonUiIdleTaskInfo.isEmpty() && uiIdleTaskInfo.isEmpty()) {
+            initIdleTasks();
+        }
+        return nonUiIdleTaskInfo;
+    }
+
+    public static List<IdleTaskInfo> getUiIdleTaskInfo() {
+        if (nonUiIdleTaskInfo.isEmpty() && uiIdleTaskInfo.isEmpty()) {
+            initIdleTasks();
+        }
+        return uiIdleTaskInfo;
+    }
+
+    static void initDelayTaskCollectors() {
+        List<IDelayTaskCollector> list = sDelayTaskCollectors;
+        list.clear();
+        list.add(new DelayTaskCollector__trae_android_app());
+    }
+
+    static void initFeedShowTaskCollectors() {
+        List<IFeedShowTaskCollector> list = sFeedShowTaskCollectors;
+        list.clear();
+        list.add(new FeedShowTaskCollector__trae_android_app());
+    }
+
+    static void initIdleTasks() {
+        uiIdleTaskInfo.clear();
+        nonUiIdleTaskInfo.clear();
+    }
+
+    static void initPeriodCollectors() {
+        List<IPeriodTaskCollector> list = sCollectors;
+        list.clear();
+        list.add(new PeriodTaskCollector__trae_android_app());
+    }
+
+    static void initTasksIndexs() {
+        Map<String, InitTaskInfo> map = taskIndexs;
+        map.clear();
+        ArrayList arrayList = new ArrayList();
+        ArrayList arrayList2 = new ArrayList();
+        ArrayList arrayList3 = new ArrayList();
+        ArrayList arrayList4 = new ArrayList();
+        arrayList.add("SPLASH_ONCREATE2SUPER_START");
+        arrayList2.add("APP_SUPER2ONCREATEEND_START");
+        arrayList2.add("INIT_SHARE_SERVICE");
+        arrayList2.add("INIT_APPLOG");
+        arrayList2.add("INIT_IMAGE_TASK");
+        arrayList2.add("INIT_SETTINGS_TASK");
+        arrayList2.add("INIT_QUEUE_WORK");
+        arrayList2.add("INIT_PUSH_TASK");
+        arrayList2.add("INIT_PRAISE_DIALOG_TASK");
+        arrayList2.add("INIT_MARKDOWN_TASK");
+        arrayList2.add("INIT_APM_TASK");
+        arrayList2.add("INIT_TTNET_TASK");
+        arrayList2.add("INIT_ACCOUNT_TASK");
+        arrayList2.add("INIT_LOAD_REMOTE_HOT_PATCH_TASK");
+        arrayList2.add("INIT_TIMON_TASK");
+        arrayList2.add("INIT_ANNIEX_TASK");
+        arrayList2.add("INIT_ABTEST_SDK_TASK");
+        arrayList2.add("INIT_STARLING_ONLINE_TEXT_TASK");
+        arrayList2.add("INIT_WEBVIEW_STARTUP_TASK");
+        arrayList2.add("INIT_FACEBOOK_TASK");
+        arrayList2.add("INIT_MS_SDK_SERVICE");
+        arrayList3.add("APP_SUPER2ONCREATEEND_START");
+        arrayList3.add("INIT_SHARE_SERVICE");
+        arrayList3.add("INIT_APPLOG");
+        arrayList3.add("INIT_IMAGE_TASK");
+        arrayList3.add("INIT_SETTINGS_TASK");
+        arrayList3.add("INIT_QUEUE_WORK");
+        arrayList3.add("INIT_PUSH_TASK");
+        arrayList3.add("INIT_PRAISE_DIALOG_TASK");
+        arrayList3.add("INIT_MARKDOWN_TASK");
+        arrayList3.add("INIT_APM_TASK");
+        arrayList3.add("INIT_TTNET_TASK");
+        arrayList3.add("INIT_ACCOUNT_TASK");
+        arrayList3.add("INIT_LOAD_REMOTE_HOT_PATCH_TASK");
+        arrayList3.add("INIT_TIMON_TASK");
+        arrayList3.add("INIT_ANNIEX_TASK");
+        arrayList3.add("INIT_ABTEST_SDK_TASK");
+        arrayList3.add("INIT_STARLING_ONLINE_TEXT_TASK");
+        arrayList3.add("INIT_WEBVIEW_STARTUP_TASK");
+        arrayList3.add("INIT_FACEBOOK_TASK");
+        arrayList3.add("INIT_MS_SDK_SERVICE");
+        arrayList4.add("all");
+        map.put("APP_SUPER2ONCREATEEND_END", new InitTaskInfo("APP_SUPER2ONCREATEEND_END", true, false, 17.497513f, arrayList4, arrayList, arrayList2, arrayList3, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList5 = new ArrayList();
+        ArrayList arrayList6 = new ArrayList();
+        ArrayList arrayList7 = new ArrayList();
+        ArrayList arrayList8 = new ArrayList();
+        arrayList5.add("MAIN_ONRESUME2SUPER_END");
+        arrayList6.add("MAIN_SUPER2ONCREATEEND_END");
+        arrayList7.add("MAIN_SUPER2ONCREATEEND_END");
+        arrayList8.add("main");
+        map.put("MAIN_ONRESUME2SUPER_START", new InitTaskInfo("MAIN_ONRESUME2SUPER_START", true, false, 4.4975123f, arrayList8, arrayList5, arrayList6, arrayList7, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList9 = new ArrayList();
+        ArrayList arrayList10 = new ArrayList();
+        ArrayList arrayList11 = new ArrayList();
+        ArrayList arrayList12 = new ArrayList();
+        arrayList9.add("APP_SUPER2ONCREATEEND_END");
+        arrayList10.add("APP_SUPER2ONCREATEEND_START");
+        arrayList10.add("INIT_HOT_PATCH_TASK");
+        arrayList10.add("INIT_TTNET_TASK");
+        arrayList10.add("INIT_APPLOG");
+        arrayList11.add("APP_SUPER2ONCREATEEND_START");
+        arrayList11.add("INIT_HOT_PATCH_TASK");
+        arrayList11.add("INIT_TTNET_TASK");
+        arrayList11.add("INIT_APPLOG");
+        arrayList12.add("main");
+        map.put("INIT_LOAD_REMOTE_HOT_PATCH_TASK", new InitTaskInfo("INIT_LOAD_REMOTE_HOT_PATCH_TASK", true, false, 18.497513f, arrayList12, arrayList9, arrayList10, arrayList11, "com.bytedance.trae.init.task.InitLoadRemoteHotPatchTask", new InitLoadRemoteHotPatchTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList13 = new ArrayList();
+        ArrayList arrayList14 = new ArrayList();
+        ArrayList arrayList15 = new ArrayList();
+        ArrayList arrayList16 = new ArrayList();
+        arrayList13.add("APP_SUPER2ONCREATEEND_END");
+        arrayList14.add("APP_SUPER2ONCREATEEND_START");
+        arrayList14.add("INIT_TTNET_TASK");
+        arrayList15.add("APP_SUPER2ONCREATEEND_START");
+        arrayList15.add("INIT_TTNET_TASK");
+        arrayList16.add("main");
+        map.put("INIT_STARLING_ONLINE_TEXT_TASK", new InitTaskInfo("INIT_STARLING_ONLINE_TEXT_TASK", true, false, 18.497513f, arrayList16, arrayList13, arrayList14, arrayList15, "com.bytedance.trae.init.task.InitStarlingOnlineTextTask", new InitStarlingOnlineTextTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList17 = new ArrayList();
+        ArrayList arrayList18 = new ArrayList();
+        ArrayList arrayList19 = new ArrayList();
+        ArrayList arrayList20 = new ArrayList();
+        arrayList17.add("MAIN_ONCREATE2SUPER_END");
+        arrayList18.add("SPLASH_SUPER2ONRESUMEEND_END");
+        arrayList19.add("SPLASH_SUPER2ONRESUMEEND_END");
+        arrayList20.add("main");
+        map.put("MAIN_ONCREATE2SUPER_START", new InitTaskInfo("MAIN_ONCREATE2SUPER_START", true, false, 8.497513f, arrayList20, arrayList17, arrayList18, arrayList19, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList21 = new ArrayList();
+        ArrayList arrayList22 = new ArrayList();
+        ArrayList arrayList23 = new ArrayList();
+        ArrayList arrayList24 = new ArrayList();
+        arrayList21.add("MAIN_ONRESUME2SUPER_START");
+        arrayList22.add("MAIN_SUPER2ONCREATEEND_START");
+        arrayList23.add("MAIN_SUPER2ONCREATEEND_START");
+        arrayList24.add("main");
+        map.put("MAIN_SUPER2ONCREATEEND_END", new InitTaskInfo("MAIN_SUPER2ONCREATEEND_END", true, false, 5.4975123f, arrayList24, arrayList21, arrayList22, arrayList23, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList25 = new ArrayList();
+        ArrayList arrayList26 = new ArrayList();
+        ArrayList arrayList27 = new ArrayList();
+        ArrayList arrayList28 = new ArrayList();
+        arrayList25.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList26.add("APP_ATTACHBASE2SUPER_START");
+        arrayList27.add("APP_ATTACHBASE2SUPER_START");
+        arrayList28.add("all");
+        map.put("APP_ATTACHBASE2SUPER_END", new InitTaskInfo("APP_ATTACHBASE2SUPER_END", true, false, 6217.4976f, arrayList28, arrayList25, arrayList26, arrayList27, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList29 = new ArrayList();
+        ArrayList arrayList30 = new ArrayList();
+        ArrayList arrayList31 = new ArrayList();
+        ArrayList arrayList32 = new ArrayList();
+        arrayList29.add("APP_SUPER2ONCREATEEND_END");
+        arrayList30.add("APP_SUPER2ONCREATEEND_START");
+        arrayList30.add("INIT_APPLOG");
+        arrayList31.add("APP_SUPER2ONCREATEEND_START");
+        arrayList31.add("INIT_APPLOG");
+        arrayList32.add("main");
+        map.put("INIT_QUEUE_WORK", new InitTaskInfo("INIT_QUEUE_WORK", false, false, 18.497513f, arrayList32, arrayList29, arrayList30, arrayList31, "com.bytedance.trae.init.task.InitQueueWorkTask", new InitQueueWorkTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList33 = new ArrayList();
+        ArrayList arrayList34 = new ArrayList();
+        ArrayList arrayList35 = new ArrayList();
+        ArrayList arrayList36 = new ArrayList();
+        arrayList33.add("SPLASH_ONCREATE2SUPER_END");
+        arrayList34.add("APP_SUPER2ONCREATEEND_END");
+        arrayList35.add("APP_SUPER2ONCREATEEND_END");
+        arrayList36.add("main");
+        map.put("SPLASH_ONCREATE2SUPER_START", new InitTaskInfo("SPLASH_ONCREATE2SUPER_START", true, false, 16.497513f, arrayList36, arrayList33, arrayList34, arrayList35, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList37 = new ArrayList();
+        ArrayList arrayList38 = new ArrayList();
+        ArrayList arrayList39 = new ArrayList();
+        ArrayList arrayList40 = new ArrayList();
+        arrayList37.add("APP_SUPER2ONCREATEEND_END");
+        arrayList38.add("APP_SUPER2ONCREATEEND_START");
+        arrayList39.add("APP_SUPER2ONCREATEEND_START");
+        arrayList40.add("main");
+        map.put("INIT_MARKDOWN_TASK", new InitTaskInfo("INIT_MARKDOWN_TASK", true, false, 18.497513f, arrayList40, arrayList37, arrayList38, arrayList39, "com.bytedance.trae.init.task.InitMarkdownTask", new InitMarkdownTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList41 = new ArrayList();
+        ArrayList arrayList42 = new ArrayList();
+        ArrayList arrayList43 = new ArrayList();
+        ArrayList arrayList44 = new ArrayList();
+        arrayList41.add("INIT_ACCOUNT_TASK");
+        arrayList41.add("INIT_PRAISE_DIALOG_TASK");
+        arrayList41.add("APP_SUPER2ONCREATEEND_END");
+        arrayList42.add("APP_SUPER2ONCREATEEND_START");
+        arrayList42.add("INIT_TTNET_TASK");
+        arrayList42.add("INIT_APPLOG");
+        arrayList43.add("APP_SUPER2ONCREATEEND_START");
+        arrayList43.add("INIT_TTNET_TASK");
+        arrayList43.add("INIT_APPLOG");
+        arrayList44.add("main");
+        map.put("INIT_SETTINGS_TASK", new InitTaskInfo("INIT_SETTINGS_TASK", true, false, 72.49751f, arrayList44, arrayList41, arrayList42, arrayList43, "com.bytedance.trae.init.task.InitSettingsTask", new InitSettingsTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList45 = new ArrayList();
+        ArrayList arrayList46 = new ArrayList();
+        ArrayList arrayList47 = new ArrayList();
+        ArrayList arrayList48 = new ArrayList();
+        arrayList45.add("INIT_SETTINGS_TASK");
+        arrayList45.add("INIT_ACCOUNT_TASK");
+        arrayList45.add("INIT_ABTEST_SDK_TASK");
+        arrayList45.add("INIT_LOAD_REMOTE_HOT_PATCH_TASK");
+        arrayList45.add("INIT_PRAISE_DIALOG_TASK");
+        arrayList45.add("INIT_STARLING_ONLINE_TEXT_TASK");
+        arrayList45.add("INIT_TIMON_TASK");
+        arrayList45.add("APP_SUPER2ONCREATEEND_END");
+        arrayList46.add("APP_SUPER2ONCREATEEND_START");
+        arrayList46.add("INIT_APPLOG");
+        arrayList47.add("APP_SUPER2ONCREATEEND_START");
+        arrayList47.add("INIT_APPLOG");
+        arrayList48.add("main");
+        map.put("INIT_TTNET_TASK", new InitTaskInfo("INIT_TTNET_TASK", true, false, 216.49751f, arrayList48, arrayList45, arrayList46, arrayList47, "com.bytedance.trae.init.task.InitTTnetTask", new InitTTnetTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList49 = new ArrayList();
+        ArrayList arrayList50 = new ArrayList();
+        ArrayList arrayList51 = new ArrayList();
+        ArrayList arrayList52 = new ArrayList();
+        arrayList49.add("APP_SUPER2ONCREATEEND_END");
+        arrayList50.add("APP_SUPER2ONCREATEEND_START");
+        arrayList51.add("APP_SUPER2ONCREATEEND_START");
+        arrayList52.add("main");
+        map.put("INIT_ANNIEX_TASK", new InitTaskInfo("INIT_ANNIEX_TASK", true, false, 18.497513f, arrayList52, arrayList49, arrayList50, arrayList51, "com.bytedance.trae.init.task.InitAnnieXTask", new InitAnnieXTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList53 = new ArrayList();
+        ArrayList arrayList54 = new ArrayList();
+        ArrayList arrayList55 = new ArrayList();
+        ArrayList arrayList56 = new ArrayList();
+        arrayList53.add("APP_ONCREATE2SUPER_START");
+        arrayList54.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList54.add("INIT_A_LOG_TASK");
+        arrayList54.add("INIT_WEBVIEW_OTHER_PROCESS_TASK");
+        arrayList54.add("INIT_NPTH_TASK");
+        arrayList54.add("INIT_HOT_PATCH_TASK");
+        arrayList54.add("INIT_WEBVIEW_MAIN_PROCESS_TASK");
+        arrayList55.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList55.add("INIT_A_LOG_TASK");
+        arrayList55.add("INIT_WEBVIEW_OTHER_PROCESS_TASK");
+        arrayList55.add("INIT_NPTH_TASK");
+        arrayList55.add("INIT_HOT_PATCH_TASK");
+        arrayList55.add("INIT_WEBVIEW_MAIN_PROCESS_TASK");
+        arrayList56.add("all");
+        map.put("APP_SUPER2ATTACHBASEEND_END", new InitTaskInfo("APP_SUPER2ATTACHBASEEND_END", true, false, 1029.4976f, arrayList56, arrayList53, arrayList54, arrayList55, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList57 = new ArrayList();
+        ArrayList arrayList58 = new ArrayList();
+        ArrayList arrayList59 = new ArrayList();
+        ArrayList arrayList60 = new ArrayList();
+        arrayList57.add("INIT_MS_SDK_SERVICE");
+        arrayList57.add("APP_SUPER2ONCREATEEND_END");
+        arrayList58.add("APP_SUPER2ONCREATEEND_START");
+        arrayList58.add("INIT_TTNET_TASK");
+        arrayList58.add("INIT_SETTINGS_TASK");
+        arrayList59.add("APP_SUPER2ONCREATEEND_START");
+        arrayList59.add("INIT_TTNET_TASK");
+        arrayList59.add("INIT_SETTINGS_TASK");
+        arrayList60.add("main");
+        map.put("INIT_ACCOUNT_TASK", new InitTaskInfo("INIT_ACCOUNT_TASK", true, false, 36.497513f, arrayList60, arrayList57, arrayList58, arrayList59, "com.bytedance.trae.init.task.InitAccountTask", new InitAccountTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList61 = new ArrayList();
+        ArrayList arrayList62 = new ArrayList();
+        ArrayList arrayList63 = new ArrayList();
+        ArrayList arrayList64 = new ArrayList();
+        arrayList61.add("APP_ATTACHBASE2SUPER_END");
+        arrayList64.add("all");
+        map.put("APP_ATTACHBASE2SUPER_START", new InitTaskInfo("APP_ATTACHBASE2SUPER_START", true, false, 6218.4976f, arrayList64, arrayList61, arrayList62, arrayList63, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList65 = new ArrayList();
+        ArrayList arrayList66 = new ArrayList();
+        ArrayList arrayList67 = new ArrayList();
+        ArrayList arrayList68 = new ArrayList();
+        arrayList65.add("APP_SUPER2ONCREATEEND_START");
+        arrayList66.add("APP_ONCREATE2SUPER_START");
+        arrayList67.add("APP_ONCREATE2SUPER_START");
+        arrayList68.add("all");
+        map.put("APP_ONCREATE2SUPER_END", new InitTaskInfo("APP_ONCREATE2SUPER_END", true, false, 1027.4976f, arrayList68, arrayList65, arrayList66, arrayList67, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList69 = new ArrayList();
+        ArrayList arrayList70 = new ArrayList();
+        ArrayList arrayList71 = new ArrayList();
+        ArrayList arrayList72 = new ArrayList();
+        arrayList69.add("APP_SUPER2ONCREATEEND_END");
+        arrayList70.add("APP_SUPER2ONCREATEEND_START");
+        arrayList71.add("APP_SUPER2ONCREATEEND_START");
+        arrayList72.add("main");
+        map.put("INIT_IMAGE_TASK", new InitTaskInfo("INIT_IMAGE_TASK", true, false, 18.497513f, arrayList72, arrayList69, arrayList70, arrayList71, "com.bytedance.trae.init.task.InitImageTask", new InitImageTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList73 = new ArrayList();
+        ArrayList arrayList74 = new ArrayList();
+        ArrayList arrayList75 = new ArrayList();
+        ArrayList arrayList76 = new ArrayList();
+        arrayList73.add("APP_SUPER2ONCREATEEND_END");
+        arrayList74.add("APP_SUPER2ONCREATEEND_START");
+        arrayList75.add("APP_SUPER2ONCREATEEND_START");
+        arrayList76.add("main");
+        map.put("INIT_FACEBOOK_TASK", new InitTaskInfo("INIT_FACEBOOK_TASK", false, false, 18.497513f, arrayList76, arrayList73, arrayList74, arrayList75, "com.bytedance.trae.init.task.InitFacebookSdkTask", new InitFacebookSdkTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList77 = new ArrayList();
+        ArrayList arrayList78 = new ArrayList();
+        ArrayList arrayList79 = new ArrayList();
+        ArrayList arrayList80 = new ArrayList();
+        arrayList77.add("APP_SUPER2ONCREATEEND_END");
+        arrayList78.add("APP_SUPER2ONCREATEEND_START");
+        arrayList78.add("INIT_TTNET_TASK");
+        arrayList78.add("INIT_APPLOG");
+        arrayList79.add("APP_SUPER2ONCREATEEND_START");
+        arrayList79.add("INIT_TTNET_TASK");
+        arrayList79.add("INIT_APPLOG");
+        arrayList80.add("main");
+        map.put("INIT_ABTEST_SDK_TASK", new InitTaskInfo("INIT_ABTEST_SDK_TASK", true, false, 18.497513f, arrayList80, arrayList77, arrayList78, arrayList79, "com.bytedance.trae.init.task.InitAbTestSdkTask", new InitAbTestSdkTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList81 = new ArrayList();
+        ArrayList arrayList82 = new ArrayList();
+        ArrayList arrayList83 = new ArrayList();
+        ArrayList arrayList84 = new ArrayList();
+        arrayList82.add("MAIN_SUPER2ONRESUMEEND_START");
+        arrayList83.add("MAIN_SUPER2ONRESUMEEND_START");
+        arrayList84.add("main");
+        map.put("MAIN_SUPER2ONRESUMEEND_END", new InitTaskInfo("MAIN_SUPER2ONRESUMEEND_END", true, false, 1.4975125f, arrayList84, arrayList81, arrayList82, arrayList83, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList85 = new ArrayList();
+        ArrayList arrayList86 = new ArrayList();
+        ArrayList arrayList87 = new ArrayList();
+        ArrayList arrayList88 = new ArrayList();
+        arrayList85.add("APP_SUPER2ONCREATEEND_END");
+        arrayList86.add("APP_SUPER2ONCREATEEND_START");
+        arrayList86.add("INIT_ACCOUNT_TASK");
+        arrayList87.add("APP_SUPER2ONCREATEEND_START");
+        arrayList87.add("INIT_ACCOUNT_TASK");
+        arrayList88.add("main");
+        map.put("INIT_MS_SDK_SERVICE", new InitTaskInfo("INIT_MS_SDK_SERVICE", true, false, 18.497513f, arrayList88, arrayList85, arrayList86, arrayList87, "com.bytedance.trae.init.task.InitMsSdkServiceTask", new InitMsSdkServiceTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList89 = new ArrayList();
+        ArrayList arrayList90 = new ArrayList();
+        ArrayList arrayList91 = new ArrayList();
+        ArrayList arrayList92 = new ArrayList();
+        arrayList89.add("SPLASH_SUPER2ONCREATEEND_START");
+        arrayList90.add("SPLASH_ONCREATE2SUPER_START");
+        arrayList91.add("SPLASH_ONCREATE2SUPER_START");
+        arrayList92.add("main");
+        map.put("SPLASH_ONCREATE2SUPER_END", new InitTaskInfo("SPLASH_ONCREATE2SUPER_END", true, false, 15.497513f, arrayList92, arrayList89, arrayList90, arrayList91, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList93 = new ArrayList();
+        ArrayList arrayList94 = new ArrayList();
+        ArrayList arrayList95 = new ArrayList();
+        ArrayList arrayList96 = new ArrayList();
+        arrayList93.add("APP_SUPER2ONCREATEEND_END");
+        arrayList94.add("APP_SUPER2ONCREATEEND_START");
+        arrayList94.add("INIT_WEBVIEW_MAIN_PROCESS_TASK");
+        arrayList95.add("APP_SUPER2ONCREATEEND_START");
+        arrayList95.add("INIT_WEBVIEW_MAIN_PROCESS_TASK");
+        arrayList96.add("main");
+        map.put("INIT_WEBVIEW_STARTUP_TASK", new InitTaskInfo("INIT_WEBVIEW_STARTUP_TASK", false, false, 18.497513f, arrayList96, arrayList93, arrayList94, arrayList95, "com.bytedance.trae.init.task.InitWebViewStartupTask", new InitWebViewStartupTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList97 = new ArrayList();
+        ArrayList arrayList98 = new ArrayList();
+        ArrayList arrayList99 = new ArrayList();
+        ArrayList arrayList100 = new ArrayList();
+        arrayList97.add("APP_SUPER2ATTACHBASEEND_END");
+        arrayList98.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList99.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList100.add(InitTaskProcess.NONMAIN);
+        map.put("INIT_WEBVIEW_OTHER_PROCESS_TASK", new InitTaskInfo("INIT_WEBVIEW_OTHER_PROCESS_TASK", true, false, 1030.4976f, arrayList100, arrayList97, arrayList98, arrayList99, "com.bytedance.trae.init.task.InitWebViewFixOtherProcessTask", new InitWebViewFixOtherProcessTask(), InitPeriod.APP_SUPER2ATTACHBASEEND));
+        ArrayList arrayList101 = new ArrayList();
+        ArrayList arrayList102 = new ArrayList();
+        ArrayList arrayList103 = new ArrayList();
+        ArrayList arrayList104 = new ArrayList();
+        arrayList101.add("SPLASH_SUPER2ONCREATEEND_END");
+        arrayList102.add("SPLASH_ONCREATE2SUPER_END");
+        arrayList103.add("SPLASH_ONCREATE2SUPER_END");
+        arrayList104.add("main");
+        map.put("SPLASH_SUPER2ONCREATEEND_START", new InitTaskInfo("SPLASH_SUPER2ONCREATEEND_START", true, false, 14.497513f, arrayList104, arrayList101, arrayList102, arrayList103, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList105 = new ArrayList();
+        ArrayList arrayList106 = new ArrayList();
+        ArrayList arrayList107 = new ArrayList();
+        ArrayList arrayList108 = new ArrayList();
+        arrayList105.add("APP_SUPER2ATTACHBASEEND_END");
+        arrayList106.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList107.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList108.add("all");
+        map.put("INIT_NPTH_TASK", new InitTaskInfo("INIT_NPTH_TASK", true, false, 1030.4976f, arrayList108, arrayList105, arrayList106, arrayList107, "com.bytedance.trae.init.task.InitNpthTask", new InitNpthTask(), InitPeriod.APP_SUPER2ATTACHBASEEND));
+        ArrayList arrayList109 = new ArrayList();
+        ArrayList arrayList110 = new ArrayList();
+        ArrayList arrayList111 = new ArrayList();
+        ArrayList arrayList112 = new ArrayList();
+        arrayList109.add("SPLASH_ONRESUME2SUPER_END");
+        arrayList110.add("SPLASH_SUPER2ONCREATEEND_END");
+        arrayList111.add("SPLASH_SUPER2ONCREATEEND_END");
+        arrayList112.add("main");
+        map.put("SPLASH_ONRESUME2SUPER_START", new InitTaskInfo("SPLASH_ONRESUME2SUPER_START", true, false, 12.497513f, arrayList112, arrayList109, arrayList110, arrayList111, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList113 = new ArrayList();
+        ArrayList arrayList114 = new ArrayList();
+        ArrayList arrayList115 = new ArrayList();
+        ArrayList arrayList116 = new ArrayList();
+        arrayList113.add("APP_ONCREATE2SUPER_END");
+        arrayList114.add("APP_SUPER2ATTACHBASEEND_END");
+        arrayList115.add("APP_SUPER2ATTACHBASEEND_END");
+        arrayList116.add("all");
+        map.put("APP_ONCREATE2SUPER_START", new InitTaskInfo("APP_ONCREATE2SUPER_START", true, false, 1028.4976f, arrayList116, arrayList113, arrayList114, arrayList115, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList117 = new ArrayList();
+        ArrayList arrayList118 = new ArrayList();
+        ArrayList arrayList119 = new ArrayList();
+        ArrayList arrayList120 = new ArrayList();
+        arrayList117.add("MAIN_SUPER2ONRESUMEEND_END");
+        arrayList118.add("MAIN_ONRESUME2SUPER_END");
+        arrayList119.add("MAIN_ONRESUME2SUPER_END");
+        arrayList120.add("main");
+        map.put("MAIN_SUPER2ONRESUMEEND_START", new InitTaskInfo("MAIN_SUPER2ONRESUMEEND_START", true, false, 2.4975123f, arrayList120, arrayList117, arrayList118, arrayList119, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList121 = new ArrayList();
+        ArrayList arrayList122 = new ArrayList();
+        ArrayList arrayList123 = new ArrayList();
+        ArrayList arrayList124 = new ArrayList();
+        arrayList121.add("MAIN_SUPER2ONRESUMEEND_START");
+        arrayList122.add("MAIN_ONRESUME2SUPER_START");
+        arrayList123.add("MAIN_ONRESUME2SUPER_START");
+        arrayList124.add("main");
+        map.put("MAIN_ONRESUME2SUPER_END", new InitTaskInfo("MAIN_ONRESUME2SUPER_END", true, false, 3.4975123f, arrayList124, arrayList121, arrayList122, arrayList123, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList125 = new ArrayList();
+        ArrayList arrayList126 = new ArrayList();
+        ArrayList arrayList127 = new ArrayList();
+        ArrayList arrayList128 = new ArrayList();
+        arrayList125.add("APP_SUPER2ATTACHBASEEND_END");
+        arrayList126.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList127.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList128.add("all");
+        map.put("INIT_A_LOG_TASK", new InitTaskInfo("INIT_A_LOG_TASK", true, false, 1030.4976f, arrayList128, arrayList125, arrayList126, arrayList127, "com.bytedance.trae.init.task.InitALogTask", new InitALogTask(), InitPeriod.APP_SUPER2ATTACHBASEEND));
+        ArrayList arrayList129 = new ArrayList();
+        ArrayList arrayList130 = new ArrayList();
+        ArrayList arrayList131 = new ArrayList();
+        ArrayList arrayList132 = new ArrayList();
+        arrayList129.add("INIT_APPLOG");
+        arrayList129.add("INIT_TTNET_TASK");
+        arrayList129.add("INIT_SETTINGS_TASK");
+        arrayList129.add("INIT_ACCOUNT_TASK");
+        arrayList129.add("INIT_ABTEST_SDK_TASK");
+        arrayList129.add("INIT_ANNIEX_TASK");
+        arrayList129.add("INIT_APM_TASK");
+        arrayList129.add("INIT_FACEBOOK_TASK");
+        arrayList129.add("INIT_IMAGE_TASK");
+        arrayList129.add("INIT_LOAD_REMOTE_HOT_PATCH_TASK");
+        arrayList129.add("INIT_MARKDOWN_TASK");
+        arrayList129.add("INIT_MS_SDK_SERVICE");
+        arrayList129.add("INIT_PRAISE_DIALOG_TASK");
+        arrayList129.add("INIT_PUSH_TASK");
+        arrayList129.add("INIT_QUEUE_WORK");
+        arrayList129.add("INIT_SHARE_SERVICE");
+        arrayList129.add("INIT_STARLING_ONLINE_TEXT_TASK");
+        arrayList129.add("INIT_TIMON_TASK");
+        arrayList129.add("INIT_WEBVIEW_STARTUP_TASK");
+        arrayList129.add("APP_SUPER2ONCREATEEND_END");
+        arrayList130.add("APP_ONCREATE2SUPER_END");
+        arrayList131.add("APP_ONCREATE2SUPER_END");
+        arrayList132.add("all");
+        map.put("APP_SUPER2ONCREATEEND_START", new InitTaskInfo("APP_SUPER2ONCREATEEND_START", true, false, 1026.4976f, arrayList132, arrayList129, arrayList130, arrayList131, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList133 = new ArrayList();
+        ArrayList arrayList134 = new ArrayList();
+        ArrayList arrayList135 = new ArrayList();
+        ArrayList arrayList136 = new ArrayList();
+        arrayList133.add("APP_SUPER2ATTACHBASEEND_END");
+        arrayList133.add("INIT_LOAD_REMOTE_HOT_PATCH_TASK");
+        arrayList134.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList135.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList136.add("main");
+        map.put("INIT_HOT_PATCH_TASK", new InitTaskInfo("INIT_HOT_PATCH_TASK", true, false, 1048.4976f, arrayList136, arrayList133, arrayList134, arrayList135, "com.bytedance.trae.init.task.InitHotPatchTask", new InitHotPatchTask(), InitPeriod.APP_SUPER2ATTACHBASEEND));
+        ArrayList arrayList137 = new ArrayList();
+        ArrayList arrayList138 = new ArrayList();
+        ArrayList arrayList139 = new ArrayList();
+        ArrayList arrayList140 = new ArrayList();
+        arrayList137.add("APP_SUPER2ONCREATEEND_END");
+        arrayList138.add("APP_SUPER2ONCREATEEND_START");
+        arrayList139.add("APP_SUPER2ONCREATEEND_START");
+        arrayList140.add("main");
+        map.put("INIT_APM_TASK", new InitTaskInfo("INIT_APM_TASK", true, false, 18.497513f, arrayList140, arrayList137, arrayList138, arrayList139, "com.bytedance.trae.init.task.InitApmTask", new InitApmTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList141 = new ArrayList();
+        ArrayList arrayList142 = new ArrayList();
+        ArrayList arrayList143 = new ArrayList();
+        ArrayList arrayList144 = new ArrayList();
+        arrayList141.add("INIT_HOT_PATCH_TASK");
+        arrayList141.add("INIT_WEBVIEW_MAIN_PROCESS_TASK");
+        arrayList141.add("INIT_A_LOG_TASK");
+        arrayList141.add("INIT_NPTH_TASK");
+        arrayList141.add("INIT_WEBVIEW_OTHER_PROCESS_TASK");
+        arrayList141.add("APP_SUPER2ATTACHBASEEND_END");
+        arrayList142.add("APP_ATTACHBASE2SUPER_END");
+        arrayList143.add("APP_ATTACHBASE2SUPER_END");
+        arrayList144.add("all");
+        map.put("APP_SUPER2ATTACHBASEEND_START", new InitTaskInfo("APP_SUPER2ATTACHBASEEND_START", true, false, 6216.4976f, arrayList144, arrayList141, arrayList142, arrayList143, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList145 = new ArrayList();
+        ArrayList arrayList146 = new ArrayList();
+        ArrayList arrayList147 = new ArrayList();
+        ArrayList arrayList148 = new ArrayList();
+        arrayList145.add("MAIN_SUPER2ONCREATEEND_START");
+        arrayList146.add("MAIN_ONCREATE2SUPER_START");
+        arrayList147.add("MAIN_ONCREATE2SUPER_START");
+        arrayList148.add("main");
+        map.put("MAIN_ONCREATE2SUPER_END", new InitTaskInfo("MAIN_ONCREATE2SUPER_END", true, false, 7.4975123f, arrayList148, arrayList145, arrayList146, arrayList147, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList149 = new ArrayList();
+        ArrayList arrayList150 = new ArrayList();
+        ArrayList arrayList151 = new ArrayList();
+        ArrayList arrayList152 = new ArrayList();
+        arrayList149.add("SPLASH_SUPER2ONRESUMEEND_END");
+        arrayList150.add("SPLASH_ONRESUME2SUPER_END");
+        arrayList151.add("SPLASH_ONRESUME2SUPER_END");
+        arrayList152.add("main");
+        map.put("SPLASH_SUPER2ONRESUMEEND_START", new InitTaskInfo("SPLASH_SUPER2ONRESUMEEND_START", true, false, 10.497513f, arrayList152, arrayList149, arrayList150, arrayList151, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList153 = new ArrayList();
+        ArrayList arrayList154 = new ArrayList();
+        ArrayList arrayList155 = new ArrayList();
+        ArrayList arrayList156 = new ArrayList();
+        arrayList153.add("SPLASH_ONRESUME2SUPER_START");
+        arrayList154.add("SPLASH_SUPER2ONCREATEEND_START");
+        arrayList155.add("SPLASH_SUPER2ONCREATEEND_START");
+        arrayList156.add("main");
+        map.put("SPLASH_SUPER2ONCREATEEND_END", new InitTaskInfo("SPLASH_SUPER2ONCREATEEND_END", true, false, 13.497513f, arrayList156, arrayList153, arrayList154, arrayList155, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList157 = new ArrayList();
+        ArrayList arrayList158 = new ArrayList();
+        ArrayList arrayList159 = new ArrayList();
+        ArrayList arrayList160 = new ArrayList();
+        arrayList157.add("APP_SUPER2ONCREATEEND_END");
+        arrayList158.add("APP_SUPER2ONCREATEEND_START");
+        arrayList158.add("INIT_APPLOG");
+        arrayList159.add("APP_SUPER2ONCREATEEND_START");
+        arrayList159.add("INIT_APPLOG");
+        arrayList160.add("main");
+        arrayList160.add(":push");
+        arrayList160.add(":pushservice");
+        arrayList160.add(":smp");
+        map.put("INIT_PUSH_TASK", new InitTaskInfo("INIT_PUSH_TASK", false, false, 18.497513f, arrayList160, arrayList157, arrayList158, arrayList159, "com.bytedance.trae.init.task.InitPushTask", new InitPushTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList161 = new ArrayList();
+        ArrayList arrayList162 = new ArrayList();
+        ArrayList arrayList163 = new ArrayList();
+        ArrayList arrayList164 = new ArrayList();
+        arrayList161.add("MAIN_SUPER2ONCREATEEND_END");
+        arrayList162.add("MAIN_ONCREATE2SUPER_END");
+        arrayList163.add("MAIN_ONCREATE2SUPER_END");
+        arrayList164.add("main");
+        map.put("MAIN_SUPER2ONCREATEEND_START", new InitTaskInfo("MAIN_SUPER2ONCREATEEND_START", true, false, 6.4975123f, arrayList164, arrayList161, arrayList162, arrayList163, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList165 = new ArrayList();
+        ArrayList arrayList166 = new ArrayList();
+        ArrayList arrayList167 = new ArrayList();
+        ArrayList arrayList168 = new ArrayList();
+        arrayList165.add("APP_SUPER2ONCREATEEND_END");
+        arrayList166.add("APP_SUPER2ONCREATEEND_START");
+        arrayList166.add("INIT_TTNET_TASK");
+        arrayList166.add("INIT_APPLOG");
+        arrayList167.add("APP_SUPER2ONCREATEEND_START");
+        arrayList167.add("INIT_TTNET_TASK");
+        arrayList167.add("INIT_APPLOG");
+        arrayList168.add("main");
+        map.put("INIT_TIMON_TASK", new InitTaskInfo("INIT_TIMON_TASK", true, false, 18.497513f, arrayList168, arrayList165, arrayList166, arrayList167, "com.bytedance.trae.init.task.InitTimonTask", new InitTimonTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList169 = new ArrayList();
+        ArrayList arrayList170 = new ArrayList();
+        ArrayList arrayList171 = new ArrayList();
+        ArrayList arrayList172 = new ArrayList();
+        arrayList169.add("INIT_TTNET_TASK");
+        arrayList169.add("INIT_SETTINGS_TASK");
+        arrayList169.add("INIT_ABTEST_SDK_TASK");
+        arrayList169.add("INIT_LOAD_REMOTE_HOT_PATCH_TASK");
+        arrayList169.add("INIT_PRAISE_DIALOG_TASK");
+        arrayList169.add("INIT_PUSH_TASK");
+        arrayList169.add("INIT_QUEUE_WORK");
+        arrayList169.add("INIT_TIMON_TASK");
+        arrayList169.add("APP_SUPER2ONCREATEEND_END");
+        arrayList170.add("APP_SUPER2ONCREATEEND_START");
+        arrayList171.add("APP_SUPER2ONCREATEEND_START");
+        arrayList172.add("main");
+        map.put("INIT_APPLOG", new InitTaskInfo("INIT_APPLOG", true, false, 414.4975f, arrayList172, arrayList169, arrayList170, arrayList171, "com.bytedance.trae.init.task.InitAppLog", new InitAppLog(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList173 = new ArrayList();
+        ArrayList arrayList174 = new ArrayList();
+        ArrayList arrayList175 = new ArrayList();
+        ArrayList arrayList176 = new ArrayList();
+        arrayList173.add("MAIN_ONCREATE2SUPER_START");
+        arrayList174.add("SPLASH_SUPER2ONRESUMEEND_START");
+        arrayList175.add("SPLASH_SUPER2ONRESUMEEND_START");
+        arrayList176.add("main");
+        map.put("SPLASH_SUPER2ONRESUMEEND_END", new InitTaskInfo("SPLASH_SUPER2ONRESUMEEND_END", true, false, 9.497513f, arrayList176, arrayList173, arrayList174, arrayList175, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList177 = new ArrayList();
+        ArrayList arrayList178 = new ArrayList();
+        ArrayList arrayList179 = new ArrayList();
+        ArrayList arrayList180 = new ArrayList();
+        arrayList177.add("APP_SUPER2ONCREATEEND_END");
+        arrayList178.add("APP_SUPER2ONCREATEEND_START");
+        arrayList179.add("APP_SUPER2ONCREATEEND_START");
+        arrayList180.add("main");
+        map.put("INIT_SHARE_SERVICE", new InitTaskInfo("INIT_SHARE_SERVICE", true, false, 18.497513f, arrayList180, arrayList177, arrayList178, arrayList179, "com.bytedance.trae.init.task.InitShareSdk", new InitShareSdk(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList181 = new ArrayList();
+        ArrayList arrayList182 = new ArrayList();
+        ArrayList arrayList183 = new ArrayList();
+        ArrayList arrayList184 = new ArrayList();
+        arrayList181.add("SPLASH_SUPER2ONRESUMEEND_START");
+        arrayList182.add("SPLASH_ONRESUME2SUPER_START");
+        arrayList183.add("SPLASH_ONRESUME2SUPER_START");
+        arrayList184.add("main");
+        map.put("SPLASH_ONRESUME2SUPER_END", new InitTaskInfo("SPLASH_ONRESUME2SUPER_END", true, false, 11.497513f, arrayList184, arrayList181, arrayList182, arrayList183, InitTaskDispatcherKt.INIT_SCHEDULER_INTERNAL_TASK, InitPeriod.NONE));
+        ArrayList arrayList185 = new ArrayList();
+        ArrayList arrayList186 = new ArrayList();
+        ArrayList arrayList187 = new ArrayList();
+        ArrayList arrayList188 = new ArrayList();
+        arrayList185.add("APP_SUPER2ONCREATEEND_END");
+        arrayList186.add("APP_SUPER2ONCREATEEND_START");
+        arrayList186.add("INIT_TTNET_TASK");
+        arrayList186.add("INIT_APPLOG");
+        arrayList186.add("INIT_SETTINGS_TASK");
+        arrayList187.add("APP_SUPER2ONCREATEEND_START");
+        arrayList187.add("INIT_TTNET_TASK");
+        arrayList187.add("INIT_APPLOG");
+        arrayList187.add("INIT_SETTINGS_TASK");
+        arrayList188.add("main");
+        map.put("INIT_PRAISE_DIALOG_TASK", new InitTaskInfo("INIT_PRAISE_DIALOG_TASK", true, false, 18.497513f, arrayList188, arrayList185, arrayList186, arrayList187, "com.bytedance.trae.init.task.InitPraiseDialogTask", new InitPraiseDialogTask(), InitPeriod.APP_SUPER2ONCREATEEND));
+        ArrayList arrayList189 = new ArrayList();
+        ArrayList arrayList190 = new ArrayList();
+        ArrayList arrayList191 = new ArrayList();
+        ArrayList arrayList192 = new ArrayList();
+        arrayList189.add("APP_SUPER2ATTACHBASEEND_END");
+        arrayList189.add("INIT_WEBVIEW_STARTUP_TASK");
+        arrayList190.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList191.add("APP_SUPER2ATTACHBASEEND_START");
+        arrayList192.add("main");
+        map.put("INIT_WEBVIEW_MAIN_PROCESS_TASK", new InitTaskInfo("INIT_WEBVIEW_MAIN_PROCESS_TASK", false, false, 1048.4976f, arrayList192, arrayList189, arrayList190, arrayList191, "com.bytedance.trae.init.task.InitWebViewFixMainProcessTask", new InitWebViewFixMainProcessTask(), InitPeriod.APP_SUPER2ATTACHBASEEND));
+    }
+}
