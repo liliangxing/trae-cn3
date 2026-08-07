@@ -288,28 +288,44 @@ public final class ExtractHelper {
 
             String html = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>body{font-family:sans-serif;padding:16px;line-height:1.6;color:#333;max-width:800px;margin:0 auto}h1{border-bottom:1px solid #eee;padding-bottom:8px}blockquote{border-left:4px solid #ddd;margin:0;padding:8px 16px;color:#666;background:#f9f9f9}hr{border:none;border-top:1px solid #eee;margin:16px 0}b{color:#0066cc}</style><script src=\"https://cdn.jsdelivr.net/npm/marked/marked.min.js\"></script></head><body><textarea id=\"md\" style=\"display:none\">" + markdown + "</textarea><div id=\"content\"></div><script>var md=document.getElementById('md').value;document.getElementById('content').innerHTML=marked.parse(md);</script></body></html>";
 
-            // 写 HTML 到 app 专属外部目录（公共路径，WebView 可读）
-            // 路径: /storage/emulated/0/Android/data/com.bytedance.trae.cn3/files/TRAE/xxx.html
-            File htmlDir = context.getExternalFilesDir("TRAE");
-            if (htmlDir == null) {
-                htmlDir = context.getCacheDir();
+            // 方式1: 写 HTML 到内部缓存目录（WebView 可以加载 file:// 内部缓存路径）
+            // 路径: /data/data/com.bytedance.trae.cn3/cache/TRAE/xxx.html
+            File cacheHtmlDir = new File(context.getCacheDir(), "TRAE");
+            if (!cacheHtmlDir.exists()) {
+                cacheHtmlDir.mkdirs();
             }
-            if (!htmlDir.exists()) {
-                htmlDir.mkdirs();
-            }
-            File htmlFile = new File(htmlDir, mdFileName + ".html");
+            File cacheHtmlFile = new File(cacheHtmlDir, mdFileName + ".html");
 
             try {
-                FileWriter htmlWriter = new FileWriter(htmlFile);
+                FileWriter htmlWriter = new FileWriter(cacheHtmlFile);
                 htmlWriter.write(html);
                 htmlWriter.close();
-                FileLogger.log(TAG, "Step11: HTML saved");
+                FileLogger.log(TAG, "Step11: HTML saved to cache");
             } catch (Throwable te) {
-                FileLogger.log(TAG, "Step11: HTML write failed", te);
+                FileLogger.log(TAG, "Step11: HTML cache write failed", te);
             }
 
+            // 方式2: 也写一份到外部目录（方便用户通过文件管理器找到）
+            File extHtmlDir = context.getExternalFilesDir("TRAE");
+            if (extHtmlDir != null) {
+                if (!extHtmlDir.exists()) {
+                    extHtmlDir.mkdirs();
+                }
+                File extHtmlFile = new File(extHtmlDir, mdFileName + ".html");
+                try {
+                    FileWriter extWriter = new FileWriter(extHtmlFile);
+                    extWriter.write(html);
+                    extWriter.close();
+                    FileLogger.log(TAG, "Step11a: HTML also saved to external");
+                } catch (Throwable te) {
+                    FileLogger.log(TAG, "Step11a: HTML external write failed", te);
+                }
+            }
+
+            // 使用内部缓存路径的 file:// URI 打开预览（WebView 可读）
+            // 不用外部存储路径，因为 Android 7+ WebView 禁止 file:// 外部存储
             final Intent intent = new Intent(activity, SimpleWebViewActivity.class);
-            intent.putExtra("extra_url", Uri.fromFile(htmlFile).toString());
+            intent.putExtra("extra_url", Uri.fromFile(cacheHtmlFile).toString());
             try {
                 // startActivity 必须在主线程调用
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -318,14 +334,14 @@ public final class ExtractHelper {
                         try {
                             activity.startActivity(intent);
                         } catch (Throwable se) {
-                            FileLogger.log("ExtractHelper", "Step11a: preview start failed", se);
+                            FileLogger.log("ExtractHelper", "Step12: preview start failed", se);
                             toast(activity, "预览打开失败: " + se.getMessage());
                         }
                     }
                 });
-                FileLogger.log(TAG, "Step11a: preview started");
+                FileLogger.log(TAG, "Step12: preview started");
             } catch (Throwable se) {
-                FileLogger.log(TAG, "Step11a: preview start failed", se);
+                FileLogger.log(TAG, "Step12: preview start failed", se);
                 toast(activity, "预览打开失败: " + se.getMessage());
             }
 
@@ -348,9 +364,9 @@ public final class ExtractHelper {
         if (raw == null || raw.length() == 0) {
             return raw;
         }
-        // 消息内容可能是 JSON 数组格式:
-        // [{"type": "text", "text_content": "实际文本"}, {"type": "code", "text_content": "code"}]
         String trimmed = raw.trim();
+
+        // 处理 JSON 数组: [{"type": "text", "text_content": "实际文本"}]
         if (trimmed.startsWith("[")) {
             try {
                 JSONArray arr = new JSONArray(trimmed);
@@ -358,12 +374,18 @@ public final class ExtractHelper {
                 for (int i = 0; i < arr.length(); i++) {
                     JSONObject obj = arr.optJSONObject(i);
                     if (obj != null) {
+                        // 尝试 text_content 字段
                         String text = obj.optString("text_content");
+                        if (text == null || text.length() == 0) {
+                            // 回退到 content 字段
+                            text = obj.optString("content");
+                        }
                         if (text != null && text.length() > 0) {
                             if (sb.length() > 0) {
                                 sb.append("\n");
                             }
-                            sb.append(text);
+                            // 递归处理：content 可能还是 JSON
+                            sb.append(extractPlainText(text));
                         }
                     }
                 }
@@ -374,6 +396,27 @@ public final class ExtractHelper {
                 // 解析失败，返回原始内容
             }
         }
+
+        // 处理 JSON 对象: {"content": "实际文本", "agent_id": "solo_work_remote", ...}
+        // 实际消息存储为完整 JSON 对象，用户文本在 content 字段内
+        if (trimmed.startsWith("{")) {
+            try {
+                JSONObject obj = new JSONObject(trimmed);
+                String text = obj.optString("content");
+                if (text != null && text.length() > 0) {
+                    // 递归处理：content 可能还是 JSON
+                    return extractPlainText(text);
+                }
+                // 尝试 text 字段
+                text = obj.optString("text");
+                if (text != null && text.length() > 0) {
+                    return extractPlainText(text);
+                }
+            } catch (Throwable t) {
+                // 解析失败，返回原始内容
+            }
+        }
+
         return raw;
     }
 

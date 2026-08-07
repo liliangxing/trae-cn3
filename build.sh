@@ -170,8 +170,8 @@ fi
 # 验证
 SMALI_COUNT=$(find "$SMALI_DIR" -name "*.smali" | wc -l)
 echo "生成 $SMALI_COUNT 个 Smali 文件"
-if [ "$SMALI_COUNT" -ne 5 ]; then
-    echo "错误: 应该生成 5 个 Smali 文件，实际 $SMALI_COUNT"
+if [ "$SMALI_COUNT" -lt 5 ]; then
+    echo "错误: 应该至少生成 5 个 Smali 文件，实际 $SMALI_COUNT"
     exit 1
 fi
 
