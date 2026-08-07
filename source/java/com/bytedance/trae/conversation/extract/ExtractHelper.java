@@ -11,7 +11,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
+import android.widget.Toast;
 import com.bytedance.trae.TraeApplication;
 import com.bytedance.trae.common.activity.SimpleWebViewActivity;
 import com.bytedance.trae.im.database.ChatMessageDao;
@@ -41,50 +44,74 @@ public final class ExtractHelper {
     private ExtractHelper() {
     }
 
-    public final void start(Activity activity, String conversationId, String title) {
-        requestStoragePermission(activity);
-        performExtract(activity, conversationId, title);
+    private static void toast(final Activity activity, final String msg) {
+        try {
+            if (activity == null) return;
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Toast.makeText(activity, msg, Toast.LENGTH_LONG).show();
+                    } catch (Throwable t) {
+                    }
+                }
+            });
+        } catch (Throwable t) {
+        }
     }
 
-    private void requestStoragePermission(Activity activity) {
-        try {
-            if (Build.VERSION.SDK_INT >= 23 && Build.VERSION.SDK_INT < 33) {
-                if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1001);
-                    FileLogger.log("ExtractHelper", "Permission: requested WRITE_EXTERNAL_STORAGE");
-                } else {
-                    FileLogger.log("ExtractHelper", "Permission: already granted");
-                }
-            } else {
-                FileLogger.log("ExtractHelper", "Permission: not required (SDK_INT=" + Build.VERSION.SDK_INT + ")");
+    public final void start(final Activity activity, final String conversationId, final String title) {
+        FileLogger.log("ExtractHelper", "=== START === convId=" + conversationId + " title=" + title);
+        toast(activity, "开始提取对话...");
+
+        // 必须在后台线程执行！performExtract 包含数据库查询 + HTTP API 调用，
+        // 在主线程执行会阻塞 UI，Android 15 / MIUI 会直接杀进程（不弹 ANR）
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                performExtract(activity, conversationId, title);
             }
-        } catch (Throwable t) {
-            FileLogger.log("ExtractHelper", "Permission: request failed", t);
-        }
+        }, "TraeExtract").start();
     }
 
     private void performExtract(Activity activity, String conversationId, String title) {
         String TAG = "ExtractHelper";
         try {
             FileLogger.log(TAG, "Step1: started");
+            toast(activity, "Step1: 开始提取");
 
             Context context = (Context) TraeApplication.Companion.getInst();
+            if (context == null) {
+                FileLogger.log(TAG, "EARLY RETURN: context null");
+                toast(activity, "错误: 无法获取 Context");
+                return;
+            }
             FileLogger.log(TAG, "Step2: got context");
+            toast(activity, "Step2: 获取上下文");
 
             ServiceManager serviceManager = ServiceManager.get();
+            if (serviceManager == null) {
+                FileLogger.log(TAG, "EARLY RETURN: ServiceManager null");
+                toast(activity, "错误: ServiceManager 为空");
+                return;
+            }
+            FileLogger.log(TAG, "Step3: ServiceManager got");
+
             ILoginService loginService = (ILoginService) serviceManager.getService(ILoginService.class);
-            FileLogger.log(TAG, "Step3: LoginService");
+            FileLogger.log(TAG, "Step3a: LoginService=" + (loginService != null ? "ok" : "null"));
 
             if (loginService == null) {
                 FileLogger.log(TAG, "EARLY RETURN: LoginService null");
+                toast(activity, "错误: 登录服务为空");
                 return;
             }
 
             AccountInfo accountInfo = loginService.getAccountInfo();
-            FileLogger.log(TAG, "Step4: AccountInfo");
+            FileLogger.log(TAG, "Step4: AccountInfo=" + (accountInfo != null ? "ok" : "null"));
 
             if (accountInfo == null) {
                 FileLogger.log(TAG, "EARLY RETURN: AccountInfo null");
+                toast(activity, "错误: 账号信息为空");
                 return;
             }
 
@@ -93,10 +120,17 @@ public final class ExtractHelper {
 
             if (userId == null) {
                 FileLogger.log(TAG, "EARLY RETURN: userId null");
+                toast(activity, "错误: 用户ID为空");
                 return;
             }
 
+            toast(activity, "Step5: 用户ID=" + userId);
             DatabaseOpenHelper dbHelper = DatabaseManager.INSTANCE.getDatabase(context, userId);
+            if (dbHelper == null) {
+                FileLogger.log(TAG, "EARLY RETURN: dbHelper null");
+                toast(activity, "错误: 数据库为空");
+                return;
+            }
             FileLogger.log(TAG, "Step6: DB opened");
 
             SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -109,6 +143,7 @@ public final class ExtractHelper {
             cursor.close();
 
             FileLogger.log(TAG, "Step7: convId=" + conversationId + " taskId=" + (taskId != null ? taskId : "NULL"));
+            toast(activity, "Step7: taskId=" + (taskId != null ? taskId : "NULL"));
 
             if (taskId != null && taskId.length() > 0) {
                 FileLogger.log(TAG, "Step7a: using latest_task_id");
@@ -122,8 +157,10 @@ public final class ExtractHelper {
 
             if (messages != null) {
                 FileLogger.log(TAG, "Step8: msgCount=" + messages.size());
+                toast(activity, "Step8: 消息数=" + messages.size());
             } else {
                 FileLogger.log(TAG, "Step8: messages list is null");
+                toast(activity, "Step8: 消息列表为空");
             }
 
             if (messages == null || messages.isEmpty()) {
@@ -132,7 +169,7 @@ public final class ExtractHelper {
                 messages = detailDao.queryLatest(conversationId, 1000);
 
                 if (messages != null && !messages.isEmpty()) {
-                    FileLogger.log(TAG, "Step8b: using conversation_detail");
+                    FileLogger.log(TAG, "Step8b: using conversation_detail, count=" + messages.size());
                 }
             }
 
@@ -142,26 +179,31 @@ public final class ExtractHelper {
 
             if (messages == null) {
                 FileLogger.log(TAG, "EARLY RETURN: messages null");
+                toast(activity, "错误: 消息为 null");
                 return;
             }
 
             if (messages.isEmpty()) {
                 FileLogger.log(TAG, "Step9: DB empty, trying API fetch");
+                toast(activity, "Step9: 数据库为空，尝试 API 拉取");
 
                 String apiToken = SdkCommonHttpImpl.INSTANCE.getToken();
                 String apiUrl = TraeHttpConnection.INSTANCE.baseUrl();
 
                 int tokenLen = apiToken != null ? apiToken.length() : 0;
                 FileLogger.log(TAG, "Step9a: token=" + tokenLen + " url=" + apiUrl);
+                toast(activity, "Step9a: token长度=" + tokenLen);
 
                 markdown = ApiMessageFetcher.fetch(conversationId, title, apiToken, apiUrl);
 
                 if (markdown == null) {
                     FileLogger.log(TAG, "EARLY RETURN: API fetch failed");
+                    toast(activity, "错误: API 拉取失败");
                     return;
                 }
 
                 FileLogger.log(TAG, "Step9b: API success, MD len=" + markdown.length());
+                toast(activity, "Step9b: API 成功，MD 长度=" + markdown.length());
 
                 firstQuestion = ApiMessageFetcher.getLastFirstUserMessage();
                 if (firstQuestion == null) {
@@ -196,6 +238,7 @@ public final class ExtractHelper {
 
                 userMessageCount = userMessages.size();
                 FileLogger.log(TAG, "Step9a: userMessageCount=" + userMessageCount);
+                toast(activity, "Step9a: 用户消息数=" + userMessageCount);
 
                 if (userMessageCount > 0) {
                     firstQuestion = (String) userMessages.get(0);
@@ -229,19 +272,25 @@ public final class ExtractHelper {
 
             String mdFileName = buildFileName(firstQuestion);
             FileLogger.log(TAG, "Step10: writing " + mdFileName);
+            toast(activity, "Step10: 写入 " + mdFileName);
 
-            File cacheFile = writeMarkdownFile(context, mdFileName, markdown);
+            File cacheFile = writeMarkdownFile(context, mdFileName, markdown, activity);
             if (cacheFile == null) {
                 FileLogger.log(TAG, "EARLY RETURN: writeMarkdownFile failed");
+                toast(activity, "错误: 文件写入失败");
                 return;
             }
 
             FileLogger.log(TAG, "Step10a: MD saved to cache");
+            toast(activity, "Step10a: 文件已保存");
 
             String html = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>body{font-family:sans-serif;padding:16px;line-height:1.6;color:#333;max-width:800px;margin:0 auto}h1{border-bottom:1px solid #eee;padding-bottom:8px}blockquote{border-left:4px solid #ddd;margin:0;padding:8px 16px;color:#666;background:#f9f9f9}hr{border:none;border-top:1px solid #eee;margin:16px 0}b{color:#0066cc}</style><script src=\"https://cdn.jsdelivr.net/npm/marked/marked.min.js\"></script></head><body><textarea id=\"md\" style=\"display:none\">" + markdown + "</textarea><div id=\"content\"></div><script>var md=document.getElementById('md').value;document.getElementById('content').innerHTML=marked.parse(md);</script></body></html>";
 
             File cacheDir = context.getCacheDir();
             File extractDir = new File(cacheDir, "extracted");
+            if (!extractDir.exists()) {
+                extractDir.mkdirs();
+            }
             File htmlFile = new File(extractDir, mdFileName + ".html");
 
             try {
@@ -253,24 +302,40 @@ public final class ExtractHelper {
                 FileLogger.log(TAG, "Step11: HTML write failed", te);
             }
 
-            Intent intent = new Intent(activity, SimpleWebViewActivity.class);
+            final Intent intent = new Intent(activity, SimpleWebViewActivity.class);
             intent.putExtra("extra_url", Uri.fromFile(htmlFile).toString());
             try {
-                activity.startActivity(intent);
+                // startActivity 必须在主线程调用
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            activity.startActivity(intent);
+                        } catch (Throwable se) {
+                            FileLogger.log("ExtractHelper", "Step11a: preview start failed", se);
+                            toast(activity, "预览打开失败: " + se.getMessage());
+                        }
+                    }
+                });
+                FileLogger.log(TAG, "Step11a: preview started");
             } catch (Throwable se) {
                 FileLogger.log(TAG, "Step11a: preview start failed", se);
+                toast(activity, "预览打开失败: " + se.getMessage());
             }
 
             FileLogger.log(TAG, "Step12: pushing to GitHub");
+            toast(activity, "Step12: 推送到 GitHub");
             GitHubPusher.push(mdFileName, cacheFile);
             FileLogger.log(TAG, "Step12a: push done");
 
         } catch (Throwable t) {
             FileLogger.log(TAG, ">>> FAILED <<<", t);
+            toast(activity, "提取失败: " + t.getMessage());
             return;
         }
 
         FileLogger.log(TAG, ">>> COMPLETED SUCCESSFULLY <<<");
+        toast(activity, "提取完成！");
     }
 
     private String buildFileName(String question) {
@@ -288,9 +353,10 @@ public final class ExtractHelper {
         return name + ".md";
     }
 
-    private File writeMarkdownFile(Context context, String fileName, String content) {
+    private File writeMarkdownFile(Context context, String fileName, String content, Activity activity) {
         boolean publicWritten = false;
 
+        // 方式1: MediaStore (Android 10+)
         if (Build.VERSION.SDK_INT >= 29) {
             try {
                 ContentValues values = new ContentValues();
@@ -307,6 +373,7 @@ public final class ExtractHelper {
                         os.close();
                         publicWritten = true;
                         FileLogger.log("ExtractHelper", "MediaStore write OK: Download/TRAE/" + fileName);
+                        if (activity != null) toast(activity, "MD 已写入: Download/TRAE/" + fileName);
                     } else {
                         FileLogger.log("ExtractHelper", "MediaStore openOutputStream null");
                     }
@@ -318,12 +385,33 @@ public final class ExtractHelper {
             }
 
             if (!publicWritten) {
-                FileLogger.log("ExtractHelper", "MediaStore failed, falling back to legacy public dir");
+                FileLogger.log("ExtractHelper", "MediaStore failed, trying app-specific dir");
             }
-        } else {
-            FileLogger.log("ExtractHelper", "SDK<29, using legacy public dir directly");
         }
 
+        // 方式2: app 专属外部目录（不需要权限，任何 Android 版本都能写）
+        // 路径: /storage/emulated/0/Android/data/com.bytedance.trae.cn3/files/TRAE/xxx.md
+        if (!publicWritten) {
+            try {
+                File appDir = context.getExternalFilesDir("TRAE");
+                if (appDir != null) {
+                    if (!appDir.exists()) {
+                        appDir.mkdirs();
+                    }
+                    File file = new File(appDir, fileName);
+                    FileWriter writer = new FileWriter(file);
+                    writer.write(content);
+                    writer.close();
+                    publicWritten = true;
+                    FileLogger.log("ExtractHelper", "App-specific write OK: " + file.getAbsolutePath());
+                    if (activity != null) toast(activity, "MD 已写入: Android/data/.../files/TRAE/" + fileName);
+                }
+            } catch (Throwable t) {
+                FileLogger.log("ExtractHelper", "App-specific write failed", t);
+            }
+        }
+
+        // 方式3: legacy 公共目录 (Android 9 及以下)
         if (!publicWritten) {
             try {
                 File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -342,6 +430,7 @@ public final class ExtractHelper {
             }
         }
 
+        // 总是写一份到 cache（给 GitHubPusher 用）
         File cacheDir = context.getCacheDir();
         File extractDir = new File(cacheDir, "extracted");
         if (!extractDir.exists()) {
