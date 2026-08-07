@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public final class ExtractHelper {
 
@@ -232,7 +234,7 @@ public final class ExtractHelper {
                     }
 
                     if ("user".equals(role) && content != null && content.length() > 0) {
-                        userMessages.add(content);
+                        userMessages.add(extractPlainText(content));
                     }
                 }
 
@@ -286,12 +288,16 @@ public final class ExtractHelper {
 
             String html = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>body{font-family:sans-serif;padding:16px;line-height:1.6;color:#333;max-width:800px;margin:0 auto}h1{border-bottom:1px solid #eee;padding-bottom:8px}blockquote{border-left:4px solid #ddd;margin:0;padding:8px 16px;color:#666;background:#f9f9f9}hr{border:none;border-top:1px solid #eee;margin:16px 0}b{color:#0066cc}</style><script src=\"https://cdn.jsdelivr.net/npm/marked/marked.min.js\"></script></head><body><textarea id=\"md\" style=\"display:none\">" + markdown + "</textarea><div id=\"content\"></div><script>var md=document.getElementById('md').value;document.getElementById('content').innerHTML=marked.parse(md);</script></body></html>";
 
-            File cacheDir = context.getCacheDir();
-            File extractDir = new File(cacheDir, "extracted");
-            if (!extractDir.exists()) {
-                extractDir.mkdirs();
+            // 写 HTML 到 app 专属外部目录（公共路径，WebView 可读）
+            // 路径: /storage/emulated/0/Android/data/com.bytedance.trae.cn3/files/TRAE/xxx.html
+            File htmlDir = context.getExternalFilesDir("TRAE");
+            if (htmlDir == null) {
+                htmlDir = context.getCacheDir();
             }
-            File htmlFile = new File(extractDir, mdFileName + ".html");
+            if (!htmlDir.exists()) {
+                htmlDir.mkdirs();
+            }
+            File htmlFile = new File(htmlDir, mdFileName + ".html");
 
             try {
                 FileWriter htmlWriter = new FileWriter(htmlFile);
@@ -336,6 +342,39 @@ public final class ExtractHelper {
 
         FileLogger.log(TAG, ">>> COMPLETED SUCCESSFULLY <<<");
         toast(activity, "提取完成！");
+    }
+
+    private static String extractPlainText(String raw) {
+        if (raw == null || raw.length() == 0) {
+            return raw;
+        }
+        // 消息内容可能是 JSON 数组格式:
+        // [{"type": "text", "text_content": "实际文本"}, {"type": "code", "text_content": "code"}]
+        String trimmed = raw.trim();
+        if (trimmed.startsWith("[")) {
+            try {
+                JSONArray arr = new JSONArray(trimmed);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.optJSONObject(i);
+                    if (obj != null) {
+                        String text = obj.optString("text_content");
+                        if (text != null && text.length() > 0) {
+                            if (sb.length() > 0) {
+                                sb.append("\n");
+                            }
+                            sb.append(text);
+                        }
+                    }
+                }
+                if (sb.length() > 0) {
+                    return sb.toString();
+                }
+            } catch (Throwable t) {
+                // 解析失败，返回原始内容
+            }
+        }
+        return raw;
     }
 
     private String buildFileName(String question) {
