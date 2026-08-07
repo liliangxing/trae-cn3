@@ -1,9 +1,11 @@
 package com.bytedance.trae.conversation.extract;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -40,7 +42,25 @@ public final class ExtractHelper {
     }
 
     public final void start(Activity activity, String conversationId, String title) {
+        requestStoragePermission(activity);
         performExtract(activity, conversationId, title);
+    }
+
+    private void requestStoragePermission(Activity activity) {
+        try {
+            if (Build.VERSION.SDK_INT >= 23 && Build.VERSION.SDK_INT < 33) {
+                if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    activity.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1001);
+                    FileLogger.log("ExtractHelper", "Permission: requested WRITE_EXTERNAL_STORAGE");
+                } else {
+                    FileLogger.log("ExtractHelper", "Permission: already granted");
+                }
+            } else {
+                FileLogger.log("ExtractHelper", "Permission: not required (SDK_INT=" + Build.VERSION.SDK_INT + ")");
+            }
+        } catch (Throwable t) {
+            FileLogger.log("ExtractHelper", "Permission: request failed", t);
+        }
     }
 
     private void performExtract(Activity activity, String conversationId, String title) {
@@ -269,6 +289,8 @@ public final class ExtractHelper {
     }
 
     private File writeMarkdownFile(Context context, String fileName, String content) {
+        boolean publicWritten = false;
+
         if (Build.VERSION.SDK_INT >= 29) {
             try {
                 ContentValues values = new ContentValues();
@@ -283,13 +305,26 @@ public final class ExtractHelper {
                         os.write(content.getBytes("UTF-8"));
                         os.flush();
                         os.close();
+                        publicWritten = true;
                         FileLogger.log("ExtractHelper", "MediaStore write OK: Download/TRAE/" + fileName);
+                    } else {
+                        FileLogger.log("ExtractHelper", "MediaStore openOutputStream null");
                     }
+                } else {
+                    FileLogger.log("ExtractHelper", "MediaStore insert returned null uri");
                 }
             } catch (Throwable t) {
                 FileLogger.log("ExtractHelper", "MediaStore write failed", t);
             }
+
+            if (!publicWritten) {
+                FileLogger.log("ExtractHelper", "MediaStore failed, falling back to legacy public dir");
+            }
         } else {
+            FileLogger.log("ExtractHelper", "SDK<29, using legacy public dir directly");
+        }
+
+        if (!publicWritten) {
             try {
                 File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                 File traeDir = new File(downloadDir, "TRAE");
@@ -300,6 +335,7 @@ public final class ExtractHelper {
                 FileWriter writer = new FileWriter(file);
                 writer.write(content);
                 writer.close();
+                publicWritten = true;
                 FileLogger.log("ExtractHelper", "Legacy write OK: Download/TRAE/" + fileName);
             } catch (Throwable t) {
                 FileLogger.log("ExtractHelper", "Legacy write failed", t);
@@ -316,6 +352,7 @@ public final class ExtractHelper {
             FileWriter writer = new FileWriter(cacheFile);
             writer.write(content);
             writer.close();
+            FileLogger.log("ExtractHelper", "Cache write OK: " + cacheFile.getAbsolutePath());
             return cacheFile;
         } catch (Throwable t) {
             FileLogger.log("ExtractHelper", "Cache write failed", t);
