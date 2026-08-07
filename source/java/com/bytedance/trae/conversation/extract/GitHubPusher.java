@@ -45,7 +45,7 @@ public final class GitHubPusher implements Runnable {
     private boolean performPush() {
         boolean success = false;
         try {
-            URL url = new URL("https://api.github.com/repos/liliangxing/trae-cn2/contents/docs/" + fileName + ".md");
+            URL url = new URL("https://api.github.com/repos/liliangxing/trae-cn3/contents/docs/" + fileName + ".md");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("PUT");
             conn.setRequestProperty("Authorization", "token " + BuildConfig.getGITHUB_TOKEN());
