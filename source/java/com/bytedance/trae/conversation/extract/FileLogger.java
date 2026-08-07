@@ -11,6 +11,8 @@ import java.util.Date;
 
 public final class FileLogger {
 
+    private static File cachedLogFile = null;
+
     public static void log(String tag, String message) {
         log(tag, message, null);
     }
@@ -48,32 +50,67 @@ public final class FileLogger {
     }
 
     private static File getLogFile() {
+        if (cachedLogFile != null) {
+            return cachedLogFile;
+        }
+
+        // 优先使用 app 专属目录（任何 Android 版本都能写，不需要权限）
+        // 路径: /storage/emulated/0/Android/data/com.bytedance.trae.cn3/files/trae-cn3.log
+        try {
+            Context context = (Context) TraeApplication.Companion.getInst();
+            if (context != null) {
+                File externalDir = context.getExternalFilesDir(null);
+                if (externalDir != null) {
+                    File logFile = new File(externalDir, "trae-cn3.log");
+                    // 测试写入
+                    FileWriter testWriter = new FileWriter(logFile, true);
+                    testWriter.write("");
+                    testWriter.flush();
+                    testWriter.close();
+                    cachedLogFile = logFile;
+                    Log.i("FileLogger", "Log file: " + logFile.getAbsolutePath());
+                    return logFile;
+                }
+            }
+        } catch (Throwable t) {
+            Log.e("FileLogger", "app-specific dir failed", t);
+        }
+
+        // 备用: cacheDir（绝对能写）
+        try {
+            Context context = (Context) TraeApplication.Companion.getInst();
+            if (context != null) {
+                File cacheDir = context.getCacheDir();
+                if (cacheDir != null) {
+                    File logFile = new File(cacheDir, "trae-cn3.log");
+                    cachedLogFile = logFile;
+                    Log.i("FileLogger", "Log file (cache): " + logFile.getAbsolutePath());
+                    return logFile;
+                }
+            }
+        } catch (Throwable t) {
+            Log.e("FileLogger", "cache dir failed", t);
+        }
+
+        // 最后尝试: 公共 /sdcard 目录（Android 10 以下或已授权）
         try {
             File extRoot = Environment.getExternalStorageDirectory();
             if (extRoot != null) {
                 File dir = new File(extRoot, "douyinguanjia/Log");
+                File logFile = new File(dir, "trae-cn3.log");
                 if (dir.exists() || dir.mkdirs()) {
-                    return new File(dir, "trae-cn3.log");
+                    FileWriter testWriter = new FileWriter(logFile, true);
+                    testWriter.write("");
+                    testWriter.flush();
+                    testWriter.close();
+                    cachedLogFile = logFile;
+                    return logFile;
                 }
             }
         } catch (Throwable t) {
-            Log.e("FileLogger", "public log dir failed", t);
+            Log.e("FileLogger", "public dir failed", t);
         }
 
-        try {
-            Context context = (Context) TraeApplication.Companion.getInst();
-            File externalDir = context.getExternalFilesDir(null);
-            if (externalDir != null) {
-                return new File(externalDir, "trae-cn3.log");
-            }
-            File cacheDir = context.getCacheDir();
-            if (cacheDir != null) {
-                return new File(cacheDir, "trae-cn3.log");
-            }
-            return null;
-        } catch (Throwable t) {
-            Log.e("FileLogger", "fallback log dir failed", t);
-            return null;
-        }
+        return null;
     }
 }

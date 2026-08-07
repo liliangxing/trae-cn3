@@ -54,9 +54,13 @@ if [ ! -f "$APKTOOL_JAR" ]; then
     wget -q "https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar" -O "$APKTOOL_JAR"
 fi
 
-if [ ! -f "$BAKSMALI_JAR" ]; then
+# baksmali: bitbucket 已 404，尝试多个源；全部失败则用 apktool 回退（脚本已内置）
+if [ ! -f "$BAKSMALI_JAR" ] || ! java -jar "$BAKSMALI_JAR" --version >/dev/null 2>&1; then
     echo "下载 baksmali..."
-    wget -q "https://bitbucket.org/JesusFreke/smali/downloads/baksmali-2.5.2.jar" -O "$BAKSMALI_JAR"
+    rm -f "$BAKSMALI_JAR"
+    wget -q "https://bitbucket.org/JesusFreke/smali/downloads/baksmali-2.5.2.jar" -O "$BAKSMALI_JAR" 2>/dev/null || \
+    wget -q "https://github.com/JesusFreke/smali/releases/download/v2.5.2/baksmali-2.5.2.jar" -O "$BAKSMALI_JAR" 2>/dev/null || \
+    echo "警告: baksmali 下载失败，将使用 apktool 回退方案"
 fi
 
 if [ ! -f "$UBER_SIGNER" ]; then
