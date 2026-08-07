@@ -144,14 +144,38 @@ keytool -genkey -v -keystore /data/user/work/trae3.keystore \
 
 ### 4.3 编译 Java → Smali
 
+> **v24 重要修复：** 如果代码用了 `MediaStore.Downloads`（API 29+），必须先创建 MediaStore stub。
+> 否则 javac 报 `cannot find symbol: MediaStore.Downloads`，编译失败，APK 中还是旧代码。
+
 ```bash
 REPO=/data/user/work/trae-cn3-repo
 ANDROID_JAR=/usr/lib/android-sdk/platforms/android-23/android.jar
 
-# 1. 编译 stub 类
+# 0. 创建 MediaStore.Downloads stub（API 29+ 功能，API 23 android.jar 没有）
+mkdir -p /data/user/work/mediastub/src/android/provider
+cat > /data/user/work/mediastub/src/android/provider/MediaStore.java << 'STUB'
+package android.provider;
+import android.net.Uri;
+public final class MediaStore {
+    public static final class Downloads {
+        public static final String DISPLAY_NAME = "_display_name";
+        public static final String MIME_TYPE = "mime_type";
+        public static final String RELATIVE_PATH = "relative_path";
+        public static final Uri EXTERNAL_CONTENT_URI = Uri.parse("content://media/external/downloads");
+    }
+}
+STUB
+mkdir -p /data/user/work/mediastub/classes
+javac -source 8 -target 8 -cp "$ANDROID_JAR" \
+  -d /data/user/work/mediastub/classes \
+  /data/user/work/mediastub/src/android/provider/MediaStore.java
+cd /data/user/work/mediastub/classes
+jar cf /data/user/work/mediastub/mediastub.jar .
+
+# 1. 编译 stub 类（MediaStore stub 放 classpath 最前面）
 mkdir -p /data/user/work/stubs/classes
 javac -source 8 -target 8 \
-  -cp "$ANDROID_JAR" \
+  -cp "/data/user/work/mediastub/mediastub.jar:$ANDROID_JAR" \
   -d /data/user/work/stubs/classes \
   $(find "$REPO/source/stubs" -name "*.java")
 
@@ -159,10 +183,10 @@ javac -source 8 -target 8 \
 cd /data/user/work/stubs/classes
 jar cf /data/user/work/stubs/stubs.jar .
 
-# 3. 编译自定义 Java 文件
+# 3. 编译自定义 Java 文件（MediaStore stub 放 classpath 最前面）
 mkdir -p /data/user/work/build/classes
 javac -source 8 -target 8 \
-  -cp "$ANDROID_JAR:/data/user/work/stubs/stubs.jar" \
+  -cp "/data/user/work/mediastub/mediastub.jar:$ANDROID_JAR:/data/user/work/stubs/stubs.jar" \
   -d /data/user/work/build/classes \
   "$REPO/source/java/com/bytedance/trae/conversation/extract/"*.java
 
@@ -171,13 +195,21 @@ javac -source 8 -target 8 \
   --output=/data/user/work/build/classes.dex \
   /data/user/work/build/classes
 
-# 5. 用 baksmali 反编译 dex 为 smali
-java -jar /data/user/work/baksmali.jar d \
-  /data/user/work/build/classes.dex \
-  -o /data/user/work/build/smali
+# 5. 用 apktool 反编译 dex 为 smali（如果没有独立 baksmali.jar，用 apktool 代替）
+# 方法 A：有 baksmali.jar
+# java -jar /data/user/work/baksmali.jar d /data/user/work/build/classes.dex -o /data/user/work/build/smali
+#
+# 方法 B：没有 baksmali.jar，用 apktool（创建 dummy APK 再反编译）
+mkdir -p /data/user/work/dummy_apk
+unzip -o /workspace/trae_cn3_v23.apk AndroidManifest.xml -d /data/user/work/dummy_apk/
+cp /data/user/work/build/classes.dex /data/user/work/dummy_apk/
+cd /data/user/work/dummy_apk
+zip -q /data/user/work/build/dummy.apk AndroidManifest.xml classes.dex
+java -jar /data/user/work/apktool.jar d /data/user/work/build/dummy.apk \
+  -o /data/user/work/build/smali -f
 ```
 
-编译成功后在 `/data/user/work/build/smali/com/bytedance/trae/conversation/extract/` 下应有 5 个文件：
+编译成功后在 `/data/user/work/build/smali/smali/com/bytedance/trae/conversation/extract/` 下应有 5 个文件：
 - `ExtractHelper.smali`
 - `ApiMessageFetcher.smali`
 - `ApiMessageFetcher$1.smali`（匿名内部类，SSL TrustManager）
@@ -326,6 +358,14 @@ grep "before_limit" verify_smali/com/bytedance/trae/conversation/extract/ApiMess
 **原因：** 新环境没有 keystore，或者 keystore 是新生成的（SHA256 不同）
 **解决：** 如果是新 keystore，安装前需要先卸载旧版本 APK（签名不同无法覆盖安装）
 
+### 6.12 编译报错 cannot find symbol: MediaStore.Downloads
+**原因：** 代码使用了 `MediaStore.Downloads`（API 29+），但 android.jar 是 API 23（`/usr/lib/android-sdk/platforms/android-23/android.jar`）
+**解决：** 创建 `MediaStore` stub 类（含 `Downloads` 内部类），编译时把 stub jar 放在 classpath **最前面**（在 android.jar 之前）。stub 只用于编译，运行时用系统的 MediaStore。详见第 4.3 节。
+
+### 6.13 提交了代码但 APK 中没生效
+**原因：** 编译失败（如 6.12），但构建脚本可能没有 `set -e` 或错误被 `|| true` 吞掉，导致用了旧 dex
+**解决：** 每次打包后必须验证 APK 中的 smali 包含新代码（用 apktool 反编译 APK，grep 关键字）
+
 ---
 
 ## 7. 需要哪些工具
@@ -422,3 +462,4 @@ echo "=== build.sh 是否存在 ==="
 | v22 | 2026-08-06 | 首个 Java→Smali 编译打包版本 |
 | v23 | 2026-08-07 | 从远程仓库代码重新打包，验证全流程可复现 |
 | v23-release | 2026-08-07 | 提交 build.sh + 14 个 stub 类，修复 GitHubPusher 仓库名为 trae-cn3，发布 GitHub Release |
+| v24 | 2026-08-07 | 修复 MediaStore.Downloads 编译失败问题（API 23→29 stub），重新打包含提交 6539434 的改动 |
