@@ -96,39 +96,75 @@ echo "工具就绪。"
 echo ""
 echo "=== 步骤 2: 编译 Java → Smali ==="
 
-# 2a. 编译 stub 类
+# 2a. 创建 MediaStore.Downloads stub（API 29+ 功能，API 23 android.jar 没有）
+echo "创建 MediaStore stub..."
+MEDIASTUB="$WORK/mediastub"
+mkdir -p "$MEDIASTUB/src/android/provider" "$MEDIASTUB/classes"
+cat > "$MEDIASTUB/src/android/provider/MediaStore.java" << 'STUB'
+package android.provider;
+import android.net.Uri;
+public final class MediaStore {
+    public static final class Downloads {
+        public static final String DISPLAY_NAME = "_display_name";
+        public static final String MIME_TYPE = "mime_type";
+        public static final String RELATIVE_PATH = "relative_path";
+        public static final Uri EXTERNAL_CONTENT_URI = Uri.parse("content://media/external/downloads");
+    }
+}
+STUB
+javac -source 8 -target 8 -cp "$ANDROID_JAR" \
+    -d "$MEDIASTUB/classes" \
+    "$MEDIASTUB/src/android/provider/MediaStore.java" 2>&1
+cd "$MEDIASTUB/classes"
+jar cf "$MEDIASTUB/mediastub.jar" .
+
+# 2b. 编译 stub 类（MediaStore stub 放 classpath 最前面）
 echo "编译 stub 类..."
 rm -rf "$STUBS_DIR/classes"
 mkdir -p "$STUBS_DIR/classes"
 javac -source 8 -target 8 \
-    -cp "$ANDROID_JAR" \
+    -cp "$MEDIASTUB/mediastub.jar:$ANDROID_JAR" \
     -d "$STUBS_DIR/classes" \
     $(find "$REPO/source/stubs" -name "*.java") 2>&1
 
-# 2b. 打包 stub 为 jar
+# 2c. 打包 stub 为 jar
 echo "打包 stub jar..."
 cd "$STUBS_DIR/classes"
 jar cf "$STUBS_DIR/stubs.jar" .
 
-# 2c. 编译自定义 Java
+# 2d. 编译自定义 Java（MediaStore stub 放 classpath 最前面）
 echo "编译自定义 Java..."
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR/classes"
 javac -source 8 -target 8 \
-    -cp "$ANDROID_JAR:$STUBS_DIR/stubs.jar" \
+    -cp "$MEDIASTUB/mediastub.jar:$ANDROID_JAR:$STUBS_DIR/stubs.jar" \
     -d "$BUILD_DIR/classes" \
     "$REPO/source/java/com/bytedance/trae/conversation/extract/"*.java 2>&1
 
-# 2d. dx 转 dex
+# 2e. dx 转 dex
 echo "dx 转 dex..."
 "$DX" --dex --output="$BUILD_DIR/classes.dex" "$BUILD_DIR/classes"
 
-# 2e. baksmali 反编译
+# 2f. baksmali 反编译（优先用 baksmali.jar，没有则用 apktool）
 echo "baksmali 反编译..."
-java -jar "$BAKSMALI_JAR" d "$BUILD_DIR/classes.dex" -o "$BUILD_DIR/smali"
+if [ -f "$BAKSMALI_JAR" ] && [ -s "$BAKSMALI_JAR" ]; then
+    java -jar "$BAKSMALI_JAR" d "$BUILD_DIR/classes.dex" -o "$BUILD_DIR/smali"
+    SMALI_DIR="$BUILD_DIR/smali/com/bytedance/trae/conversation/extract"
+else
+    echo "baksmali.jar 不可用，使用 apktool 代替..."
+    mkdir -p "$BUILD_DIR/dummy_apk"
+    # 从输入 APK 提取 AndroidManifest.xml（二进制格式）
+    unzip -o "$INPUT_APK" AndroidManifest.xml -d "$BUILD_DIR/dummy_apk/" 2>/dev/null
+    cp "$BUILD_DIR/classes.dex" "$BUILD_DIR/dummy_apk/"
+    cd "$BUILD_DIR/dummy_apk"
+    zip -q "$BUILD_DIR/dummy.apk" AndroidManifest.xml classes.dex
+    rm -rf "$BUILD_DIR/smali"
+    java -jar "$APKTOOL_JAR" d "$BUILD_DIR/dummy.apk" -o "$BUILD_DIR/smali" -f 2>&1 | tail -3
+    SMALI_DIR="$BUILD_DIR/smali/smali/com/bytedance/trae/conversation/extract"
+fi
 
 # 验证
-SMALI_COUNT=$(find "$BUILD_DIR/smali/com/bytedance/trae/conversation/extract/" -name "*.smali" | wc -l)
+SMALI_COUNT=$(find "$SMALI_DIR" -name "*.smali" | wc -l)
 echo "生成 $SMALI_COUNT 个 Smali 文件"
 if [ "$SMALI_COUNT" -ne 5 ]; then
     echo "错误: 应该生成 5 个 Smali 文件，实际 $SMALI_COUNT"
@@ -142,9 +178,9 @@ echo "=== 步骤 3: 解包 APK 并替换 dex ==="
 rm -rf "$DECODED"
 java -jar "$APKTOOL_JAR" d "$INPUT_APK" -o "$DECODED" -f 2>&1 | tail -3
 
-# 替换自定义 Smali
+# 替换自定义 Smali（SMALI_DIR 已在步骤 2f 中设置）
 echo "替换自定义 Smali..."
-cp "$BUILD_DIR/smali/com/bytedance/trae/conversation/extract/"*.smali \
+cp "$SMALI_DIR/"*.smali \
    "$DECODED/smali_classes9/com/bytedance/trae/conversation/extract/"
 
 # 删除 build 缓存
