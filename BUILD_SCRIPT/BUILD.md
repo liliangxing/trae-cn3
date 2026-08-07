@@ -98,7 +98,7 @@ public static final String GITHUB_TOKEN = "ghp_1gKKIGFi4DUszUsuozrxcWTP60WUNh0yl
 6. Markdown is generated with format: `**[User]**: content\n\n`
 7. File saved to `cacheDir/extracted/{title}.md`
 8. SimpleWebViewActivity opens with the file URI
-9. GitHubPusher launches coroutine to push file to `liliangxing/trae-cn2` repo at `docs/`
+9. GitHubPusher launches coroutine to push file to `liliangxing/trae-cn3` repo at `docs/`
 10. On failure, retry every 10 minutes up to 10 times using SharedPreferences for retry tracking
 
 ## Dependencies

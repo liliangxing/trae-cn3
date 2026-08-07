@@ -1,6 +1,7 @@
 # AI Agent 操作指引（必读）
 
 > **如果你是 AI Agent，请在做任何修改之前完整阅读本文件。**
+> **最后更新：2026-08-07（v23 打包验证后）**
 
 ---
 
@@ -9,9 +10,9 @@
 **自定义代码只存 Java，不存 Smali。**
 
 ```
-你修改的文件              构建过程              最终产物
-source/java/*.java  →  javac → d8 → baksmali  →  *.smali  →  apktool b  →  APK
-（唯一源码）              （编译链，中间产物）        （临时文件）       （最终包）
+你修改的文件              构建过程                              最终产物
+source/java/*.java  →  javac → dx → baksmali  →  *.smali  →  替换 dex  →  APK
+（唯一源码）              （编译链，中间产物）     （临时文件）   （签名打包）
 ```
 
 - 你只修改 `source/java/` 下的 Java 文件
@@ -22,36 +23,63 @@ source/java/*.java  →  javac → d8 → baksmali  →  *.smali  →  apktool b
 
 ## 2. 仓库里有什么、在哪里
 
-### 2.1 两类代码：自定义 Java 和原版 Smali
+### 2.1 目录结构
 
 | 目录 | 内容 | 你能改吗 |
 |------|------|---------|
 | `source/java/com/bytedance/trae/conversation/extract/` | 4 个手写 Java 文件 | **可以改，这是你的工作区** |
+| `source/stubs/` | 14 个 stub 类（编译依赖用） | 一般不改，除非编译报错缺类 |
 | `source/java/` 其余部分 | 37,983 个 jadx 反编译的 Java 文件 | **不要改**（仅供阅读原版逻辑） |
-| `source/smali/` | 6,732 个原版 APK 的 Smali 文件 | **不要改**（打包时原样使用） |
+| `source/smali/` | 原版 APK 的 Smali 文件 | **不要改**（打包时原样使用） |
 | `source/res/` | 修改过的资源文件 | 可以改 |
+| `BUILD_SCRIPT/` | 构建规范文档 | 可以改 |
+| `build.sh` | 自动化构建脚本 | 可以改 |
 
 ### 2.2 自定义 Java 文件清单
 
 | 文件 | 路径 | 作用 |
 |------|------|------|
-| `ExtractHelper.java` | `source/java/com/bytedance/trae/conversation/extract/ExtractHelper.java` | 主入口：数据库查询 + API 回退 + Markdown 生成 |
-| `ApiMessageFetcher.java` | `source/java/com/bytedance/trae/conversation/extract/ApiMessageFetcher.java` | 从服务器 API 拉取消息（含 SSL TrustManager 内部类） |
-| `FileLogger.java` | `source/java/com/bytedance/trae/conversation/extract/FileLogger.java` | 文件日志工具 |
-| `GitHubPusher.java` | `source/java/com/bytedance/trae/conversation/extract/GitHubPusher.java` | 异步推送到 GitHub |
+| `ExtractHelper.java` | `source/java/com/bytedance/trae/conversation/extract/` | 主入口：数据库查询 + API 回退 + Markdown 生成 |
+| `ApiMessageFetcher.java` | 同上 | 从服务器 API 拉取消息（含 SSL TrustManager 内部类） |
+| `FileLogger.java` | 同上 | 文件日志工具 |
+| `GitHubPusher.java` | 同上 | 异步推送到 GitHub |
 
-### 2.3 其他修改过的文件
+### 2.3 stub 类清单（14 个，在 `source/stubs/`）
+
+stub 类是空壳类，只为让 javac 编译通过，**不参与最终 APK**。
+
+| stub 类 | 为什么要它 |
+|---------|-----------|
+| `com.bytedance.trae.TraeApplication` | ExtractHelper 调用 `TraeApplication.Companion.getInst()` 获取 Context |
+| `com.bytedance.trae.common.activity.SimpleWebViewActivity` | ExtractHelper 用它打开预览 |
+| `com.bytedance.trae.conversation.BuildConfig` | GitHubPusher 调用 `BuildConfig.getGITHUB_TOKEN()` |
+| `com.bytedance.trae.im.database.ChatMessageDao` | ExtractHelper 查询消息 |
+| `com.bytedance.trae.im.database.ChatMessageEntity` | 消息实体类 |
+| `com.bytedance.trae.im.database.ConversationDetailDao` | 备用查询 DAO |
+| `com.bytedance.trae.im.database.ConversationDetailEntity` | 对话详情实体类 |
+| `com.bytedance.trae.im.database.DatabaseManager` | 数据库单例 |
+| `com.bytedance.trae.im.database.DatabaseOpenHelper` | SQLite 打开助手 |
+| `com.bytedance.trae.login.api.AccountInfo` | 账号信息 |
+| `com.bytedance.trae.login.api.ILoginService` | 登录服务接口 |
+| `com.bytedance.trae.network.TraeHttpConnection` | API base URL |
+| `com.bytedance.trae.service.SdkCommonHttpImpl` | API token 获取 |
+| `com.ss.android.ugc.aweme.framework.services.ServiceManager` | 服务管理器 |
+
+> **两个关键 stub 修复（v23 打包时发现的坑）：**
+> 1. `TraeApplication` **不能继承 Context**（Context 是抽象类，有大量抽象方法）。改为普通类，`getInst()` 返回 `Object`，调用方自己强转。
+> 2. `DatabaseManager.getDatabase()` 返回类型必须是 `DatabaseOpenHelper`（不能是 `Object`），否则 javac 报类型不兼容。
+
+### 2.4 其他修改过的 Smali 文件（原版小改动）
 
 | 文件 | 路径 | 改动 |
 |------|------|------|
-| MenuPopupWindow.smali | `source/smali/com/bytedance/trae/conversation/widget/MenuPopupWindow.smali` | 添加"提取对话"菜单点击 |
-| MenuPopupWindow$OnMenuClickListener.smali | `source/smali/com/bytedance/trae/conversation/widget/` | 添加 `onExtractClick()` 方法 |
-| MenuPopupWindow$$ExternalSyntheticLambda5.smali | `source/smali/com/bytedance/trae/conversation/widget/` | 新增：点击监听器 |
-| TaskFragment.smali | `source/smali/com/bytedance/trae/conversation/TaskFragment.smali` | 任务列表接入提取 |
-| ConversationActivity$initTitleBar$3$1.smali | `source/smali/com/bytedance/trae/conversation/` | 对话页面接入提取 |
-| conversation_popup_menu.xml | `source/res/layout/conversation_popup_menu.xml` | 菜单布局 |
+| MenuPopupWindow.smali | `source/smali/.../widget/` | 添加"提取对话"菜单点击 |
+| MenuPopupWindow$OnMenuClickListener.smali | 同上 | 添加 `onExtractClick()` 方法 |
+| MenuPopupWindow$$ExternalSyntheticLambda5.smali | 同上 | 新增：点击监听器 |
+| ConversationActivity$initTitleBar$3$1.smali | `source/smali/.../conversation/` | 对话页面接入提取 |
 
-> 这些 Smali 文件是原版 APK 反编译后做了小改动（加菜单项），不是我们的自定义类，所以仍以 Smali 形式存储。
+> 这些是原版 APK 反编译后做了小改动（加菜单项），不是自定义类，所以仍以 Smali 形式存储。
+> **注意：** `TaskFragment.smali` 在原版 APK 的 `smali_classes5` 中已有修改版，不需要额外同步。
 
 ---
 
@@ -74,64 +102,136 @@ source/java/*.java  →  javac → d8 → baksmali  →  *.smali  →  apktool b
 
 ## 4. 如何从 Java 编译 Smali 并打包 APK
 
-### 4.1 前提条件
+> **以下所有命令均在 v23 打包中真实执行并验证通过（2026-08-07）。**
+> **有 `build.sh` 自动化脚本可用，但建议先手动跑一遍理解流程。**
 
-需要一个 apktool 解包的 APK 项目目录。如果环境里没有：
+### 4.1 安装工具
 
 ```bash
-apktool d original.apk -o decoded_project/
+# 1. 安装基础工具
+apt-get update -qq
+apt-get install -y -qq apktool default-jdk android-sdk-build-tools
+
+# 2. 下载新版 apktool（apt 版本 2.5.0 有 bug，必须用 2.9.3）
+wget -q "https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar" -O /data/user/work/apktool.jar
+
+# 3. 下载 uber-apk-signer（签名工具）
+wget -q "https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar" -O /data/user/work/uber-apk-signer.jar
+
+# 4. 下载 baksmali（dex→smali 反编译工具）
+wget -q "https://bitbucket.org/JesusFreke/smali/downloads/baksmali-2.5.2.jar" -O /data/user/work/baksmali.jar
+
+# 5. 生成签名证书（如果还没有）
+keytool -genkey -v -keystore /data/user/work/trae3.keystore \
+  -alias trae3 -keyalg RSA -keysize 2048 -validity 10000 \
+  -storepass trae123 -keypass trae123 \
+  -dname "CN=TRAE3, OU=Dev, O=ByteDance, L=Beijing, ST=Beijing, C=CN"
 ```
 
-### 4.2 编译 Java → Smali
+### 4.2 工具路径速查
+
+| 工具 | 路径 |
+|------|------|
+| apktool (jar) | `/data/user/work/apktool.jar`（用 `java -jar` 调用） |
+| baksmali | `/data/user/work/baksmali.jar`（用 `java -jar` 调用） |
+| uber-apk-signer | `/data/user/work/uber-apk-signer.jar`（用 `java -jar` 调用） |
+| keystore | `/data/user/work/trae3.keystore`（密码 `trae123`） |
+| android.jar | `/usr/lib/android-sdk/platforms/android-23/android.jar` |
+| dx (替代 d8) | `/usr/lib/android-sdk/build-tools/debian/dx` |
+| javac | 系统自带（`apt install default-jdk`） |
+
+> **注意：** 环境里可能没有 `d8`，用 `dx` 代替。`dx --dex --output=out.dex classes/` 等价于 `d8 --output=out.dex classes/*.class`。
+
+### 4.3 编译 Java → Smali
 
 ```bash
-# 1. 准备 stub 类（解决编译依赖）
-#    需要 Android SDK 的 android.jar 和 App 内部类的 stub
-#    详见 BUILD_SCRIPT/BUILD.md
+REPO=/data/user/work/trae-cn3-repo
+ANDROID_JAR=/usr/lib/android-sdk/platforms/android-23/android.jar
 
-# 2. 编译 Java
+# 1. 编译 stub 类
+mkdir -p /data/user/work/stubs/classes
 javac -source 8 -target 8 \
-  -cp android.jar:stubs.jar \
-  -d out_classes/ \
-  source/java/com/bytedance/trae/conversation/extract/*.java
+  -cp "$ANDROID_JAR" \
+  -d /data/user/work/stubs/classes \
+  $(find "$REPO/source/stubs" -name "*.java")
 
-# 3. 转成 dex
-d8 --output out.dex \
-  out_classes/com/bytedance/trae/conversation/extract/*.class
+# 2. 打包 stub 为 jar
+cd /data/user/work/stubs/classes
+jar cf /data/user/work/stubs/stubs.jar .
 
-# 4. 反编译 dex 为 Smali
-java -jar baksmali.jar d out.dex -o out_smali/
+# 3. 编译自定义 Java 文件
+mkdir -p /data/user/work/build/classes
+javac -source 8 -target 8 \
+  -cp "$ANDROID_JAR:/data/user/work/stubs/stubs.jar" \
+  -d /data/user/work/build/classes \
+  "$REPO/source/java/com/bytedance/trae/conversation/extract/"*.java
+
+# 4. 用 dx 转 dex
+/usr/lib/android-sdk/build-tools/debian/dx --dex \
+  --output=/data/user/work/build/classes.dex \
+  /data/user/work/build/classes
+
+# 5. 用 baksmali 反编译 dex 为 smali
+java -jar /data/user/work/baksmali.jar d \
+  /data/user/work/build/classes.dex \
+  -o /data/user/work/build/smali
 ```
 
-### 4.3 同步到解包目录并打包
+编译成功后在 `/data/user/work/build/smali/com/bytedance/trae/conversation/extract/` 下应有 5 个文件：
+- `ExtractHelper.smali`
+- `ApiMessageFetcher.smali`
+- `ApiMessageFetcher$1.smali`（匿名内部类，SSL TrustManager）
+- `FileLogger.smali`
+- `GitHubPusher.smali`
+
+### 4.4 替换 dex 并打包 APK
+
+> **重要发现（v23 打包）：** apktool 2.9.3 编译 dex 没问题，但资源编译会因 framework apk 太旧报错
+> （`attribute android:dataExtractionRules not found`）。
+> **解决方案：** 用 apktool 只编译 dex，然后手动替换到原始 APK 中。
 
 ```bash
-# 1. 复制编译生成的 Smali 到解包目录
-cp out_smali/com/bytedance/trae/conversation/extract/*.smali \
-   decoded_project/smali_classes9/com/bytedance/trae/conversation/extract/
+DECODED=/data/user/work/trae_cn3_decoded
+ORIGINAL_APK=/workspace/trae_cn3_v22.apk  # 上一个版本的 APK
 
-# 2. 复制原版 Smali 中的其他修改文件
-cp source/smali/com/bytedance/trae/conversation/widget/MenuPopupWindow*.smali \
-   decoded_project/smali_classes9/com/bytedance/trae/conversation/widget/
+# 1. 解包原始 APK
+rm -rf "$DECODED"
+java -jar /data/user/work/apktool.jar d "$ORIGINAL_APK" -o "$DECODED" -f
 
-# 3. 复制资源文件
-cp source/res/layout/conversation_popup_menu.xml \
-   decoded_project/res/layout/
+# 2. 替换自定义 Smali
+cp /data/user/work/build/smali/com/bytedance/trae/conversation/extract/*.smali \
+   "$DECODED/smali_classes9/com/bytedance/trae/conversation/extract/"
 
-# 4. 删除缓存（重要！）
-rm -rf decoded_project/build
+# 3. 删除 build 缓存
+rm -rf "$DECODED/build"
 
-# 5. 打包
-apktool b decoded_project/ -o output_unsigned.apk
+# 4. 用 apktool 编译（只需 dex，资源编译会失败但 dex 已生成）
+java -jar /data/user/work/apktool.jar b "$DECODED" -o /tmp/dummy.apk 2>&1 || true
+
+# 5. 验证 dex 已生成
+ls -la "$DECODED/build/apk/classes9.dex"
+
+# 6. 复制原始 APK，删除旧签名，替换 dex
+cp "$ORIGINAL_APK" /workspace/trae_cn3_v23.apk
+zip -d /workspace/trae_cn3_v23.apk "META-INF/*"
+
+# 7. 替换 classes9.dex
+cd "$DECODED/build/apk/"
+zip -0 /workspace/trae_cn3_v23.apk classes9.dex
+
+# 8. 恢复 META-INF/services（删除签名时被误删）
+mkdir -p /tmp/meta_restore && cd /tmp/meta_restore
+unzip -o "$ORIGINAL_APK" "META-INF/services/*" -d .
+zip /workspace/trae_cn3_v23.apk META-INF/services/*
 ```
 
-### 4.4 签名（关键！）
+### 4.5 签名（关键！）
 
 ```bash
-java -jar uber-apk-signer.jar \
-  -a output_unsigned.apk \
+java -jar /data/user/work/uber-apk-signer.jar \
+  -a /workspace/trae_cn3_v23.apk \
   --out /workspace \
-  --ks trae3.keystore \
+  --ks /data/user/work/trae3.keystore \
   --ksAlias trae3 \
   --ksPass trae123 \
   --ksKeyPass trae123 \
@@ -141,63 +241,111 @@ java -jar uber-apk-signer.jar \
 > **绝对不能用 jarsigner！** 它只生成 v1 签名，Android 7.0+ 会闪退（package info is null）。
 > **必须看到 `signature verified [v2, v3]` 才算成功。**
 
-### 4.5 验证
+签名后会生成 `trae_cn3_v23-aligned-signed.apk`，重命名为 `trae_cn3_v23.apk` 即可。
+
+### 4.6 验证
 
 ```bash
-java -jar uber-apk-signer.jar -a output.apk -y
-unzip -t output.apk
+# 验证签名
+java -jar /data/user/work/uber-apk-signer.jar -a /workspace/trae_cn3_v23.apk -y
+
+# 验证完整性
+unzip -t /workspace/trae_cn3_v23.apk
+
+# 验证 dex 内容
+mkdir -p /tmp/verify && cd /tmp/verify
+unzip -o /workspace/trae_cn3_v23.apk classes9.dex -d .
+java -jar /data/user/work/baksmali.jar d classes9.dex -o verify_smali
+find verify_smali -name "*.smali" -path "*/extract/*" | sort
+
+# 验证关键参数
+grep "before_limit" verify_smali/com/bytedance/trae/conversation/extract/ApiMessageFetcher.smali
+# 应该输出: const-string v1, "&before_limit=10&after_limit=0&include_anchor=true"
 ```
 
 ---
 
-## 5. 常见错误与避坑
+## 5. 自动化构建脚本
 
-### 5.1 "package info is null" 闪退
-**原因：** 只签了 v1（用了 jarsigner）
-**解决：** 用 uber-apk-signer，确保输出 `[v2, v3]`
+仓库根目录有 `build.sh`，可一键完成上述全部步骤：
 
-### 5.2 VerifyError 闪退
-**原因：** Smali 寄存器类型冲突（如果你手写了 Smali）
-**解决：** 不要手写 Smali，从 Java 编译
+```bash
+# 用法
+./build.sh /workspace/trae_cn3_v22.apk /workspace/trae_cn3_v24.apk
+# 参数1：输入 APK（上一个版本）
+# 参数2：输出 APK 路径
+```
 
-### 5.3 打包出来代码没变
-**原因：** apktool 用了 `build/` 缓存
-**解决：** 打包前 `rm -rf decoded_project/build`
-
-### 5.4 Smali 文件冲突
-**原因：** 同一个类在多个 `smali_classes*` 目录下都有
-**解决：** 自定义类只放在 `smali_classes9/`
-
-### 5.5 API 返回 400
-**原因：** `before_limit` 参数值不对
-**解决：** 必须用 `before_limit=10`
-
-### 5.6 GitHubPusher 推送失败
-**原因：** Token 已失效
-**解决：** 生成新 Token，更新到 BuildConfig
-
-### 5.7 编译 Java 报错找不到类
-**原因：** 缺少 stub 类（Android 框架类、Trae 内部类）
-**解决：** 参见 `BUILD_SCRIPT/BUILD.md` 中的 stub 类清单
+脚本会自动：解包 → 编译 Java → 替换 dex → 恢复 services → 签名 → 验证。
 
 ---
 
-## 6. 需要哪些工具
+## 6. 常见错误与避坑
 
-| 工具 | 用途 | 下载方式 |
+### 6.1 "package info is null" 闪退
+**原因：** 只签了 v1（用了 jarsigner）
+**解决：** 用 uber-apk-signer，确保输出 `[v2, v3]`
+
+### 6.2 VerifyError 闪退
+**原因：** Smali 寄存器类型冲突（如果你手写了 Smali）
+**解决：** 不要手写 Smali，从 Java 编译
+
+### 6.3 apktool 资源编译失败
+**原因：** apt 安装的 apktool 2.5.0 的 aapt 不支持 `$` 开头的资源名；apktool 2.9.3 的 framework apk 太旧不认识 `dataExtractionRules`
+**解决：** 用 apktool 只编译 dex（`b` 命令），然后手动替换 `classes9.dex` 到原始 APK 中。详见第 4.4 节。
+
+### 6.4 META-INF/services 被误删
+**原因：** `zip -d apk "META-INF/*"` 删除签名时，把 services 目录也删了
+**解决：** 从原始 APK 提取 `META-INF/services/*` 并重新打包回去
+
+### 6.5 打包出来代码没变
+**原因：** apktool 用了 `build/` 缓存
+**解决：** 打包前 `rm -rf decoded_project/build`
+
+### 6.6 Smali 文件冲突
+**原因：** 同一个类在多个 `smali_classes*` 目录下都有
+**解决：** 自定义类只放在 `smali_classes9/`
+
+### 6.7 API 返回 400
+**原因：** `before_limit` 参数值不对
+**解决：** 必须用 `before_limit=10`
+
+### 6.8 GitHubPusher 推送失败
+**原因：** Token 已失效（GitHub 会自动吊销泄露的 token）
+**解决：** 生成新 Token，更新到 `BuildConfig.java` stub
+
+### 6.9 编译 Java 报错找不到类
+**原因：** 缺少 stub 类
+**解决：** stub 类在 `source/stubs/` 目录下。如果还缺类，创建新 stub 并加入仓库。
+
+### 6.10 dx 找不到
+**原因：** 环境里没有 d8，只有 dx
+**解决：** `apt install android-sdk-build-tools`，然后用 `/usr/lib/android-sdk/build-tools/debian/dx --dex`
+
+### 6.11 keystore 不存在或签名不同
+**原因：** 新环境没有 keystore，或者 keystore 是新生成的（SHA256 不同）
+**解决：** 如果是新 keystore，安装前需要先卸载旧版本 APK（签名不同无法覆盖安装）
+
+---
+
+## 7. 需要哪些工具
+
+| 工具 | 用途 | 安装方式 |
 |------|------|---------|
-| apktool | APK 解包/打包 | `apt install apktool` 或 [ibotpeaches.github.io](https://ibotpeaches.github.io/Apktool/) |
-| baksmali | dex→smali | `wget https://bitbucket.org/JesusFreke/smali/downloads/baksmali-2.5.2.jar` |
-| uber-apk-signer | APK 签名（v2/v3） | [GitHub](https://github.com/patrickfav/uber-apk-signer) |
-| jadx | dex→Java 反编译 | [GitHub](https://github.com/skylot/jadx/releases) |
-| Java JDK | 运行工具 + 编译 Java | 系统自带或 `apt install default-jdk` |
-| d8 | .class→.dex | Android SDK build-tools 中自带 |
+| Java JDK 11 | 运行工具 + 编译 Java | `apt install default-jdk` |
+| apktool 2.9.3 | APK 解包/编译 dex | `wget` 下载 jar（不要用 apt 版） |
+| baksmali 2.5.2 | dex→smali | `wget` 下载 jar |
+| uber-apk-signer 1.3.0 | APK 签名（v2/v3） | `wget` 下载 jar |
+| dx | .class→.dex | `apt install android-sdk-build-tools` |
+| android.jar | Android 框架类 | `apt install android-sdk-platform`（如果没有） |
+| keytool | 生成 keystore | JDK 自带 |
+| zip/unzip | APK 文件操作 | 系统自带 |
 
 > **不需要任何特殊 skill、MCP 工具或浏览器自动化。** 只需要基本的文件读写和 bash 执行能力。
 
 ---
 
-## 7. 完整搭建文档
+## 8. 完整搭建文档
 
 从原始 APK 到修改到打包到反编译的完整过程，见：
 
@@ -205,7 +353,7 @@ unzip -t output.apk
 
 ---
 
-## 8. 文件完整性检查清单
+## 9. 文件完整性检查清单
 
 确认以下文件都在：
 
@@ -215,9 +363,26 @@ unzip -t output.apk
 - [ ] `source/java/com/bytedance/trae/conversation/extract/FileLogger.java`
 - [ ] `source/java/com/bytedance/trae/conversation/extract/GitHubPusher.java`
 
-**构建规范（必须）：**
+**stub 类（必须，14 个）：**
+- [ ] `source/stubs/com/bytedance/trae/TraeApplication.java`
+- [ ] `source/stubs/com/bytedance/trae/common/activity/SimpleWebViewActivity.java`
+- [ ] `source/stubs/com/bytedance/trae/conversation/BuildConfig.java`
+- [ ] `source/stubs/com/bytedance/trae/im/database/ChatMessageDao.java`
+- [ ] `source/stubs/com/bytedance/trae/im/database/ChatMessageEntity.java`
+- [ ] `source/stubs/com/bytedance/trae/im/database/ConversationDetailDao.java`
+- [ ] `source/stubs/com/bytedance/trae/im/database/ConversationDetailEntity.java`
+- [ ] `source/stubs/com/bytedance/trae/im/database/DatabaseManager.java`
+- [ ] `source/stubs/com/bytedance/trae/im/database/DatabaseOpenHelper.java`
+- [ ] `source/stubs/com/bytedance/trae/login/api/AccountInfo.java`
+- [ ] `source/stubs/com/bytedance/trae/login/api/ILoginService.java`
+- [ ] `source/stubs/com/bytedance/trae/network/TraeHttpConnection.java`
+- [ ] `source/stubs/com/bytedance/trae/service/SdkCommonHttpImpl.java`
+- [ ] `source/stubs/com/ss/android/ugc/aweme/framework/services/ServiceManager.java`
+
+**构建文件（必须）：**
+- [ ] `build.sh`（自动化构建脚本）
 - [ ] `BUILD_SCRIPT/APK_BUILD_SPEC.md`
-- [ ] `BUILD_SCRIPT/BUILD.md`
+- [ ] `AGENTS_GUIDE.md`（本文件）
 
 **不应存在的文件（如果有请删除）：**
 - [ ] ~~`source/smali/.../extract/ExtractHelper.smali`~~
@@ -234,9 +399,26 @@ for f in ExtractHelper ApiMessageFetcher FileLogger GitHubPusher; do
   [ -f "$p" ] && echo "  OK  $p" || echo "  缺失 $p"
 done
 
+echo "=== stub 类检查 ==="
+find source/stubs -name "*.java" | wc -l
+# 应该输出 14
+
 echo "=== 不应该存在的 Smali 文件 ==="
 for f in ExtractHelper ApiMessageFetcher FileLogger GitHubPusher; do
   p="source/smali/com/bytedance/trae/conversation/extract/$f.smali"
   [ -f "$p" ] && echo "  错误！存在 $p（应删除）" || echo "  OK  $p 不存在"
 done
+
+echo "=== build.sh 是否存在 ==="
+[ -f "build.sh" ] && echo "  OK" || echo "  缺失"
 ```
+
+---
+
+## 10. 版本历史
+
+| 版本 | 日期 | 说明 |
+|------|------|------|
+| v22 | 2026-08-06 | 首个 Java→Smali 编译打包版本 |
+| v23 | 2026-08-07 | 从远程仓库代码重新打包，验证全流程可复现 |
+| v23-release | 2026-08-07 | 提交 build.sh + 14 个 stub 类，修复 GitHubPusher 仓库名为 trae-cn3，发布 GitHub Release |
