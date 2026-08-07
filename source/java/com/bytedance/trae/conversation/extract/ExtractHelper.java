@@ -80,7 +80,7 @@ public final class ExtractHelper {
             FileLogger.log(TAG, "Step1: started");
             toast(activity, "Step1: 开始提取");
 
-            Context context = (Context) TraeApplication.Companion.getInst();
+            Context context = TraeApplication.Companion.getInst();
             if (context == null) {
                 FileLogger.log(TAG, "EARLY RETURN: context null");
                 toast(activity, "错误: 无法获取 Context");

@@ -57,7 +57,7 @@ public final class FileLogger {
         // 优先使用 app 专属目录（任何 Android 版本都能写，不需要权限）
         // 路径: /storage/emulated/0/Android/data/com.bytedance.trae.cn3/files/trae-cn3.log
         try {
-            Context context = (Context) TraeApplication.Companion.getInst();
+            Context context = TraeApplication.Companion.getInst();
             if (context != null) {
                 File externalDir = context.getExternalFilesDir(null);
                 if (externalDir != null) {
@@ -78,7 +78,7 @@ public final class FileLogger {
 
         // 备用: cacheDir（绝对能写）
         try {
-            Context context = (Context) TraeApplication.Companion.getInst();
+            Context context = TraeApplication.Companion.getInst();
             if (context != null) {
                 File cacheDir = context.getCacheDir();
                 if (cacheDir != null) {
