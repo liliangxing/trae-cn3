@@ -1,6 +1,7 @@
 package com.bytedance.trae.conversation.extract;
 
 import android.content.Context;
+import android.os.Environment;
 import android.util.Log;
 import com.bytedance.trae.TraeApplication;
 import java.io.File;
@@ -48,6 +49,18 @@ public final class FileLogger {
 
     private static File getLogFile() {
         try {
+            File extRoot = Environment.getExternalStorageDirectory();
+            if (extRoot != null) {
+                File dir = new File(extRoot, "douyinguanjia/Log");
+                if (dir.exists() || dir.mkdirs()) {
+                    return new File(dir, "trae-cn3.log");
+                }
+            }
+        } catch (Throwable t) {
+            Log.e("FileLogger", "public log dir failed", t);
+        }
+
+        try {
             Context context = (Context) TraeApplication.Companion.getInst();
             File externalDir = context.getExternalFilesDir(null);
             if (externalDir != null) {
@@ -59,7 +72,7 @@ public final class FileLogger {
             }
             return null;
         } catch (Throwable t) {
-            Log.e("FileLogger", "getLogFile failed", t);
+            Log.e("FileLogger", "fallback log dir failed", t);
             return null;
         }
     }
