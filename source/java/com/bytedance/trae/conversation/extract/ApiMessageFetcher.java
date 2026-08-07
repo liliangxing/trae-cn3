@@ -69,7 +69,7 @@ public class ApiMessageFetcher implements Runnable {
     public void run() {
         String TAG = "ApiFetcher";
         try {
-            String urlStr = baseUrl + "api/solo_hub/v1/conversations/messages/anchor?conversation_id=" + conversationId + "&before_limit=200&after_limit=0&include_anchor=true";
+            String urlStr = baseUrl + "api/solo_hub/v1/conversations/messages/anchor?conversation_id=" + conversationId + "&before_limit=10&after_limit=0&include_anchor=true";
             FileLogger.log(TAG, "API-1: URL=" + urlStr);
 
             URL url = new URL(urlStr);
