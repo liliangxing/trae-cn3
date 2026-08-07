@@ -203,9 +203,9 @@ public class ApiMessageFetcher implements Runnable {
         if (raw == null || raw.length() == 0) {
             return raw;
         }
-        // 消息内容可能是 JSON 数组格式:
-        // [{"type": "text", "text_content": "实际文本"}, {"type": "code", "text_content": "code"}]
         String trimmed = raw.trim();
+
+        // 处理 JSON 数组: [{"type": "text", "text_content": "实际文本"}]
         if (trimmed.startsWith("[")) {
             try {
                 JSONArray arr = new JSONArray(trimmed);
@@ -213,12 +213,18 @@ public class ApiMessageFetcher implements Runnable {
                 for (int i = 0; i < arr.length(); i++) {
                     JSONObject obj = arr.optJSONObject(i);
                     if (obj != null) {
+                        // 尝试 text_content 字段
                         String text = obj.optString("text_content");
+                        if (text == null || text.length() == 0) {
+                            // 回退到 content 字段
+                            text = obj.optString("content");
+                        }
                         if (text != null && text.length() > 0) {
                             if (sb.length() > 0) {
                                 sb.append("\n");
                             }
-                            sb.append(text);
+                            // 递归处理：content 可能还是 JSON
+                            sb.append(extractPlainText(text));
                         }
                     }
                 }
@@ -229,6 +235,27 @@ public class ApiMessageFetcher implements Runnable {
                 // 解析失败，返回原始内容
             }
         }
+
+        // 处理 JSON 对象: {"content": "实际文本", "agent_id": "solo_work_remote", ...}
+        // 实际消息存储为完整 JSON 对象，用户文本在 content 字段内
+        if (trimmed.startsWith("{")) {
+            try {
+                JSONObject obj = new JSONObject(trimmed);
+                String text = obj.optString("content");
+                if (text != null && text.length() > 0) {
+                    // 递归处理：content 可能还是 JSON
+                    return extractPlainText(text);
+                }
+                // 尝试 text 字段
+                text = obj.optString("text");
+                if (text != null && text.length() > 0) {
+                    return extractPlainText(text);
+                }
+            } catch (Throwable t) {
+                // 解析失败，返回原始内容
+            }
+        }
+
         return raw;
     }
 
