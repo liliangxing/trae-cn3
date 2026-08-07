@@ -69,7 +69,7 @@ public class ApiMessageFetcher implements Runnable {
     public void run() {
         String TAG = "ApiFetcher";
         try {
-            String urlStr = baseUrl + "api/solo_hub/v1/conversations/messages/anchor?conversation_id=" + conversationId + "&before_limit=10&after_limit=0&include_anchor=true";
+            String urlStr = baseUrl + "api/solo_hub/v1/conversations/messages/anchor?conversation_id=" + conversationId + "&before_limit=200&after_limit=0&include_anchor=true";
             FileLogger.log(TAG, "API-1: URL=" + urlStr);
 
             URL url = new URL(urlStr);
@@ -132,7 +132,8 @@ public class ApiMessageFetcher implements Runnable {
                                 if (msg != null) {
                                     String role = msg.optString("role");
                                     if ("user".equals(role)) {
-                                        String content = msg.optString("content");
+                                        String rawContent = msg.optString("content");
+                                        String content = extractPlainText(rawContent);
                                         if (content != null && content.length() > 0) {
                                             if (firstQuestion == null) {
                                                 firstQuestion = content;
@@ -196,6 +197,39 @@ public class ApiMessageFetcher implements Runnable {
         }
 
         latch.countDown();
+    }
+
+    private static String extractPlainText(String raw) {
+        if (raw == null || raw.length() == 0) {
+            return raw;
+        }
+        // 消息内容可能是 JSON 数组格式:
+        // [{"type": "text", "text_content": "实际文本"}, {"type": "code", "text_content": "code"}]
+        String trimmed = raw.trim();
+        if (trimmed.startsWith("[")) {
+            try {
+                JSONArray arr = new JSONArray(trimmed);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.optJSONObject(i);
+                    if (obj != null) {
+                        String text = obj.optString("text_content");
+                        if (text != null && text.length() > 0) {
+                            if (sb.length() > 0) {
+                                sb.append("\n");
+                            }
+                            sb.append(text);
+                        }
+                    }
+                }
+                if (sb.length() > 0) {
+                    return sb.toString();
+                }
+            } catch (Throwable t) {
+                // 解析失败，返回原始内容
+            }
+        }
+        return raw;
     }
 
     private static SSLSocketFactory createTrustAllSocketFactory() {
