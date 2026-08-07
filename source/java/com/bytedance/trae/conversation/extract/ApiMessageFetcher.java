@@ -53,7 +53,7 @@ public class ApiMessageFetcher implements Runnable {
         new Thread(fetcher).start();
 
         try {
-            latch.await(35, TimeUnit.SECONDS);
+            latch.await(120, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             return null;
         }
@@ -69,26 +69,63 @@ public class ApiMessageFetcher implements Runnable {
     public void run() {
         String TAG = "ApiFetcher";
         try {
-            String urlStr = baseUrl + "api/solo_hub/v1/conversations/messages/anchor?conversation_id=" + conversationId + "&before_limit=10&after_limit=0&include_anchor=true";
-            FileLogger.log(TAG, "API-1: URL=" + urlStr);
+            // 分页拉取所有消息
+            StringBuilder allUserContent = new StringBuilder();
+            String firstQuestion = null;
+            int totalUserCount = 0;
+            int page = 0;
+            String beforeId = null; // 游标：当前页最早消息的 ID，用于翻页
 
-            URL url = new URL(urlStr);
-            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-            conn.setSSLSocketFactory(createTrustAllSocketFactory());
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("X-App-Id", "6eefa01c-1036-4c7e-9ca5-d891f63bfcd8");
-            conn.setRequestProperty("X-App-Version-Code", "20260310");
-            conn.setRequestProperty("x-ide-token", token);
-            conn.setConnectTimeout(30000);
-            conn.setReadTimeout(30000);
+            while (true) {
+                // 构建 URL
+                StringBuilder urlBuilder = new StringBuilder();
+                urlBuilder.append(baseUrl);
+                urlBuilder.append("api/solo_hub/v1/conversations/messages/anchor?conversation_id=");
+                urlBuilder.append(conversationId);
+                urlBuilder.append("&before_limit=10&after_limit=0&include_anchor=true");
+                if (beforeId != null) {
+                    urlBuilder.append("&before_id=").append(beforeId);
+                }
+                String urlStr = urlBuilder.toString();
+                FileLogger.log(TAG, "API-P" + page + ": URL=" + urlStr);
 
-            FileLogger.log(TAG, "API-2: headers set, getting response");
+                URL url = new URL(urlStr);
+                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+                conn.setSSLSocketFactory(createTrustAllSocketFactory());
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("X-App-Id", "6eefa01c-1036-4c7e-9ca5-d891f63bfcd8");
+                conn.setRequestProperty("X-App-Version-Code", "20260310");
+                conn.setRequestProperty("x-ide-token", token);
+                conn.setConnectTimeout(30000);
+                conn.setReadTimeout(30000);
 
-            int responseCode = conn.getResponseCode();
-            FileLogger.log(TAG, "API-3: responseCode=" + responseCode);
+                FileLogger.log(TAG, "API-P" + page + ": headers set, getting response");
 
-            if (responseCode == 200) {
+                int responseCode = conn.getResponseCode();
+                FileLogger.log(TAG, "API-P" + page + ": responseCode=" + responseCode);
+
+                if (responseCode != 200) {
+                    InputStream errorStream = conn.getErrorStream();
+                    if (errorStream != null) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            sb.append(line);
+                        }
+                        reader.close();
+                        FileLogger.log(TAG, "API-ERR: code=" + responseCode + " body=" + sb.toString());
+                    } else {
+                        FileLogger.log(TAG, "API-ERR: code=" + responseCode + " no error stream");
+                    }
+                    if (page == 0) {
+                        // 第一页就失败，返回 null
+                        markdown = null;
+                    }
+                    break;
+                }
+
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 StringBuilder sb = new StringBuilder();
                 String line;
@@ -98,94 +135,112 @@ public class ApiMessageFetcher implements Runnable {
                 reader.close();
                 String responseBody = sb.toString();
 
-                FileLogger.log(TAG, "API-4: rawLen=" + responseBody.length());
+                FileLogger.log(TAG, "API-P" + page + ": rawLen=" + responseBody.length());
 
                 JSONObject root = new JSONObject(responseBody);
                 JSONObject data = root.optJSONObject("data");
 
                 if (data == null) {
-                    FileLogger.log(TAG, "API-ERR: data object is null");
-                    markdown = null;
-                } else {
-                    JSONArray items = data.optJSONArray("items");
-                    if (items == null) {
-                        items = data.optJSONArray("messages");
-                    }
-
-                    if (items == null) {
-                        FileLogger.log(TAG, "API-ERR: items/messages array is null");
+                    FileLogger.log(TAG, "API-P" + page + ": data object is null");
+                    if (page == 0) {
                         markdown = null;
+                    }
+                    break;
+                }
+
+                JSONArray items = data.optJSONArray("items");
+                if (items == null) {
+                    items = data.optJSONArray("messages");
+                }
+
+                if (items == null || items.length() == 0) {
+                    FileLogger.log(TAG, "API-P" + page + ": items empty, done");
+                    break;
+                }
+
+                int arrayLen = items.length();
+                FileLogger.log(TAG, "API-P" + page + ": itemsLen=" + arrayLen);
+
+                // 记录最早消息的 ID 用于下一页翻页
+                // items 返回的是从最新到最旧的顺序，最后一条是最早的
+                JSONObject oldestMsg = items.optJSONObject(arrayLen - 1);
+                if (oldestMsg != null) {
+                    // 尝试多种可能的 ID 字段名
+                    String nextBeforeId = oldestMsg.optString("message_id");
+                    if (nextBeforeId == null || nextBeforeId.length() == 0) {
+                        nextBeforeId = oldestMsg.optString("id");
+                    }
+                    if (nextBeforeId != null && nextBeforeId.length() > 0) {
+                        beforeId = nextBeforeId;
                     } else {
-                        int arrayLen = items.length();
-                        FileLogger.log(TAG, "API-5: arrayLen=" + arrayLen);
+                        // 没有 ID 字段，无法继续翻页
+                        FileLogger.log(TAG, "API-P" + page + ": no message_id/id, pagination stopped");
+                    }
+                }
 
-                        if (arrayLen == 0) {
-                            FileLogger.log(TAG, "API-ERR: array is empty");
-                            markdown = null;
-                        } else {
-                            StringBuilder userContent = new StringBuilder();
-                            int userCount = 0;
-                            String firstQuestion = null;
+                // 判断是否有更多页
+                boolean hasMore = data.optBoolean("has_more", false);
 
-                            for (int i = 0; i < arrayLen; i++) {
-                                JSONObject msg = items.optJSONObject(i);
-                                if (msg != null) {
-                                    String role = msg.optString("role");
-                                    if ("user".equals(role)) {
-                                        String rawContent = msg.optString("content");
-                                        String content = extractPlainText(rawContent);
-                                        if (content != null && content.length() > 0) {
-                                            if (firstQuestion == null) {
-                                                firstQuestion = content;
-                                            }
-                                            userCount++;
-                                            if (userContent.length() > 0) {
-                                                userContent.append("\n\n");
-                                            }
-                                            userContent.append(content);
-                                        }
-                                    }
+                // 处理当前页的消息（从旧到新顺序，先收集再反转）
+                // items 是倒序（最新在前），我们需要正序追加到已有内容后面
+                // 所以先把当前页的用户消息收集到临时列表
+                java.util.ArrayList pageUserMessages = new java.util.ArrayList();
+                for (int i = 0; i < arrayLen; i++) {
+                    JSONObject msg = items.optJSONObject(i);
+                    if (msg != null) {
+                        String role = msg.optString("role");
+                        if ("user".equals(role)) {
+                            String rawContent = msg.optString("content");
+                            String content = extractPlainText(rawContent);
+                            if (content != null && content.length() > 0) {
+                                if (firstQuestion == null) {
+                                    firstQuestion = content;
                                 }
+                                totalUserCount++;
+                                pageUserMessages.add(content);
                             }
-
-                            lastFirstUserMessage = firstQuestion;
-                            lastUserMessageCount = userCount;
-
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            String exportTime = sdf.format(new Date());
-
-                            StringBuilder md = new StringBuilder();
-                            md.append("# 会话用户消息导出");
-                            md.append("\n\n");
-                            md.append("> 导出时间: ").append(exportTime);
-                            md.append("\n");
-                            md.append("> 任务ID: ").append(conversationId);
-                            md.append("\n");
-                            md.append("> 用户消息数: ").append(userCount);
-                            md.append("\n---\n");
-                            md.append(userContent.toString());
-
-                            markdown = md.toString();
-                            FileLogger.log(TAG, "API-6: markdown built, userCount=" + userCount);
                         }
                     }
                 }
-            } else {
-                InputStream errorStream = conn.getErrorStream();
-                if (errorStream != null) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream));
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line);
+
+                // 当前页的消息是倒序的（最新在前），所以要反转后追加到 allUserContent
+                // 这样最终结果就是按时间正序排列
+                for (int i = pageUserMessages.size() - 1; i >= 0; i--) {
+                    if (allUserContent.length() > 0) {
+                        allUserContent.append("\n\n");
                     }
-                    reader.close();
-                    FileLogger.log(TAG, "API-ERR: code=" + responseCode + " body=" + sb.toString());
-                } else {
-                    FileLogger.log(TAG, "API-ERR: code=" + responseCode + " no error stream");
+                    allUserContent.append(pageUserMessages.get(i));
                 }
-                markdown = null;
+
+                FileLogger.log(TAG, "API-P" + page + ": pageUserCount=" + pageUserMessages.size() + " hasMore=" + hasMore);
+
+                if (!hasMore || beforeId == null) {
+                    FileLogger.log(TAG, "API-P" + page + ": no more pages, totalUserCount=" + totalUserCount);
+                    break;
+                }
+
+                page++;
             }
+
+            lastFirstUserMessage = firstQuestion;
+            lastUserMessageCount = totalUserCount;
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String exportTime = sdf.format(new Date());
+
+            StringBuilder md = new StringBuilder();
+            md.append("# 会话用户消息导出");
+            md.append("\n\n");
+            md.append("> 导出时间: ").append(exportTime);
+            md.append("\n");
+            md.append("> 任务ID: ").append(conversationId);
+            md.append("\n");
+            md.append("> 用户消息数: ").append(totalUserCount);
+            md.append("\n---\n");
+            md.append(allUserContent.toString());
+
+            markdown = md.toString();
+            FileLogger.log(TAG, "API-6: markdown built, totalUserCount=" + totalUserCount);
         } catch (Throwable t) {
             try {
                 String msg = "API-EXCEPTION: " + t.getClass().getName() + ": " + t.getMessage();
