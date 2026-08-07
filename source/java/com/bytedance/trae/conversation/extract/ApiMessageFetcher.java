@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HttpsURLConnection;
@@ -26,12 +28,23 @@ public class ApiMessageFetcher implements Runnable {
     private String markdown;
     private CountDownLatch latch;
 
+    private static String lastFirstUserMessage;
+    private static int lastUserMessageCount;
+
     public ApiMessageFetcher(String conversationId, String title, String token, String baseUrl, CountDownLatch latch) {
         this.conversationId = conversationId;
         this.title = title;
         this.token = token;
         this.baseUrl = baseUrl;
         this.latch = latch;
+    }
+
+    public static String getLastFirstUserMessage() {
+        return lastFirstUserMessage;
+    }
+
+    public static int getLastUserMessageCount() {
+        return lastUserMessageCount;
     }
 
     public static String fetch(String conversationId, String title, String token, String baseUrl) {
@@ -85,7 +98,7 @@ public class ApiMessageFetcher implements Runnable {
                 reader.close();
                 String responseBody = sb.toString();
 
-                FileLogger.log(TAG, "API-4: rawLen=" + responseBody.length() + " body=" + responseBody);
+                FileLogger.log(TAG, "API-4: rawLen=" + responseBody.length());
 
                 JSONObject root = new JSONObject(responseBody);
                 JSONObject data = root.optJSONObject("data");
@@ -110,26 +123,49 @@ public class ApiMessageFetcher implements Runnable {
                             FileLogger.log(TAG, "API-ERR: array is empty");
                             markdown = null;
                         } else {
-                            StringBuilder md = new StringBuilder();
-                            md.append("# ").append(title);
-                            md.append("\n\n---\n\n");
+                            StringBuilder userContent = new StringBuilder();
+                            int userCount = 0;
+                            String firstQuestion = null;
 
                             for (int i = 0; i < arrayLen; i++) {
                                 JSONObject msg = items.optJSONObject(i);
                                 if (msg != null) {
                                     String role = msg.optString("role");
                                     if ("user".equals(role)) {
-                                        md.append("**[User]**: ");
-                                    } else {
-                                        md.append("**[Assistant]**: ");
+                                        String content = msg.optString("content");
+                                        if (content != null && content.length() > 0) {
+                                            if (firstQuestion == null) {
+                                                firstQuestion = content;
+                                            }
+                                            userCount++;
+                                            if (userContent.length() > 0) {
+                                                userContent.append("\n\n");
+                                            }
+                                            userContent.append(content);
+                                        }
                                     }
-                                    md.append(msg.optString("content"));
-                                    md.append("\n\n");
                                 }
                             }
 
+                            lastFirstUserMessage = firstQuestion;
+                            lastUserMessageCount = userCount;
+
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            String exportTime = sdf.format(new Date());
+
+                            StringBuilder md = new StringBuilder();
+                            md.append("# 会话用户消息导出");
+                            md.append("\n\n");
+                            md.append("> 导出时间: ").append(exportTime);
+                            md.append("\n");
+                            md.append("> 任务ID: ").append(conversationId);
+                            md.append("\n");
+                            md.append("> 用户消息数: ").append(userCount);
+                            md.append("\n---\n");
+                            md.append(userContent.toString());
+
                             markdown = md.toString();
-                            FileLogger.log(TAG, "API-6: markdown built successfully");
+                            FileLogger.log(TAG, "API-6: markdown built, userCount=" + userCount);
                         }
                     }
                 }
