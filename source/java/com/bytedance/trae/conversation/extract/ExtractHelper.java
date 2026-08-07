@@ -175,9 +175,21 @@ public final class ExtractHelper {
                 }
             }
 
-            String markdown;
-            String firstQuestion;
-            int userMessageCount;
+            // 如果数据库消息太少（< 50），也尝试 API 获取完整历史
+            boolean tryApiFetch = false;
+            if (messages == null || messages.isEmpty()) {
+                tryApiFetch = true;
+                FileLogger.log(TAG, "Step8c: DB empty, will try API fetch");
+            } else if (messages.size() < 50) {
+                // 数据库可能只有本地缓存的少量消息，API 才能拿到完整历史
+                // 先记录 DB 消息数量，后续会尝试 API 获取更多
+                FileLogger.log(TAG, "Step8c: DB only has " + messages.size() + " msgs, will also try API fetch");
+                tryApiFetch = true;
+            }
+
+            String markdown = null;
+            String firstQuestion = null;
+            int userMessageCount = 0;
 
             if (messages == null) {
                 FileLogger.log(TAG, "EARLY RETURN: messages null");
@@ -185,9 +197,9 @@ public final class ExtractHelper {
                 return;
             }
 
-            if (messages.isEmpty()) {
-                FileLogger.log(TAG, "Step9: DB empty, trying API fetch");
-                toast(activity, "Step9: 数据库为空，尝试 API 拉取");
+            if (tryApiFetch) {
+                FileLogger.log(TAG, "Step9: trying API fetch for full history");
+                toast(activity, "Step9: 尝试 API 拉取完整历史");
 
                 String apiToken = SdkCommonHttpImpl.INSTANCE.getToken();
                 String apiUrl = TraeHttpConnection.INSTANCE.baseUrl();
@@ -199,9 +211,17 @@ public final class ExtractHelper {
                 markdown = ApiMessageFetcher.fetch(conversationId, title, apiToken, apiUrl);
 
                 if (markdown == null) {
-                    FileLogger.log(TAG, "EARLY RETURN: API fetch failed");
-                    toast(activity, "错误: API 拉取失败");
-                    return;
+                    if (messages != null && !messages.isEmpty()) {
+                        // API 失败但有 DB 数据，回退到 DB 路径
+                        FileLogger.log(TAG, "Step9b: API failed, falling back to DB (" + messages.size() + " msgs)");
+                        toast(activity, "Step9b: API 失败，使用本地数据");
+                        // 重置 tryApiFetch 让下面走 DB 路径
+                        tryApiFetch = false;
+                    } else {
+                        FileLogger.log(TAG, "EARLY RETURN: API fetch failed, no DB fallback");
+                        toast(activity, "错误: API 拉取失败");
+                        return;
+                    }
                 }
 
                 FileLogger.log(TAG, "Step9b: API success, MD len=" + markdown.length());
@@ -212,7 +232,9 @@ public final class ExtractHelper {
                     firstQuestion = title;
                 }
                 userMessageCount = ApiMessageFetcher.getLastUserMessageCount();
-            } else {
+            }
+
+            if (!tryApiFetch) {
                 FileLogger.log(TAG, "Step9: building user message list");
 
                 List userMessages = new ArrayList();
