@@ -308,11 +308,11 @@ public final class ExtractHelper {
             FileLogger.log(TAG, "Step10a: MD saved to cache");
             toast(activity, "Step10a: 文件已保存");
 
-            String html = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>body{font-family:sans-serif;padding:16px;line-height:1.6;color:#333;max-width:800px;margin:0 auto}h1{border-bottom:1px solid #eee;padding-bottom:8px}blockquote{border-left:4px solid #ddd;margin:0;padding:8px 16px;color:#666;background:#f9f9f9}hr{border:none;border-top:1px solid #eee;margin:16px 0}b{color:#0066cc}</style><script src=\"https://cdn.jsdelivr.net/npm/marked/marked.min.js\"></script></head><body><textarea id=\"md\" style=\"display:none\">" + markdown + "</textarea><div id=\"content\"></div><script>var md=document.getElementById('md').value;document.getElementById('content').innerHTML=marked.parse(md);</script></body></html>";
+            String html = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>body{font-family:sans-serif;padding:16px;line-height:1.6;color:#333;max-width:800px;margin:0 auto}.md h1,.md h2,.md h3{border-bottom:1px solid #eee;padding-bottom:8px;margin-top:24px}.md blockquote{border-left:4px solid #ddd;margin:8px 0;padding:8px 16px;color:#666;background:#f9f9f9}.md pre{background:#f6f8fa;padding:12px;border-radius:6px;overflow-x:auto;font-size:13px}.md code{background:#f0f0f0;padding:2px 4px;border-radius:3px;font-size:13px}.md pre code{background:none;padding:0}.md hr{border:none;border-top:1px solid #eee;margin:16px 0}.md li{margin:4px 0}.md a{color:#0066cc}</style></head><body><div class=\"md\">" + markdownToHtml(markdown) + "</div></body></html>";
 
-            // 方式1: 写 HTML 到内部缓存目录（WebView 可以加载 file:// 内部缓存路径）
-            // 路径: /data/data/com.bytedance.trae.cn3/cache/TRAE/xxx.html
-            File cacheHtmlDir = new File(context.getCacheDir(), "TRAE");
+            // 预览用 FileProvider content:// URI（WebView 默认允许 content:// 访问）
+            // HTML 写到 cache/update/TRAE/（对应 FileProvider cache-path path="/update"）
+            File cacheHtmlDir = new File(context.getCacheDir(), "update/TRAE");
             if (!cacheHtmlDir.exists()) {
                 cacheHtmlDir.mkdirs();
             }
@@ -322,7 +322,7 @@ public final class ExtractHelper {
                 FileWriter htmlWriter = new FileWriter(cacheHtmlFile);
                 htmlWriter.write(html);
                 htmlWriter.close();
-                FileLogger.log(TAG, "Step11: HTML saved to cache");
+                FileLogger.log(TAG, "Step11: HTML saved to cache/update/TRAE");
             } catch (Throwable te) {
                 FileLogger.log(TAG, "Step11: HTML cache write failed", te);
             }
@@ -344,10 +344,16 @@ public final class ExtractHelper {
                 }
             }
 
-            // 使用内部缓存路径的 file:// URI 打开预览（WebView 可读）
-            // 不用外部存储路径，因为 Android 7+ WebView 禁止 file:// 外部存储
+            // 用 FileProvider 生成 content:// URI，SimpleWebViewActivity 可直接渲染
             final Intent intent = new Intent(activity, SimpleWebViewActivity.class);
-            intent.putExtra("extra_url", Uri.fromFile(cacheHtmlFile).toString());
+            try {
+                Uri previewUri = androidx.core.content.FileProvider.getUriForFile(context, "com.bytedance.trae.cn3.uri.key", cacheHtmlFile);
+                intent.putExtra("extra_url", previewUri.toString());
+                FileLogger.log(TAG, "Step11b: preview content:// " + previewUri);
+            } catch (Throwable fe) {
+                FileLogger.log("ExtractHelper", "Step11b: FileProvider failed", fe);
+                intent.putExtra("extra_url", Uri.fromFile(cacheHtmlFile).toString());
+            }
             try {
                 // startActivity 必须在主线程调用
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -447,6 +453,8 @@ public final class ExtractHelper {
             question = "conversation";
         }
         String name = question.replace('\n', ' ').replace('\r', ' ').trim();
+        // 脱敏 GitHub 认证 token（classic PAT / fine-grained PAT / OAuth 等）
+        name = name.replaceAll("gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{30,}", "xxx");
         if (name.length() > 50) {
             name = name.substring(0, 50);
         }
@@ -455,6 +463,123 @@ public final class ExtractHelper {
             name = "conversation";
         }
         return name + ".md";
+    }
+
+    private static String markdownToHtml(String md) {
+        if (md == null) {
+            return "";
+        }
+        StringBuilder html = new StringBuilder();
+        String[] lines = md.split("\n", -1);
+        boolean inCode = false;
+        StringBuilder codeBuf = new StringBuilder();
+        boolean listOpen = false;
+        char listType = 0;
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            if (line.startsWith("```")) {
+                if (inCode) {
+                    html.append("<pre>").append(htmlEscape(codeBuf.toString())).append("</pre>");
+                    codeBuf.setLength(0);
+                    inCode = false;
+                } else {
+                    closeList(html, listOpen, listType);
+                    listOpen = false;
+                    inCode = true;
+                }
+                continue;
+            }
+            if (inCode) {
+                codeBuf.append(line).append("\n");
+                continue;
+            }
+            if (line.trim().length() == 0) {
+                closeList(html, listOpen, listType);
+                listOpen = false;
+                continue;
+            }
+            if (line.startsWith("#")) {
+                closeList(html, listOpen, listType);
+                listOpen = false;
+                int level = 0;
+                while (level < line.length() && line.charAt(level) == '#' && level < 4) {
+                    level++;
+                }
+                html.append("<h").append(level).append(">").append(inlineMarkdown(line.substring(level).trim())).append("</h").append(level).append(">");
+                continue;
+            }
+            if (line.startsWith(">")) {
+                closeList(html, listOpen, listType);
+                listOpen = false;
+                html.append("<blockquote>").append(inlineMarkdown(line.substring(1).trim())).append("</blockquote>");
+                continue;
+            }
+            if (line.matches("^\\s*-{3,}\\s*$")) {
+                closeList(html, listOpen, listType);
+                listOpen = false;
+                html.append("<hr>");
+                continue;
+            }
+            if (line.matches("^\\s*[-*+]\\s+.*")) {
+                if (!listOpen || listType != 'u') {
+                    closeList(html, listOpen, listType);
+                    html.append("<ul>");
+                    listOpen = true;
+                    listType = 'u';
+                }
+                html.append("<li>").append(inlineMarkdown(line.replaceFirst("^\\s*[-*+]\\s+", ""))).append("</li>");
+                continue;
+            }
+            if (line.matches("^\\s*\\d+\\.\\s+.*")) {
+                if (!listOpen || listType != 'o') {
+                    closeList(html, listOpen, listType);
+                    html.append("<ol>");
+                    listOpen = true;
+                    listType = 'o';
+                }
+                html.append("<li>").append(inlineMarkdown(line.replaceFirst("^\\s*\\d+\\.\\s+", ""))).append("</li>");
+                continue;
+            }
+            closeList(html, listOpen, listType);
+            listOpen = false;
+            html.append("<p>").append(inlineMarkdown(line)).append("</p>");
+        }
+        closeList(html, listOpen, listType);
+        if (inCode) {
+            html.append("<pre>").append(htmlEscape(codeBuf.toString())).append("</pre>");
+        }
+        return html.toString();
+    }
+
+    private static void closeList(StringBuilder html, boolean listOpen, char listType) {
+        if (!listOpen) {
+            return;
+        }
+        if (listType == 'o') {
+            html.append("</ol>");
+        } else {
+            html.append("</ul>");
+        }
+    }
+
+    private static String inlineMarkdown(String text) {
+        String s = htmlEscape(text);
+        s = s.replaceAll("`([^`]+)`", "<code>$1</code>");
+        s = s.replaceAll("\\*\\*([^*]+)\\*\\*", "<b>$1</b>");
+        s = s.replaceAll("\\*([^*]+)\\*", "<i>$1</i>");
+        s = s.replaceAll("~~([^~]+)~~", "<s>$1</s>");
+        s = s.replaceAll("\\[([^\\]]+)\\]\\((https?://[^)\\s]+)\\)", "<a href=\"$2\">$1</a>");
+        return s;
+    }
+
+    private static String htmlEscape(String text) {
+        if (text == null) {
+            return "";
+        }
+        String s = text.replace("&", "&amp;");
+        s = s.replace("<", "&lt;");
+        s = s.replace(">", "&gt;");
+        return s;
     }
 
     private File writeMarkdownFile(Context context, String fileName, String content, Activity activity) {
