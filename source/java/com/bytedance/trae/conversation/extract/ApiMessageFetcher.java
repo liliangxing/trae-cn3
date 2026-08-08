@@ -77,6 +77,9 @@ public class ApiMessageFetcher implements Runnable {
             // 每页的"正序"用户消息列表，结束后按翻页顺序逆序合并为全局正序列表
             // 翻页方向从新到旧，越晚拉到的页越旧，必须放在最终内容前面
             java.util.ArrayList<java.util.ArrayList<String>> pageLists = new java.util.ArrayList<>();
+            // 每页的全部消息（role, content原文），用于还原"最后一次对话"的思考链与上下文
+            // 元素: Object[]{String role, String rawContent}
+            java.util.ArrayList<java.util.ArrayList<Object[]>> pageAllMessages = new java.util.ArrayList<>();
             // 游标：当前页最早消息的 created_at_ms（毫秒时间戳），用于翻页
             // 对齐原 APK anchor API：翻页参数是 anchor_created_at_ms，而非 before_id
             String anchorCreatedAtMs = null;
@@ -195,12 +198,15 @@ public class ApiMessageFetcher implements Runnable {
 
                 // 处理当前页的消息：先收集当前页的用户消息（items 是倒序，最新在前）
                 java.util.ArrayList<String> pageUserMessages = new java.util.ArrayList<>();
+                // 本页全部消息（保持 items 顺序，最新在前），供"最后一次对话"的思考链还原
+                java.util.ArrayList<Object[]> pageAll = new java.util.ArrayList<>();
                 for (int i = 0; i < arrayLen; i++) {
                     JSONObject msg = items.optJSONObject(i);
                     if (msg != null) {
                         String role = msg.optString("role");
+                        String rawContent = msg.optString("content");
+                        pageAll.add(new Object[]{role, rawContent});
                         if ("user".equals(role)) {
-                            String rawContent = msg.optString("content");
                             String content = extractPlainText(rawContent);
                             if (content != null && content.length() > 0) {
                                 // 无条件覆盖：翻页从新到旧，循环结束时 firstQuestion 即全局最早一条用户消息
@@ -214,6 +220,7 @@ public class ApiMessageFetcher implements Runnable {
 
                 // 当前页的消息是倒序的（最新在前），收集本页正序用户消息列表，翻页结束后统一按时间正序编号
                 pageLists.add(pageUserMessages);
+                pageAllMessages.add(pageAll);
 
                 FileLogger.log(TAG, "API-P" + page + ": pageUserCount=" + pageUserMessages.size() + " hasMore=" + hasMore);
 
@@ -228,10 +235,17 @@ public class ApiMessageFetcher implements Runnable {
             // 翻页方向从新到旧：越晚拉到的页越旧，逆序合并使最终内容按时间正序
             // 同时每页内消息也是最新在前，需逐页逆序后合并
             java.util.ArrayList<String> allUserList = new java.util.ArrayList<>();
+            java.util.ArrayList<Object[]> allMessages = new java.util.ArrayList<>();
             for (int i = pageLists.size() - 1; i >= 0; i--) {
                 java.util.ArrayList<String> pageMsgs = pageLists.get(i);
                 for (int j = pageMsgs.size() - 1; j >= 0; j--) {
                     allUserList.add(pageMsgs.get(j));
+                }
+            }
+            for (int i = pageAllMessages.size() - 1; i >= 0; i--) {
+                java.util.ArrayList<Object[]> pageMsgs = pageAllMessages.get(i);
+                for (int j = pageMsgs.size() - 1; j >= 0; j--) {
+                    allMessages.add(pageMsgs.get(j));
                 }
             }
 
@@ -265,6 +279,12 @@ public class ApiMessageFetcher implements Runnable {
                     md.append(allUserList.get(i));
                 }
 
+                // 追加"最后一次对话"（用户输入 + 助手思考链/执行上下文），供下一个 Agent 接力
+                String lastTurnMd = buildLastTurnMarkdown(allMessages, allUserList);
+                if (lastTurnMd != null && lastTurnMd.length() > 0) {
+                    md.append("\n\n").append(lastTurnMd);
+                }
+
                 markdown = md.toString();
                 FileLogger.log(TAG, "API-6: markdown built, totalUserCount=" + totalUserCount);
             }
@@ -279,6 +299,146 @@ public class ApiMessageFetcher implements Runnable {
         }
 
         latch.countDown();
+    }
+
+    /**
+     * 构建"最后一次对话"的 Markdown：最后一条用户消息 + 其后所有助手消息的思考链与执行上下文。
+     * 用于会话额度不足未跑完时，供下一个 Agent 看文档接力。
+     */
+    static String buildLastTurnMarkdown(java.util.ArrayList<Object[]> allMessages, java.util.ArrayList<String> allUserList) {
+        if (allMessages == null || allMessages.size() == 0) {
+            return null;
+        }
+        int lastUserIdx = -1;
+        for (int i = 0; i < allMessages.size(); i++) {
+            Object[] entry = allMessages.get(i);
+            if (entry != null && entry.length > 0 && "user".equals(entry[0])) {
+                lastUserIdx = i;
+            }
+        }
+        if (lastUserIdx < 0) {
+            return null;
+        }
+        StringBuilder out = new StringBuilder();
+        out.append("---\n");
+        out.append("\n## 最近一次对话（含思考链与上下文，供下一个 Agent 接力）\n\n");
+
+        String userText = (allUserList != null && allUserList.size() > 0)
+                ? allUserList.get(allUserList.size() - 1) : null;
+        if (userText == null || userText.length() == 0) {
+            Object[] lastUser = allMessages.get(lastUserIdx);
+            if (lastUser != null && lastUser.length > 1 && lastUser[1] != null) {
+                userText = extractPlainText((String) lastUser[1]);
+            }
+        }
+        if (userText != null && userText.length() > 0) {
+            out.append("### 用户输入\n\n").append(userText).append("\n\n");
+        }
+
+        StringBuilder assistantSb = new StringBuilder();
+        for (int i = lastUserIdx + 1; i < allMessages.size(); i++) {
+            Object[] entry = allMessages.get(i);
+            if (entry == null || entry.length < 2 || entry[0] == null || entry[1] == null) {
+                continue;
+            }
+            String role = (String) entry[0];
+            if ("assistant".equals(role)) {
+                String extracted = extractAssistantContent((String) entry[1]);
+                if (extracted != null && extracted.length() > 0) {
+                    assistantSb.append(extracted);
+                }
+            } else if ("user".equals(role)) {
+                break;
+            }
+        }
+        out.append("### 助手思考链与执行上下文\n\n");
+        if (assistantSb.length() > 0) {
+            out.append(assistantSb);
+        } else {
+            out.append("（无：Agent 尚未回复或回复为空）\n");
+        }
+        return out.toString();
+    }
+
+    /**
+     * 从助手消息的 content（task content JSON，形如 {"messages":[{"plan_item":{...}}]}）中
+     * 提取思考链与执行上下文。返回的 Markdown 片段按消息内顺序标注：
+     *   plan_type=="text"  -> "助手回复"
+     *   reasoning_content -> "思考"
+     *   thought           -> "分析/计划"
+     *   tool_call_info.name -> "工具调用"
+     */
+    public static String extractAssistantContent(String raw) {
+        if (raw == null || raw.length() == 0) {
+            return "";
+        }
+        String trimmed = raw.trim();
+        if (!trimmed.startsWith("{")) {
+            return "";
+        }
+        StringBuilder out = new StringBuilder();
+        try {
+            JSONObject root = new JSONObject(trimmed);
+            JSONArray messages = root.optJSONArray("messages");
+            if (messages != null) {
+                for (int i = 0; i < messages.length(); i++) {
+                    JSONObject msg = messages.optJSONObject(i);
+                    if (msg == null) {
+                        continue;
+                    }
+                    JSONObject planItem = msg.optJSONObject("plan_item");
+                    if (planItem == null) {
+                        continue;
+                    }
+                    String planType = planItem.optString("plan_type");
+                    String thought = planItem.optString("thought");
+                    String reasoning = planItem.optString("reasoning_content");
+                    String toolName = null;
+                    JSONObject tci = planItem.optJSONObject("tool_call_info");
+                    if (tci != null) {
+                        toolName = tci.optString("name");
+                    }
+                    if (thought != null && thought.length() == 0) {
+                        thought = null;
+                    }
+                    if (reasoning != null && reasoning.length() == 0) {
+                        reasoning = null;
+                    }
+                    if (toolName != null && toolName.length() == 0) {
+                        toolName = null;
+                    }
+                    if (thought == null && reasoning == null && toolName == null) {
+                        continue;
+                    }
+                    if ("text".equals(planType)) {
+                        out.append("**助手回复**:\n\n");
+                        out.append(thought != null ? thought : reasoning);
+                        out.append("\n\n");
+                    } else {
+                        if (reasoning != null) {
+                            out.append("**思考**:\n\n").append(reasoning).append("\n\n");
+                        }
+                        if (thought != null) {
+                            out.append("**分析/计划**:\n\n").append(thought).append("\n\n");
+                        }
+                        if (toolName != null) {
+                            out.append("**工具调用**: `").append(toolName).append("`\n\n");
+                        }
+                    }
+                }
+            } else {
+                String content = root.optString("content");
+                if (content == null || content.length() == 0) {
+                    content = root.optString("text");
+                }
+                if (content != null && content.length() > 0) {
+                    out.append(content);
+                }
+            }
+        } catch (Throwable t) {
+            // 解析失败，返回空片段
+        }
+        return out.toString();
     }
 
     private static String extractPlainText(String raw) {

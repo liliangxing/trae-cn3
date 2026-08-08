@@ -145,9 +145,32 @@ javac -source 8 -target 8 \
     -d "$BUILD_DIR/classes" \
     "$REPO/source/java/com/bytedance/trae/conversation/extract/"*.java 2>&1
 
-# 2e. dx 转 dex
+# 2e. dx 转 dex（优先 dx；dx 缺失时回退 d8，两者输出等价 dex）
 echo "dx 转 dex..."
-"$DX" --dex --output="$BUILD_DIR/classes.dex" "$BUILD_DIR/classes"
+if [ -f "$DX" ]; then
+    "$DX" --dex --output="$BUILD_DIR/classes.dex" "$BUILD_DIR/classes"
+else
+    echo "dx 缺失，尝试 d8 转换..."
+    D8=""
+    if command -v d8 &>/dev/null; then
+        D8="$(command -v d8)"
+    elif [ -f "/tmp/opencode/buildtools/android-14/d8" ]; then
+        D8="/tmp/opencode/buildtools/android-14/d8"
+    elif [ -f "/usr/lib/android-sdk/build-tools/debian/d8" ]; then
+        D8="/usr/lib/android-sdk/build-tools/debian/d8"
+    fi
+    if [ -z "$D8" ] || [ ! -f "$D8" ]; then
+        echo "错误: 找不到 dx 或 d8"
+        exit 1
+    fi
+    echo "使用 d8: $D8"
+    rm -rf "$BUILD_DIR/dexout"
+    mkdir -p "$BUILD_DIR/dexout"
+    cd "$BUILD_DIR/classes"
+    jar cf "$BUILD_DIR/classes.jar" .
+    "$D8" --release --lib "$ANDROID_JAR" --output "$BUILD_DIR/dexout" "$BUILD_DIR/classes.jar"
+    cp "$BUILD_DIR/dexout/classes.dex" "$BUILD_DIR/classes.dex"
+fi
 
 # 2f. baksmali 反编译（优先用 baksmali.jar，没有则用 apktool）
 echo "baksmali 反编译..."
