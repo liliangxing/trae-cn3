@@ -260,6 +260,9 @@ public final class ExtractHelper {
                     }
                 }
 
+                // DB 返回顺序可能为最新在前，反转为时间正序（最早在前）
+                java.util.Collections.reverse(userMessages);
+
                 userMessageCount = userMessages.size();
                 FileLogger.log(TAG, "Step9a: userMessageCount=" + userMessageCount);
                 toast(activity, "Step9a: 用户消息数=" + userMessageCount);
@@ -287,10 +290,10 @@ public final class ExtractHelper {
 
                 // 每条用户消息加序号并用 --- 分隔，格式如：
                 // ---
-                // ## 消息 1
+                // ## TRAE 1
                 // <内容>
                 for (int i = 0; i < userMessages.size(); i++) {
-                    md.append("\n\n## 消息 ").append(i + 1).append("\n\n");
+                    md.append("\n\n## TRAE ").append(i + 1).append("\n\n");
                     md.append(userMessages.get(i));
                 }
 
@@ -299,6 +302,14 @@ public final class ExtractHelper {
             }
 
             String mdFileName = buildFileName(firstQuestion);
+
+            // 检查消息内容是否包含内存地址（如 000000000003f37c），若包含则改后缀为 .txt
+            // 防止 Markor 等 Markdown 编辑器解析超长 hex 字符串时卡死
+            if (markdown != null && java.util.regex.Pattern.compile("[0-9a-fA-F]{12,}").matcher(markdown).find()) {
+                mdFileName = mdFileName.replaceAll("\\.md$", ".txt");
+                FileLogger.log(TAG, "Step10: memory address detected, extension changed to .txt");
+            }
+
             FileLogger.log(TAG, "Step10: writing " + mdFileName);
             toast(activity, "Step10: 写入 " + mdFileName);
 
@@ -466,7 +477,7 @@ public final class ExtractHelper {
         if (name.trim().length() == 0) {
             name = "conversation";
         }
-        return "【TRAE】" + name + ".md";
+        return name + ".md";
     }
 
     private static String markdownToHtml(String md) {
@@ -594,7 +605,7 @@ public final class ExtractHelper {
             try {
                 ContentValues values = new ContentValues();
                 values.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
-                values.put(MediaStore.Downloads.MIME_TYPE, "text/markdown");
+                values.put(MediaStore.Downloads.MIME_TYPE, fileName.endsWith(".txt") ? "text/plain" : "text/markdown");
                 values.put(MediaStore.Downloads.RELATIVE_PATH, "Download/TRAE");
 
                 Uri uri = context.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
