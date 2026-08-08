@@ -226,9 +226,13 @@ public class ApiMessageFetcher implements Runnable {
             }
 
             // 翻页方向从新到旧：越晚拉到的页越旧，逆序合并使最终内容按时间正序
+            // 同时每页内消息也是最新在前，需逐页逆序后合并
             java.util.ArrayList<String> allUserList = new java.util.ArrayList<>();
             for (int i = pageLists.size() - 1; i >= 0; i--) {
-                allUserList.addAll(pageLists.get(i));
+                java.util.ArrayList<String> pageMsgs = pageLists.get(i);
+                for (int j = pageMsgs.size() - 1; j >= 0; j--) {
+                    allUserList.add(pageMsgs.get(j));
+                }
             }
 
             lastFirstUserMessage = firstQuestion;
@@ -254,10 +258,10 @@ public class ApiMessageFetcher implements Runnable {
 
                 // 每条用户消息加序号并用 --- 分隔，格式如：
                 // ---
-                // ## 消息 1
+                // ## TRAE 1
                 // <内容>
                 for (int i = 0; i < allUserList.size(); i++) {
-                    md.append("\n\n## 消息 ").append(i + 1).append("\n\n");
+                    md.append("\n\n## TRAE ").append(i + 1).append("\n\n");
                     md.append(allUserList.get(i));
                 }
 
