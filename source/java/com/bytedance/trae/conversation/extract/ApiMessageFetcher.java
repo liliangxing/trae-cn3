@@ -204,9 +204,8 @@ public class ApiMessageFetcher implements Runnable {
                             String rawContent = msg.optString("content");
                             String content = extractPlainText(rawContent);
                             if (content != null && content.length() > 0) {
-                                if (firstQuestion == null) {
-                                    firstQuestion = content;
-                                }
+                                // 无条件覆盖：翻页从新到旧，循环结束时 firstQuestion 即全局最早一条用户消息
+                                firstQuestion = content;
                                 totalUserCount++;
                                 pageUserMessages.add(content);
                             }
