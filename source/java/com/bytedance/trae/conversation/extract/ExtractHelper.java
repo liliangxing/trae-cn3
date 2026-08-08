@@ -238,6 +238,9 @@ public final class ExtractHelper {
                 FileLogger.log(TAG, "Step9: building user message list");
 
                 List userMessages = new ArrayList();
+                // 全部消息（role, content原文），用于还原"最后一次对话"的思考链与上下文
+                // 元素: Object[]{String role, String rawContent}
+                java.util.ArrayList<Object[]> allMessages = new java.util.ArrayList<>();
                 Iterator iterator = messages.iterator();
                 while (iterator.hasNext()) {
                     Object entity = iterator.next();
@@ -255,6 +258,8 @@ public final class ExtractHelper {
                         content = cme.getContent();
                     }
 
+                    allMessages.add(new Object[]{role, content});
+
                     if ("user".equals(role) && content != null && content.length() > 0) {
                         userMessages.add(extractPlainText(content));
                     }
@@ -262,6 +267,7 @@ public final class ExtractHelper {
 
                 // DB 返回顺序可能为最新在前，反转为时间正序（最早在前）
                 java.util.Collections.reverse(userMessages);
+                java.util.Collections.reverse(allMessages);
 
                 userMessageCount = userMessages.size();
                 FileLogger.log(TAG, "Step9a: userMessageCount=" + userMessageCount);
@@ -295,6 +301,13 @@ public final class ExtractHelper {
                 for (int i = 0; i < userMessages.size(); i++) {
                     md.append("\n\n## TRAE ").append(i + 1).append("\n\n");
                     md.append(userMessages.get(i));
+                }
+
+                // 追加"最后一次对话"（用户输入 + 助手思考链/执行上下文），供下一个 Agent 接力
+                // 复用 ApiMessageFetcher 的解析逻辑，与 API 拉取路径保持行为一致
+                String lastTurnMd = ApiMessageFetcher.buildLastTurnMarkdown(allMessages, null);
+                if (lastTurnMd != null && lastTurnMd.length() > 0) {
+                    md.append("\n\n").append(lastTurnMd);
                 }
 
                 markdown = md.toString();
