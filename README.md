@@ -47,7 +47,6 @@ trae-cn3/
 │   ├── resources.arsc
 │   └── README.md
 └── docs/                      ← 项目文档
-    ├── BUILD_GUIDE.md
     ├── TRAE-Android-API-Documentation.md
     └── Redmi K90 APK Packet Capture.md
 ```
