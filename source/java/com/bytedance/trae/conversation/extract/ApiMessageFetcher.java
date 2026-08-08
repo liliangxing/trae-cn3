@@ -70,14 +70,13 @@ public class ApiMessageFetcher implements Runnable {
         String TAG = "ApiFetcher";
         try {
             // 分页拉取所有消息
-            StringBuilder allUserContent = new StringBuilder();
             String firstQuestion = null;
             int totalUserCount = 0;
             int page = 0;
             int pageSize = 10;
-            // 每页反转后的用户消息块，结束后按翻页顺序逆序合并
+            // 每页的"正序"用户消息列表，结束后按翻页顺序逆序合并为全局正序列表
             // 翻页方向从新到旧，越晚拉到的页越旧，必须放在最终内容前面
-            java.util.ArrayList<String> pageBlocks = new java.util.ArrayList<>();
+            java.util.ArrayList<java.util.ArrayList<String>> pageLists = new java.util.ArrayList<>();
             // 游标：当前页最早消息的 created_at_ms（毫秒时间戳），用于翻页
             // 对齐原 APK anchor API：翻页参数是 anchor_created_at_ms，而非 before_id
             String anchorCreatedAtMs = null;
@@ -213,15 +212,8 @@ public class ApiMessageFetcher implements Runnable {
                     }
                 }
 
-                // 当前页的消息是倒序的（最新在前），反转后形成本页正序块
-                StringBuilder pageBlock = new StringBuilder();
-                for (int i = pageUserMessages.size() - 1; i >= 0; i--) {
-                    if (pageBlock.length() > 0) {
-                        pageBlock.append("\n\n");
-                    }
-                    pageBlock.append(pageUserMessages.get(i));
-                }
-                pageBlocks.add(pageBlock.toString());
+                // 当前页的消息是倒序的（最新在前），收集本页正序用户消息列表，翻页结束后统一按时间正序编号
+                pageLists.add(pageUserMessages);
 
                 FileLogger.log(TAG, "API-P" + page + ": pageUserCount=" + pageUserMessages.size() + " hasMore=" + hasMore);
 
@@ -234,11 +226,9 @@ public class ApiMessageFetcher implements Runnable {
             }
 
             // 翻页方向从新到旧：越晚拉到的页越旧，逆序合并使最终内容按时间正序
-            for (int i = pageBlocks.size() - 1; i >= 0; i--) {
-                if (allUserContent.length() > 0) {
-                    allUserContent.append("\n\n");
-                }
-                allUserContent.append(pageBlocks.get(i));
+            java.util.ArrayList<String> allUserList = new java.util.ArrayList<>();
+            for (int i = pageLists.size() - 1; i >= 0; i--) {
+                allUserList.addAll(pageLists.get(i));
             }
 
             lastFirstUserMessage = firstQuestion;
@@ -253,7 +243,7 @@ public class ApiMessageFetcher implements Runnable {
                 String exportTime = sdf.format(new Date());
 
                 StringBuilder md = new StringBuilder();
-                md.append("# 会话用户消息导出");
+                md.append("# TRAE用户消息导出");
                 md.append("\n\n");
                 md.append("> 导出时间: ").append(exportTime);
                 md.append("\n");
@@ -261,7 +251,15 @@ public class ApiMessageFetcher implements Runnable {
                 md.append("\n");
                 md.append("> 用户消息数: ").append(totalUserCount);
                 md.append("\n---\n");
-                md.append(allUserContent.toString());
+
+                // 每条用户消息加序号并用 --- 分隔，格式如：
+                // ---
+                // ## 消息 1
+                // <内容>
+                for (int i = 0; i < allUserList.size(); i++) {
+                    md.append("\n\n## 消息 ").append(i + 1).append("\n\n");
+                    md.append(allUserList.get(i));
+                }
 
                 markdown = md.toString();
                 FileLogger.log(TAG, "API-6: markdown built, totalUserCount=" + totalUserCount);
