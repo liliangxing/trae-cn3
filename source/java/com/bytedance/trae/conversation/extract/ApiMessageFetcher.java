@@ -30,6 +30,8 @@ public class ApiMessageFetcher implements Runnable {
 
     private static String lastFirstUserMessage;
     private static int lastUserMessageCount;
+    private static String lastTurnMarkdown;
+    private static String lastUserMessage;
 
     public ApiMessageFetcher(String conversationId, String title, String token, String baseUrl, CountDownLatch latch) {
         this.conversationId = conversationId;
@@ -45,6 +47,14 @@ public class ApiMessageFetcher implements Runnable {
 
     public static int getLastUserMessageCount() {
         return lastUserMessageCount;
+    }
+
+    public static String getLastTurnMarkdown() {
+        return lastTurnMarkdown;
+    }
+
+    public static String getLastUserMessage() {
+        return lastUserMessage;
     }
 
     public static String fetch(String conversationId, String title, String token, String baseUrl) {
@@ -279,10 +289,11 @@ public class ApiMessageFetcher implements Runnable {
                     md.append(allUserList.get(i));
                 }
 
-                // 追加"最后一次对话"（用户输入 + 助手思考链/执行上下文），供下一个 Agent 接力
+                // "最后一次对话"（用户输入 + 助手思考链/执行上下文）独立成单独文件，供下一个 Agent 接力
+                lastUserMessage = findLastUserMessage(allMessages, allUserList);
                 String lastTurnMd = buildLastTurnMarkdown(allMessages, allUserList);
                 if (lastTurnMd != null && lastTurnMd.length() > 0) {
-                    md.append("\n\n").append(lastTurnMd);
+                    lastTurnMarkdown = lastTurnMd;
                 }
 
                 markdown = md.toString();
@@ -320,17 +331,9 @@ public class ApiMessageFetcher implements Runnable {
             return null;
         }
         StringBuilder out = new StringBuilder();
-        out.append("---\n");
-        out.append("\n## 最近一次对话（含思考链与上下文，供下一个 Agent 接力）\n\n");
+        out.append("# 最近一次对话（思考链与上下文，供下一个 Agent 接力）\n\n");
 
-        String userText = (allUserList != null && allUserList.size() > 0)
-                ? allUserList.get(allUserList.size() - 1) : null;
-        if (userText == null || userText.length() == 0) {
-            Object[] lastUser = allMessages.get(lastUserIdx);
-            if (lastUser != null && lastUser.length > 1 && lastUser[1] != null) {
-                userText = extractPlainText((String) lastUser[1]);
-            }
-        }
+        String userText = findLastUserMessage(allMessages, allUserList);
         if (userText != null && userText.length() > 0) {
             out.append("### 用户输入\n\n").append(userText).append("\n\n");
         }
@@ -358,6 +361,35 @@ public class ApiMessageFetcher implements Runnable {
             out.append("（无：Agent 尚未回复或回复为空）\n");
         }
         return out.toString();
+    }
+
+    /**
+     * 从全局正序消息列表中提取最后一次对话的用户消息文本（用于命名独立的 (待) 文件）。
+     * allUserList 为空时回退到从 allMessages 中最后一条 user 消息的 content 提取。
+     */
+    static String findLastUserMessage(java.util.ArrayList<Object[]> allMessages, java.util.ArrayList<String> allUserList) {
+        if (allMessages == null || allMessages.size() == 0) {
+            return null;
+        }
+        int lastUserIdx = -1;
+        for (int i = 0; i < allMessages.size(); i++) {
+            Object[] entry = allMessages.get(i);
+            if (entry != null && entry.length > 0 && "user".equals(entry[0])) {
+                lastUserIdx = i;
+            }
+        }
+        if (lastUserIdx < 0) {
+            return null;
+        }
+        String userText = (allUserList != null && allUserList.size() > 0)
+                ? allUserList.get(allUserList.size() - 1) : null;
+        if (userText == null || userText.length() == 0) {
+            Object[] lastUser = allMessages.get(lastUserIdx);
+            if (lastUser != null && lastUser.length > 1 && lastUser[1] != null) {
+                userText = extractPlainText((String) lastUser[1]);
+            }
+        }
+        return userText;
     }
 
     /**
