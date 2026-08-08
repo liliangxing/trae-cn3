@@ -222,16 +222,16 @@ public final class ExtractHelper {
                         toast(activity, "错误: API 拉取失败");
                         return;
                     }
-                }
+                } else {
+                    FileLogger.log(TAG, "Step9b: API success, MD len=" + markdown.length());
+                    toast(activity, "Step9b: API 成功，MD 长度=" + markdown.length());
 
-                FileLogger.log(TAG, "Step9b: API success, MD len=" + markdown.length());
-                toast(activity, "Step9b: API 成功，MD 长度=" + markdown.length());
-
-                firstQuestion = ApiMessageFetcher.getLastFirstUserMessage();
-                if (firstQuestion == null) {
-                    firstQuestion = title;
+                    firstQuestion = ApiMessageFetcher.getLastFirstUserMessage();
+                    if (firstQuestion == null) {
+                        firstQuestion = title;
+                    }
+                    userMessageCount = ApiMessageFetcher.getLastUserMessageCount();
                 }
-                userMessageCount = ApiMessageFetcher.getLastUserMessageCount();
             }
 
             if (!tryApiFetch) {

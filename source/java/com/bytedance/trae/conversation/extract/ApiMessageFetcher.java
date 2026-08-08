@@ -74,7 +74,15 @@ public class ApiMessageFetcher implements Runnable {
             String firstQuestion = null;
             int totalUserCount = 0;
             int page = 0;
-            String beforeId = null; // 游标：当前页最早消息的 ID，用于翻页
+            int pageSize = 10;
+            // 每页反转后的用户消息块，结束后按翻页顺序逆序合并
+            // 翻页方向从新到旧，越晚拉到的页越旧，必须放在最终内容前面
+            java.util.ArrayList<String> pageBlocks = new java.util.ArrayList<>();
+            // 游标：当前页最早消息的 created_at_ms（毫秒时间戳），用于翻页
+            // 对齐原 APK anchor API：翻页参数是 anchor_created_at_ms，而非 before_id
+            String anchorCreatedAtMs = null;
+            // 第一页请求失败时置 true，此时不构建文档（返回 null）
+            boolean apiFailed = false;
 
             while (true) {
                 // 构建 URL
@@ -82,9 +90,10 @@ public class ApiMessageFetcher implements Runnable {
                 urlBuilder.append(baseUrl);
                 urlBuilder.append("api/solo_hub/v1/conversations/messages/anchor?conversation_id=");
                 urlBuilder.append(conversationId);
-                urlBuilder.append("&before_limit=10&after_limit=0&include_anchor=true");
-                if (beforeId != null) {
-                    urlBuilder.append("&before_id=").append(beforeId);
+                urlBuilder.append("&before_limit=").append(pageSize);
+                urlBuilder.append("&after_limit=0&include_anchor=false");
+                if (anchorCreatedAtMs != null) {
+                    urlBuilder.append("&anchor_created_at_ms=").append(anchorCreatedAtMs);
                 }
                 String urlStr = urlBuilder.toString();
                 FileLogger.log(TAG, "API-P" + page + ": URL=" + urlStr);
@@ -120,8 +129,8 @@ public class ApiMessageFetcher implements Runnable {
                         FileLogger.log(TAG, "API-ERR: code=" + responseCode + " no error stream");
                     }
                     if (page == 0) {
-                        // 第一页就失败，返回 null
-                        markdown = null;
+                        // 第一页就失败，标记失败（避免 break 后仍构建出空文档）
+                        apiFailed = true;
                     }
                     break;
                 }
@@ -143,7 +152,8 @@ public class ApiMessageFetcher implements Runnable {
                 if (data == null) {
                     FileLogger.log(TAG, "API-P" + page + ": data object is null");
                     if (page == 0) {
-                        markdown = null;
+                        // 第一页就失败，标记失败
+                        apiFailed = true;
                     }
                     break;
                 }
@@ -161,30 +171,31 @@ public class ApiMessageFetcher implements Runnable {
                 int arrayLen = items.length();
                 FileLogger.log(TAG, "API-P" + page + ": itemsLen=" + arrayLen);
 
-                // 记录最早消息的 ID 用于下一页翻页
+                // 记录最早消息的 created_at_ms 用于下一页翻页
                 // items 返回的是从最新到最旧的顺序，最后一条是最早的
                 JSONObject oldestMsg = items.optJSONObject(arrayLen - 1);
                 if (oldestMsg != null) {
-                    // 尝试多种可能的 ID 字段名
-                    String nextBeforeId = oldestMsg.optString("message_id");
-                    if (nextBeforeId == null || nextBeforeId.length() == 0) {
-                        nextBeforeId = oldestMsg.optString("id");
+                    String nextAnchor = oldestMsg.optString("created_at_ms");
+                    if (nextAnchor == null || nextAnchor.length() == 0) {
+                        nextAnchor = oldestMsg.optString("created_at");
                     }
-                    if (nextBeforeId != null && nextBeforeId.length() > 0) {
-                        beforeId = nextBeforeId;
+                    if (nextAnchor != null && nextAnchor.length() > 0) {
+                        anchorCreatedAtMs = nextAnchor;
                     } else {
-                        // 没有 ID 字段，无法继续翻页
-                        FileLogger.log(TAG, "API-P" + page + ": no message_id/id, pagination stopped");
+                        // 没有时间戳字段，无法继续翻页
+                        FileLogger.log(TAG, "API-P" + page + ": no created_at_ms/created_at, pagination stopped");
                     }
                 }
 
-                // 判断是否有更多页
-                boolean hasMore = data.optBoolean("has_more", false);
+                // 判断是否有更多页：返回条数达到一页（>= before_limit）则继续翻页（对齐原 APK 数量判断）
+                boolean hasMore = arrayLen >= pageSize;
+                // 兼容服务端显式返回 has_more 字段的情况
+                if (data.has("has_more")) {
+                    hasMore = data.optBoolean("has_more", hasMore);
+                }
 
-                // 处理当前页的消息（从旧到新顺序，先收集再反转）
-                // items 是倒序（最新在前），我们需要正序追加到已有内容后面
-                // 所以先把当前页的用户消息收集到临时列表
-                java.util.ArrayList pageUserMessages = new java.util.ArrayList();
+                // 处理当前页的消息：先收集当前页的用户消息（items 是倒序，最新在前）
+                java.util.ArrayList<String> pageUserMessages = new java.util.ArrayList<>();
                 for (int i = 0; i < arrayLen; i++) {
                     JSONObject msg = items.optJSONObject(i);
                     if (msg != null) {
@@ -203,18 +214,19 @@ public class ApiMessageFetcher implements Runnable {
                     }
                 }
 
-                // 当前页的消息是倒序的（最新在前），所以要反转后追加到 allUserContent
-                // 这样最终结果就是按时间正序排列
+                // 当前页的消息是倒序的（最新在前），反转后形成本页正序块
+                StringBuilder pageBlock = new StringBuilder();
                 for (int i = pageUserMessages.size() - 1; i >= 0; i--) {
-                    if (allUserContent.length() > 0) {
-                        allUserContent.append("\n\n");
+                    if (pageBlock.length() > 0) {
+                        pageBlock.append("\n\n");
                     }
-                    allUserContent.append(pageUserMessages.get(i));
+                    pageBlock.append(pageUserMessages.get(i));
                 }
+                pageBlocks.add(pageBlock.toString());
 
                 FileLogger.log(TAG, "API-P" + page + ": pageUserCount=" + pageUserMessages.size() + " hasMore=" + hasMore);
 
-                if (!hasMore || beforeId == null) {
+                if (!hasMore || anchorCreatedAtMs == null) {
                     FileLogger.log(TAG, "API-P" + page + ": no more pages, totalUserCount=" + totalUserCount);
                     break;
                 }
@@ -222,25 +234,39 @@ public class ApiMessageFetcher implements Runnable {
                 page++;
             }
 
+            // 翻页方向从新到旧：越晚拉到的页越旧，逆序合并使最终内容按时间正序
+            for (int i = pageBlocks.size() - 1; i >= 0; i--) {
+                if (allUserContent.length() > 0) {
+                    allUserContent.append("\n\n");
+                }
+                allUserContent.append(pageBlocks.get(i));
+            }
+
             lastFirstUserMessage = firstQuestion;
             lastUserMessageCount = totalUserCount;
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String exportTime = sdf.format(new Date());
+            if (apiFailed) {
+                // 第一页请求失败：不构建文档
+                FileLogger.log(TAG, "API-7: first page failed, markdown=null");
+                markdown = null;
+            } else {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String exportTime = sdf.format(new Date());
 
-            StringBuilder md = new StringBuilder();
-            md.append("# 会话用户消息导出");
-            md.append("\n\n");
-            md.append("> 导出时间: ").append(exportTime);
-            md.append("\n");
-            md.append("> 任务ID: ").append(conversationId);
-            md.append("\n");
-            md.append("> 用户消息数: ").append(totalUserCount);
-            md.append("\n---\n");
-            md.append(allUserContent.toString());
+                StringBuilder md = new StringBuilder();
+                md.append("# 会话用户消息导出");
+                md.append("\n\n");
+                md.append("> 导出时间: ").append(exportTime);
+                md.append("\n");
+                md.append("> 任务ID: ").append(conversationId);
+                md.append("\n");
+                md.append("> 用户消息数: ").append(totalUserCount);
+                md.append("\n---\n");
+                md.append(allUserContent.toString());
 
-            markdown = md.toString();
-            FileLogger.log(TAG, "API-6: markdown built, totalUserCount=" + totalUserCount);
+                markdown = md.toString();
+                FileLogger.log(TAG, "API-6: markdown built, totalUserCount=" + totalUserCount);
+            }
         } catch (Throwable t) {
             try {
                 String msg = "API-EXCEPTION: " + t.getClass().getName() + ": " + t.getMessage();
