@@ -274,7 +274,7 @@ public final class ExtractHelper {
                 String exportTime = sdf.format(new Date());
 
                 StringBuilder md = new StringBuilder();
-                md.append("# 会话用户消息导出");
+                md.append("# TRAE用户消息导出");
                 md.append("\n\n");
                 md.append("> 导出时间: ").append(exportTime);
                 md.append("\n");
@@ -285,9 +285,13 @@ public final class ExtractHelper {
                 md.append("> 用户消息数: ").append(userMessageCount);
                 md.append("\n---\n");
 
+                // 每条用户消息加序号并用 --- 分隔，格式如：
+                // ---
+                // ## 消息 1
+                // <内容>
                 for (int i = 0; i < userMessages.size(); i++) {
+                    md.append("\n\n## 消息 ").append(i + 1).append("\n\n");
                     md.append(userMessages.get(i));
-                    md.append("\n\n");
                 }
 
                 markdown = md.toString();
@@ -462,7 +466,7 @@ public final class ExtractHelper {
         if (name.trim().length() == 0) {
             name = "conversation";
         }
-        return name + ".md";
+        return "【TRAE】" + name + ".md";
     }
 
     private static String markdownToHtml(String md) {
