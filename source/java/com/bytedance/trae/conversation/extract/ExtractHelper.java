@@ -197,6 +197,10 @@ public final class ExtractHelper {
                 return;
             }
 
+            // "最后一次对话"的独立文件内容与命名（思考链 + 上下文，供下一个 Agent 接力）
+            String lastTurnMarkdown = null;
+            String lastTurnMessage = null;
+
             if (tryApiFetch) {
                 FileLogger.log(TAG, "Step9: trying API fetch for full history");
                 toast(activity, "Step9: 尝试 API 拉取完整历史");
@@ -231,6 +235,8 @@ public final class ExtractHelper {
                         firstQuestion = title;
                     }
                     userMessageCount = ApiMessageFetcher.getLastUserMessageCount();
+                    lastTurnMarkdown = ApiMessageFetcher.getLastTurnMarkdown();
+                    lastTurnMessage = ApiMessageFetcher.getLastUserMessage();
                 }
             }
 
@@ -303,25 +309,19 @@ public final class ExtractHelper {
                     md.append(userMessages.get(i));
                 }
 
-                // 追加"最后一次对话"（用户输入 + 助手思考链/执行上下文），供下一个 Agent 接力
+                // "最后一次对话"（用户输入 + 助手思考链/执行上下文）独立成单独文件，供下一个 Agent 接力
                 // 复用 ApiMessageFetcher 的解析逻辑，与 API 拉取路径保持行为一致
                 String lastTurnMd = ApiMessageFetcher.buildLastTurnMarkdown(allMessages, null);
                 if (lastTurnMd != null && lastTurnMd.length() > 0) {
-                    md.append("\n\n").append(lastTurnMd);
+                    lastTurnMarkdown = lastTurnMd;
                 }
+                lastTurnMessage = ApiMessageFetcher.findLastUserMessage(allMessages, null);
 
                 markdown = md.toString();
                 FileLogger.log(TAG, "Step9b: markdown built, len=" + markdown.length());
             }
 
-            String mdFileName = buildFileName(firstQuestion);
-
-            // 检查消息内容是否包含内存地址（如 000000000003f37c），若包含则改后缀为 .txt
-            // 防止 Markor 等 Markdown 编辑器解析超长 hex 字符串时卡死
-            if (markdown != null && java.util.regex.Pattern.compile("[0-9a-fA-F]{12,}").matcher(markdown).find()) {
-                mdFileName = mdFileName.replaceAll("\\.md$", ".txt");
-                FileLogger.log(TAG, "Step10: memory address detected, extension changed to .txt");
-            }
+            String mdFileName = txtIfManyHex(buildFileName(firstQuestion), markdown);
 
             FileLogger.log(TAG, "Step10: writing " + mdFileName);
             toast(activity, "Step10: 写入 " + mdFileName);
@@ -335,6 +335,19 @@ public final class ExtractHelper {
 
             FileLogger.log(TAG, "Step10a: MD saved to cache");
             toast(activity, "Step10a: 文件已保存");
+
+            // 独立的 (待) 文件：最后一次对话的思考链与上下文
+            if (lastTurnMarkdown != null && lastTurnMarkdown.trim().length() > 0) {
+                String lastTurnFileName = txtIfManyHex("(待)" + buildFileName(lastTurnMessage), lastTurnMarkdown);
+                FileLogger.log(TAG, "Step10b: writing " + lastTurnFileName);
+                toast(activity, "Step10b: 写入 " + lastTurnFileName);
+                File lastTurnFile = writeMarkdownFile(context, lastTurnFileName, lastTurnMarkdown, activity);
+                if (lastTurnFile != null) {
+                    FileLogger.log(TAG, "Step10b: (待) file saved to cache");
+                } else {
+                    FileLogger.log(TAG, "Step10b: (待) file write failed");
+                }
+            }
 
             String html = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>body{font-family:sans-serif;padding:16px;line-height:1.6;color:#333;max-width:800px;margin:0 auto}.md h1,.md h2,.md h3{border-bottom:1px solid #eee;padding-bottom:8px;margin-top:24px}.md blockquote{border-left:4px solid #ddd;margin:8px 0;padding:8px 16px;color:#666;background:#f9f9f9}.md pre{background:#f6f8fa;padding:12px;border-radius:6px;overflow-x:auto;font-size:13px}.md code{background:#f0f0f0;padding:2px 4px;border-radius:3px;font-size:13px}.md pre code{background:none;padding:0}.md hr{border:none;border-top:1px solid #eee;margin:16px 0}.md li{margin:4px 0}.md a{color:#0066cc}</style></head><body><div class=\"md\">" + markdownToHtml(markdown) + "</div></body></html>";
 
@@ -474,6 +487,23 @@ public final class ExtractHelper {
         }
 
         return raw;
+    }
+
+    // 检查内容是否包含大量内存地址（如 000000000003f37c），匹配次数 >= 10 时改后缀为 .txt
+    // 防止 Markor 等 Markdown 编辑器解析超长 hex 字符串时卡死
+    private static String txtIfManyHex(String fileName, String content) {
+        if (content == null) {
+            return fileName;
+        }
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("[0-9a-fA-F]{12,}").matcher(content);
+        int count = 0;
+        while (m.find()) {
+            count++;
+        }
+        if (count >= 10) {
+            return fileName.replaceAll("\\.md$", ".txt");
+        }
+        return fileName;
     }
 
     private String buildFileName(String question) {
